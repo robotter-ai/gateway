@@ -33,8 +33,8 @@ export class Polkadot {
   }
 
   public async getBalance(address: string): Promise<string> {
-    const { data } = await this._api.query.system.account(address);
-    return data.free.toString();
+    const codec = await this._api.query.system.account(address);
+    return codec.toString()
   }
 
   public async estimateGas(from: string, to: string): Promise<number> {

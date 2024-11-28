@@ -38,14 +38,16 @@ import { Balancer } from '../connectors/balancer/balancer';
 import { ETCSwapLP } from '../connectors/etcswap/etcswap.lp';
 import { EthereumClassicChain } from '../chains/ethereum-classic/ethereum-classic';
 import { ETCSwap } from '../connectors/etcswap/etcswap';
-
+import { Hydration } from '../connectors/hydration/hydration';
+import { Polkadot } from '../chains/polkadot/polkadot';
 export type ChainUnion =
   | Algorand
   | Cosmos
   | Ethereumish
   | Xdcish
   | Tezosish
-  | Osmosis;
+  | Osmosis
+  | Polkadot;
 
 export type Chain<T> = T extends Algorand
   ? Algorand
@@ -59,7 +61,9 @@ export type Chain<T> = T extends Algorand
               ? Tezosish
                 : T extends Osmosis
                   ? Osmosis
-                  : never;
+                  : T extends Polkadot
+                    ? Polkadot
+                    : never;
 
 export class UnsupportedChainException extends Error {
   constructor(message?: string) {
@@ -124,6 +128,8 @@ export async function getChainInstance(
     connection = Telos.getInstance(network);
   } else if (chain === 'ethereum-classic') {
     connection = EthereumClassicChain.getInstance(network);
+  } else if (chain === 'polkadot') {
+    connection = Polkadot.getInstance(network);
   } else {
     connection = undefined;
   }
@@ -137,7 +143,7 @@ export type ConnectorUnion =
   | Tinyman
   | Plenty
   | Curve
-
+  | Hydration;
 export type Connector<T> = T extends Uniswapish
   ? Uniswapish
   : T extends UniswapLPish
@@ -146,7 +152,9 @@ export type Connector<T> = T extends Uniswapish
         ? Tinyman
           : T extends Plenty
             ? Plenty
-              : never;
+              : T extends Hydration
+                ? Hydration
+                  : never;
 
 export async function getConnector<T>(
   chain: string,
@@ -193,6 +201,8 @@ export async function getConnector<T>(
     connectorInstance = ETCSwap.getInstance(chain, network);
   } else if (chain === 'ethereum-classic' && connector === 'etcswapLP') {
     connectorInstance = ETCSwapLP.getInstance(chain, network);
+  } else if (connector === 'hydration') {
+    connectorInstance = Hydration.getInstance(network);
   } else {
     throw new Error('unsupported chain or connector');
   }

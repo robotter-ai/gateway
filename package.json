@@ -20,7 +20,8 @@
     "test:debug": "node --inspect node_modules/.bin/jest --watch --runInBand",
     "test:unit": "NODE_OPTIONS=--max_old_space_size=10240 jest --runInBand --verbose ./test/",
     "test:cov": "NODE_OPTIONS=--max_old_space_size=10240 jest --runInBand --coverage ./test/",
-    "test:scripts": "jest -i --verbose ./test-scripts/*.test.ts"
+    "test:scripts": "jest -i --verbose ./test-scripts/*.test.ts",
+    "run:hydration": "ts-node src/hydration.ts"
   },
   "dependencies": {
     "@_etcswap/smart-order-router": "^3.15.2",
@@ -38,6 +39,7 @@
     "@ethersproject/networks": "5.7.0",
     "@ethersproject/providers": "5.7.0",
     "@ethersproject/solidity": "5.7.0",
+    "@galacticcouncil/sdk": "^5.0.1",
     "@harmony-js/core": "^0.1.57",
     "@harmony-js/utils": "^0.1.56",
     "@improbable-eng/grpc-web": "^0.13.0",

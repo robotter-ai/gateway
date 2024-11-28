@@ -22,7 +22,7 @@ export class Polkadot {
 
   public async init(): Promise<void> {
     const config = getPolkadotConfig(this._network);
-    const provider = new WsProvider(config.nodeUrl);
+    const provider = new WsProvider(config.network.nodeURL);
     this._api = await ApiPromise.create({ provider });
     this._keyring = new Keyring({ type: 'sr25519' });
     this._ready = true;

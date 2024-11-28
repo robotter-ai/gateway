@@ -2,17 +2,27 @@ import LRUCache from 'lru-cache';
 import { Polkadot } from '../../chains/polkadot/polkadot';
 import { HydrationConfig } from './hydration.config';
 import { PriceRequest, TradeRequest } from '../../amm/amm.requests';
+import { getPolkadotConfig } from '../../chains/polkadot/polkadot.config';
 
 export class Hydration {
   private static _instances: LRUCache<string, Hydration>;
   private chain!: Polkadot;
+  private _config: HydrationConfig.NetworkConfig;
   private _ready: boolean = false;
 
   constructor(network: string) {
     this.chain = Polkadot.getInstance(network);
+    this._config = HydrationConfig.config;
   }
 
   public static getInstance(network: string): Hydration {
+    const config = getPolkadotConfig(network);
+    if (Hydration._instances === undefined) {
+      Hydration._instances = new LRUCache<string, Hydration>({
+        max: config.network.maxLRUCacheInstances,
+      });
+    }
+    
     if (!Hydration._instances) {
       Hydration._instances = new LRUCache<string, Hydration>({ max: 10 });
     }

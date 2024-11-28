@@ -1,7 +1,29 @@
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
+export interface NetworkConfig {
+  name: string;
+  nodeURL: string;
+  tokenPriceApi: string;
+  maxLRUCacheInstances: number,
+}
+export interface Config {
+  network: NetworkConfig;
+  nativeCurrencySymbol: string;
+}
 
-export function getPolkadotConfig(network: string) {
+export function getPolkadotConfig(network: string):Config {
   return {
-    nodeUrl: ConfigManagerV2.getInstance().get(`polkadot.networks.${network}.nodeUrl`),
+    network: {
+      name: network,
+      nodeURL: ConfigManagerV2.getInstance().get(
+        `polkadot.networks.${network}.nodeUrl`
+      ),
+      tokenPriceApi: ConfigManagerV2.getInstance().get(
+        `polkadot.networks.${network}.tokenPriceApi`
+      ),
+      maxLRUCacheInstances: 10,
+    },
+    nativeCurrencySymbol: ConfigManagerV2.getInstance().get(
+      `polkadot.nativeCurrencySymbol`
+    ),
   };
 }

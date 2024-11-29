@@ -7,7 +7,7 @@ import { percentRegexp } from '../../services/config-manager-v2';
 
 export class Hydration {
   private static _instances: LRUCache<string, Hydration>;
-  private chain!: Polkadot;
+  private chain: Polkadot;
   private _config: HydrationConfig.NetworkConfig;
   private _ready: boolean = false;
 
@@ -62,7 +62,8 @@ export class Hydration {
 
   public async executeTrade(req: TradeRequest) {
     const account = this.chain.getKeyring().addFromUri(req.address);
-    const txHash = await this.chain.executeTrade({keyPair: account, address: account.address}, req.quote, Number(req.amount));
+    const sk = new TextEncoder().encode(account.address);
+    const txHash = await this.chain.executeTrade({ sk, addr: account.address }, req.quote, Number(req.amount));
     return txHash;
   }
 

@@ -1,8 +1,14 @@
 import { KeyringPair } from '@polkadot/keyring/types';
 
-export interface Account {
-  address: string;
-  keyPair: KeyringPair;
+export default interface Account {
+  /**
+   * Polkadot address
+   */
+  addr: string;
+  /**
+   * Secret key belonging to the Polkadot address
+   */
+  sk: Uint8Array;
 }
 
 export interface TradeResponse {

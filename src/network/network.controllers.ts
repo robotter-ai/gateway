@@ -22,6 +22,7 @@ import {
 import { Osmosis } from '../chains/osmosis/osmosis';
 
 import { EthereumClassicChain } from '../chains/ethereum-classic/ethereum-classic';
+import { Polkadot } from '../chains/polkadot/polkadot';
 
 export async function getStatus(
   req: StatusRequest,
@@ -54,6 +55,10 @@ export async function getStatus(
     const algorandConnections = Algorand.getConnectedInstances();
     connections = connections.concat(
       algorandConnections ? Object.values(algorandConnections) : [],
+    );
+    const polkadotConnections = Polkadot.getConnectedInstances();
+    connections = connections.concat(
+      polkadotConnections ? Object.values(polkadotConnections) : [],
     );
 
     const avalancheConnections = Avalanche.getConnectedInstances();

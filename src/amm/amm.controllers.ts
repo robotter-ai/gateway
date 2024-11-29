@@ -35,6 +35,9 @@ import {
   estimateGas as tinymanEstimateGas,
 } from '../connectors/tinyman/tinyman.controllers';
 import {
+  price as hydrationPrice,
+} from '../connectors/hydration/hydration.controllers';
+import {
   price as plentyPrice,
   trade as plentyTrade,
   estimateGas as plentyEstimateGas,
@@ -55,17 +58,19 @@ import { Tinyman } from '../connectors/tinyman/tinyman';
 import { Plenty } from '../connectors/plenty/plenty';
 import { Osmosis } from '../chains/osmosis/osmosis';
 import { Carbonamm } from '../connectors/carbon/carbonAMM';
+import { Polkadot } from '../chains/polkadot/polkadot';
+import { Hydration } from '../connectors/hydration/hydration';
 
 export async function price(req: PriceRequest): Promise<PriceResponse> {
   const chain = await getInitializedChain<
-    Algorand | Ethereumish | Tezosish | Osmosis
+    Algorand | Ethereumish | Tezosish | Osmosis | Polkadot
   >(req.chain, req.network);
   if (chain instanceof Osmosis){
     return chain.controller.price(chain as unknown as Osmosis, req);
   }
 
-  const connector: Uniswapish | Tinyman | Plenty  =
-    await getConnector<Uniswapish | Tinyman | Plenty>(
+  const connector: Uniswapish | Tinyman | Plenty | Hydration =
+    await getConnector<Uniswapish | Tinyman | Plenty | Hydration>(
       req.chain,
       req.network,
       req.connector
@@ -78,6 +83,8 @@ export async function price(req: PriceRequest): Promise<PriceResponse> {
   } else if ('routerAbi' in connector) {
     // we currently use the presence of routerAbi to distinguish Uniswapish from RefAMMish
     return uniswapPrice(<Ethereumish>chain, connector, req);
+  } else if (connector instanceof Hydration) {
+    return hydrationPrice(<Polkadot>chain as unknown as Polkadot, connector, req);
   } else return tinymanPrice(chain as unknown as Algorand, connector, req);
 
 }

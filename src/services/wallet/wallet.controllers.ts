@@ -30,6 +30,7 @@ import {
 import { Ethereumish, Tezosish } from '../common-interfaces';
 import { Algorand } from '../../chains/algorand/algorand';
 import { Osmosis } from '../../chains/osmosis/osmosis';
+import { Polkadot } from '../../chains/polkadot/polkadot';
 
 export function convertXdcAddressToEthAddress(publicKey: string): string {
   return publicKey.length === 43 && publicKey.slice(0, 3) === 'xdc'
@@ -80,6 +81,9 @@ export async function addWallet(
         req.privateKey,
         passphrase
       );
+    } else if (connection instanceof Polkadot) {
+      address = connection.getAccountFromPrivateKey(req.privateKey).addr;
+      encryptedPrivateKey = connection.encrypt(req.privateKey, passphrase);
     } else if (connection instanceof Xdc) {
       address = convertXdcAddressToEthAddress(
         connection.getWalletFromPrivateKey(req.privateKey).address

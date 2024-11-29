@@ -21,11 +21,7 @@ import { EstimateGasRequest } from './polkadot.types';
   }
   
   export class PolkadotController {
-    // static async poll(chain: Polkadot, req: PollRequest): Promise<PollResponse> {
-    //   validatePollRequest(req);
-  
-    //   return await chain.getBalance(req.txHash);
-    // }
+   
   
     static async balances(chain: Polkadot, request: BalanceRequest) {
         validatePolkadotBalanceRequest(request);

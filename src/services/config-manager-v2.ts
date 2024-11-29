@@ -353,8 +353,8 @@ export class ConfigManagerV2 {
       throw new Error(
         `The configuration namespace ${namespaceComponent} does not exist.`
       );
-    }
 
+    }
     const configPath: string = pathComponents.slice(1).join('.');
     return {
       namespace,

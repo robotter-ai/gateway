@@ -5,8 +5,10 @@ import {
   TradeRequest,
   TradeResponse,
 } from '../../amm/amm.requests';
+import { Polkadot } from '../../chains/polkadot/polkadot';
 
 export async function price(
+  polkadot: Polkadot,
   hydration: Hydration,
   req: PriceRequest
 ): Promise<PriceResponse> {
@@ -21,10 +23,10 @@ export async function price(
     rawAmount: req.amount,
     timestamp: Date.now(),
     latency: 0,
-    gasPrice: 0,
-    gasPriceToken: 'DOT',
-    gasLimit: 0,
-    gasCost: '0 DOT',
+    gasPrice: polkadot.gasPrice,
+    gasPriceToken: 'HDX',
+    gasLimit: polkadot.gasLimit,
+    gasCost: polkadot.gasCost.toString(),
   };
 }
 

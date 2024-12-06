@@ -53,6 +53,7 @@
     "@pancakeswap/v3-periphery": "^1.0.2",
     "@pancakeswap/v3-sdk": "^3.7.0",
     "@pangolindex/sdk": "^1.1.0",
+    "@polkadot/types": "^15.0.1",
     "@sushiswap/sdk": "^5.0.0-canary.116",
     "@taquito/rpc": "^17.0.0",
     "@taquito/signer": "^17.0.0",
@@ -115,6 +116,7 @@
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
     "@babel/runtime": "^7.0",
+    "@polkadot/types": "^15.0.1",
     "@connectis/diff-test-coverage": "^1.5.1",
     "@improbable-eng/grpc-web": "^0.13.0",
     "@solana/web3.js": "^1.58.0",

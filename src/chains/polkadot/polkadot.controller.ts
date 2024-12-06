@@ -1,52 +1,50 @@
 import { EstimateGasResponse } from '../../amm/amm.requests';
-import { validateEstimateGasRequest, validatePolkadotBalanceRequest,  } from './polkadot.validators';
+import { validateEstimateGasRequest, validatePolkadotBalanceRequest, } from './polkadot.validators';
 import {
-    BalanceRequest,
-   
-    PollRequest,
-    PollResponse,
-  } from '../../network/network.requests';
-  import { Polkadot } from './polkadot';
+  BalanceRequest,
+
+  PollRequest,
+  PollResponse,
+} from '../../network/network.requests';
+import { Polkadot } from './polkadot';
 import { EstimateGasRequest } from './polkadot.types';
- 
-  
-  async function getInitializedPolkadot(network: string): Promise<Polkadot> {
-    const polkadot = await Polkadot.getInstance(network);
-  
-    if (!polkadot.ready()) {
-      await polkadot.init();
-    }
-  
-    return polkadot;
+
+
+async function getInitializedPolkadot(network: string): Promise<Polkadot> {
+  const polkadot = await Polkadot.getInstance(network);
+
+  if (!polkadot.ready()) {
+    await polkadot.init();
   }
-  
-  export class PolkadotController {
-   
-  
-    static async balances(chain: Polkadot, request: BalanceRequest) {
-        validatePolkadotBalanceRequest(request);
-  
-      const balances: Record<string, string> = {};
-      balances['DOT'] = await chain.getBalance(request.address);
-  
-      return {
-        balances,
-      };
+
+  return polkadot;
+}
+
+export class PolkadotController {
+
+
+  static async balances(chain: Polkadot, request: BalanceRequest) {
+    validatePolkadotBalanceRequest(request);
+
+    const balances: Record<string, string> = {};
+
+    // const account = chain.getAccountFromPrivateKey(request.address);
+
+    // if (request.tokenSymbols.includes(chain.nativeTokenSymbol)) {
+    //   balances[chain.nativeTokenSymbol] = await chain.getNativeBalance(account);
+    // }
+
+    for (const token of request.tokenSymbols) {
+      if (token === chain.nativeTokenSymbol) continue;
+      balances[token] = await chain.getAssetBalance(token);
     }
-  
-    static async estimateGas(chain: Polkadot, request: EstimateGasRequest): Promise<EstimateGasResponse> {
-      validateEstimateGasRequest(request);
-  
-      const gas = await chain.estimateGas(request.tokenIn, request.tokenOut);
-  
-      return {
-        network: "wss://rpc.polkadot.io",
-        gasLimit: gas,
-        gasCost: `${gas / 10 ** 12} DOT`,
-        timestamp: Date.now(),
-        gasPrice: 0,
-        gasPriceToken: 'DOT',
-      };
-    }
+
+    return {
+      balances: balances,
+    };
   }
-  
+
+
+
+
+}

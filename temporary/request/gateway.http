@@ -1,0 +1,43 @@
+POST https://{{host}}:{{port}}/
+Content-Type: application/json
+
+{
+}
+
+###
+
+POST https://{{host}}:{{port}}/chain/balances
+Content-Type: application/json
+
+{
+"chain": "", 
+"request": ""
+
+}
+
+###
+
+GET https://{{host}}:{{port}}/amm/price
+Content-Type: application/json
+
+{
+  "chain":  "",
+  "network": "",
+  "connector":  "",
+  "quote": "",
+  "base": "",
+  "amount": "",
+  "side": "",
+  "allowedSlippage": "",
+  "poolId": ""
+}
+
+###
+
+POST https://{{host}}:{{port}}/
+Content-Type: application/json
+
+{
+}
+
+###

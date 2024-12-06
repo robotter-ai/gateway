@@ -36,7 +36,9 @@ import {
 } from '../connectors/tinyman/tinyman.controllers';
 import {
   price as hydrationPrice,
+
 } from '../connectors/hydration/hydration.controllers';
+
 import {
   price as plentyPrice,
   trade as plentyTrade,
@@ -58,14 +60,14 @@ import { Tinyman } from '../connectors/tinyman/tinyman';
 import { Plenty } from '../connectors/plenty/plenty';
 import { Osmosis } from '../chains/osmosis/osmosis';
 import { Carbonamm } from '../connectors/carbon/carbonAMM';
-import { Polkadot } from '../chains/polkadot/polkadot';
 import { Hydration } from '../connectors/hydration/hydration';
+import { Polkadot } from '../chains/polkadot/polkadot';
 
 export async function price(req: PriceRequest): Promise<PriceResponse> {
   const chain = await getInitializedChain<
     Algorand | Ethereumish | Tezosish | Osmosis | Polkadot
   >(req.chain, req.network);
-  if (chain instanceof Osmosis){
+  if (chain instanceof Osmosis) {
     return chain.controller.price(chain as unknown as Osmosis, req);
   }
 
@@ -83,9 +85,12 @@ export async function price(req: PriceRequest): Promise<PriceResponse> {
   } else if ('routerAbi' in connector) {
     // we currently use the presence of routerAbi to distinguish Uniswapish from RefAMMish
     return uniswapPrice(<Ethereumish>chain, connector, req);
-  } else if (connector instanceof Hydration) {
-    return hydrationPrice(<Polkadot>chain as unknown as Polkadot, connector, req);
-  } else return tinymanPrice(chain as unknown as Algorand, connector, req);
+
+  }
+  else if (connector instanceof Hydration) {
+    return hydrationPrice(chain as unknown as Polkadot, connector, req);
+  }
+  else return tinymanPrice(chain as unknown as Algorand, connector, req);
 
 }
 
@@ -93,7 +98,7 @@ export async function trade(req: TradeRequest): Promise<TradeResponse> {
   const chain = await getInitializedChain<
     Algorand | Ethereumish | Tezosish | Osmosis
   >(req.chain, req.network);
-  if (chain instanceof Osmosis){
+  if (chain instanceof Osmosis) {
     return chain.controller.trade(chain as unknown as Osmosis, req);
   }
 
@@ -119,7 +124,7 @@ export async function addLiquidity(
   req: AddLiquidityRequest
 ): Promise<AddLiquidityResponse> {
   const chain = await getInitializedChain<Ethereumish | Osmosis>(req.chain, req.network);
-  if (chain instanceof Osmosis){
+  if (chain instanceof Osmosis) {
     return chain.controller.addLiquidity(chain as unknown as Osmosis, req);
   }
   const connector: UniswapLPish = await getConnector<UniswapLPish>(
@@ -135,7 +140,7 @@ export async function reduceLiquidity(
   req: RemoveLiquidityRequest
 ): Promise<RemoveLiquidityResponse> {
   const chain = await getInitializedChain<Ethereumish | Osmosis>(req.chain, req.network);
-  if (chain instanceof Osmosis){
+  if (chain instanceof Osmosis) {
     return chain.controller.removeLiquidity(chain as unknown as Osmosis, req);
   }
   const connector: UniswapLPish = await getConnector<UniswapLPish>(
@@ -151,7 +156,7 @@ export async function collectFees(
   req: CollectEarnedFeesRequest
 ): Promise<RemoveLiquidityResponse> {
   const chain = await getInitializedChain<Ethereumish | Osmosis>(req.chain, req.network);
-  if (chain instanceof Osmosis){
+  if (chain instanceof Osmosis) {
     return chain.controller.collectFees(chain as unknown as Osmosis, req);
   }
   const connector: UniswapLPish = await getConnector<UniswapLPish>(
@@ -166,7 +171,7 @@ export async function positionInfo(
   req: PositionRequest
 ): Promise<PositionResponse> {
   const chain = await getInitializedChain<Ethereumish | Osmosis>(req.chain, req.network);
-  if (chain instanceof Osmosis){
+  if (chain instanceof Osmosis) {
     return chain.controller.poolPositions(chain as unknown as Osmosis, req);
   }
   const connector: UniswapLPish = await getConnector<UniswapLPish>(
@@ -181,7 +186,7 @@ export async function poolPrice(
   req: PoolPriceRequest
 ): Promise<PoolPriceResponse> {
   const chain = await getInitializedChain<Ethereumish | Osmosis>(req.chain, req.network);
-  if (chain instanceof Osmosis){
+  if (chain instanceof Osmosis) {
     return chain.controller.poolPrice(chain as unknown as Osmosis, req);
   }
   const connector: UniswapLPish = await getConnector<UniswapLPish>(
@@ -198,10 +203,10 @@ export async function estimateGas(
   const chain = await getInitializedChain<
     Algorand | Ethereumish | Tezosish | Osmosis
   >(req.chain, req.network);
-  if (chain instanceof Osmosis){
+  if (chain instanceof Osmosis) {
     return chain.controller.estimateGas(chain as unknown as Osmosis);
   }
-  
+
   const connector: Uniswapish | Tinyman | Plenty =
     await getConnector<Uniswapish | Tinyman | Plenty>(
       req.chain,

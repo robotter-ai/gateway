@@ -1,0 +1,285 @@
+
+// Get the pools
+getPools( "10", "0", "5")
+[
+  {
+    address: '7HkYL6b2p4tuppGaKpugS2WaAjngiCXDXDKrEeyYgTaFP8KA',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7NPWe2Y1TVYh6jiVzmpzGVMnKctcaduyjfSMEu3vRXceAiFx',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7JJ3ob15boE1Civ4nHm8WBBHQ6qdxkEJNHQTNGeNGyuBhKTu',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7P7gK6QgTCc5zew9RiFUnDHyFrzUshWBVhoaiSA2rqyY4LJp',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7M4PwgMNeEZB2AQa39CnVJFHx6NU3RJ7KSz2Cxyf1zyS8Grt',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7MveTu8GZxFc5953NYU85MGx6xti1KtaCiPyM6C9p9Ka2gnD',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7NUJFMR9WkJKhnYXBVMT9zohSs8ijGtBZwjv8zkwtcPhNMQc',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7JhF2aPwujc1R7fMy8PUDDnWvdgXrEPAaqftDtDGjPbkgZjp',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7JRrXBpB1K2JUapwojTYLZPoMvLPMQUDyiEyJb5hj7wad1of',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7KZGAZfYLs1m15vBZ9VwovytmnVLFtN35homzEEw55n4Njro',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7Ndv8yEWSB4Fzb6xxwUAMGsiZPkvMw5D1EPzzPhbbySrwVQg',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7Noq6Lw46jPB4zhr5yDBzQxQw5zoYdSUCHUtA5Jz2Jm8DQ78',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7KKXieLDbfJPUaVohYTbbib97LdC1URmZuMNFq9rvTudmDMv',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7MnTh8N7p88jQURyvvvh5pZiV6DAMz8rywUokYqBmtHKw8AQ',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7KhXnguryvdFEq9ToQ9mSUgR71baG3mfHHBLCkC5khUGYcpe',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7N8uzcXKbVxnKCwU8HqkoXjkw3fprdVHeWvrShzEBuBFbru8',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7KsbYZTDHQ4AZp1PVAwxsu4cqBxyKceqqMMs2dQYCf9TkAxJ',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7L3yk3A18ExaUHG7NfwAjiYyJYrcoj6Npjenkr8CUVjukS9a',
+    type: 'Xyk',
+    tokens: [ [Object], [Object] ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1',
+    type: 'Omnipool',
+    hubAssetId: '1',
+    tokens: [
+      [Object], [Object], [Object],
+      [Object], [Object], [Object],
+      [Object], [Object], [Object],
+      [Object], [Object], [Object],
+      [Object], [Object], [Object],
+      [Object], [Object], [Object],
+      [Object]
+    ],
+    maxInRatio: 3,
+    maxOutRatio: 3,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7JP6TvcH5x31TsbC6qVJHEhsW7UNmpREMZuLBpK2bG1goJRS',
+    id: '100',
+    type: 'Stableswap',
+    fee: [ 0.4, 1000 ],
+    tokens: [ [Object], [Object], [Object], [Object], [Object] ],
+    amplification: '320',
+    totalIssuance: '1602499405638571008865767',
+    maxInRatio: 0,
+    maxOutRatio: 0,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7MaKPwwnqN4cqg35PbxsGXUo1dfvjXQ3XfBjWF9UVvKMjJj8',
+    id: '101',
+    type: 'Stableswap',
+    fee: [ 0.4, 1000 ],
+    tokens: [ [Object], [Object], [Object] ],
+    amplification: '5',
+    totalIssuance: '75674896060289437495',
+    maxInRatio: 0,
+    maxOutRatio: 0,
+    minTradingLimit: 1000
+  },
+  {
+    address: '7LVGEVLFXpsCCtnsvhzkSMQARU7gRVCtwMckG7u7d3V6FVvG',
+    id: '102',
+    type: 'Stableswap',
+    fee: [ 0.4, 1000 ],
+    tokens: [ [Object], [Object], [Object] ],
+    amplification: '100',
+    totalIssuance: '16926256860761776530683836',
+    maxInRatio: 0,
+    maxOutRatio: 0,
+    minTradingLimit: 1000
+  }
+]
+{
+  type: 'Sell',
+  amountIn: '5',
+  amountOut: '366.691842622592',
+  spotPrice: '74.2684113244915929743576396285077691460078121336630208',
+  tradeFee: '3.461315055083',
+  tradeFeePct: 0.94,
+  tradeFeeRange: [ 0.8999999999999999, 5.699999999999999 ],
+  priceImpactPct: -0.32,
+  swaps: [
+    {
+      poolAddress: '7KhXnguryvdFEq9ToQ9mSUgR71baG3mfHHBLCkC5khUGYcpe',
+      poolId: undefined,
+      pool: 'Xyk',
+      assetIn: '10',
+      assetOut: '32',
+      amountIn: '5',
+      calculatedOut: '366.459058303483',
+      amountOut: '365.359681128574',
+      spotPrice: '73.367951217313869423548624',
+      tradeFeePct: 0.3,
+      tradeFeeRange: undefined,
+      priceImpactPct: -0.1,
+      errors: []
+    },
+    {
+      poolAddress: '7L3yk3A18ExaUHG7NfwAjiYyJYrcoj6Npjenkr8CUVjukS9a',
+      poolId: undefined,
+      pool: 'Xyk',
+      assetIn: '32',
+      assetOut: '5',
+      amountIn: '365.359681128574',
+      calculatedOut: '0.5776550324',
+      amountOut: '0.5759220674',
+      spotPrice: '0.0015844741254116',
+      tradeFeePct: 0.3,
+      tradeFeeRange: undefined,
+      priceImpactPct: -0.22,
+      errors: []
+    },
+    {
+      poolAddress: '7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1',
+      poolId: undefined,
+      pool: 'Omnipool',
+      assetIn: '5',
+      assetOut: '0',
+      amountIn: '0.5759220674',
+      calculatedOut: '367.93796545188',
+      amountOut: '366.691842622592',
+      spotPrice: '638.870140894787',
+      tradeFeePct: 0.34,
+      tradeFeeRange: [Array],
+      priceImpactPct: -0,
+      errors: []
+    }
+  ]
+
+  Object Tokens:
+  Tokens [
+    {
+      id: '0',
+      balance: '1698495438339800',
+      name: 'Hydration',
+      symbol: 'HDX',
+      decimals: 12,
+      icon: 'HDX',
+      type: 'Token',
+      isSufficient: true,
+      existentialDeposit: '1000000000000'
+    },
+    {
+      id: '5',
+      balance: '26580848089',
+      name: 'Polkadot',
+      symbol: 'DOT',
+      decimals: 10,
+      icon: 'DOT',
+      type: 'Token',
+      isSufficient: true,
+      location: { parents: 1, interior: [Object] },
+      existentialDeposit: '17540000'
+    }
+  ]

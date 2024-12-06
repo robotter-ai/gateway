@@ -2,53 +2,59 @@ import { Hydration } from './hydration';
 import {
   PriceRequest,
   PriceResponse,
-  TradeRequest,
-  TradeResponse,
 } from '../../amm/amm.requests';
 import { Polkadot } from '../../chains/polkadot/polkadot';
+import { HttpException, PRICE_FAILED_ERROR_CODE, PRICE_FAILED_ERROR_MESSAGE, UNKNOWN_ERROR_ERROR_CODE, UNKNOWN_ERROR_MESSAGE } from '../../services/error-handler';
+import { latency } from '../../services/base';
+
+
+
 
 export async function price(
   polkadot: Polkadot,
   hydration: Hydration,
   req: PriceRequest
 ): Promise<PriceResponse> {
-  const trade = await hydration.estimateTrade(req);
+  // const trade = await hydration.estimateTrade(req);
+  const startTimestamp: number = Date.now();
+  let trade;
+  try {
+    trade = await hydration.estimateTrade(req)
+  } catch (e) {
+    if (e instanceof Error) {
+      throw new HttpException(
+        500,
+        PRICE_FAILED_ERROR_MESSAGE + e.message,
+        PRICE_FAILED_ERROR_CODE
+      );
+    } else {
+      throw new HttpException(
+        500,
+        UNKNOWN_ERROR_MESSAGE,
+        UNKNOWN_ERROR_ERROR_CODE
+      );
+    }
+  }
   return {
-    network: "https://api.coingecko.com/api/v3/simple/price",
+    network: polkadot.network,
+    timestamp: startTimestamp,
+    latency: latency(startTimestamp, Date.now()),
     base: req.base,
     quote: req.quote,
     amount: req.amount,
-    price: String(trade.price),
-    expectedAmount: String(trade.amount),
     rawAmount: req.amount,
-    timestamp: Date.now(),
-    latency: 0,
+    expectedAmount: String(trade.expectedAmount), // TODO implement blalblab!!!
+    price: String(trade.expectedPrice),
     gasPrice: polkadot.gasPrice,
-    gasPriceToken: 'HDX',
+    gasPriceToken: polkadot.nativeTokenSymbol,
     gasLimit: polkadot.gasLimit,
-    gasCost: polkadot.gasCost.toString(),
-  };
+    gasCost: String(polkadot.gasCost),
+  } as PriceResponse;
 }
 
-export async function trade(
-  hydration: Hydration,
-  req: TradeRequest
-): Promise<TradeResponse> {
-  const txHash = await hydration.executeTrade(req);
-  return {
-    network: "wss://rpc.polkadot.io",
-    base: req.base,
-    quote: req.quote,
-    amount: req.amount,
-    txHash,
-    timestamp: Date.now(),
-    latency: 0,
-    rawAmount: req.amount,
-    price: "0",
-    expectedOut: "0",
-    gasLimit: 0,
-    gasCost: "0 DOT",
-    gasPrice: 0,
-    gasPriceToken: 'DOT',
-  };
-}
+
+
+
+
+
+

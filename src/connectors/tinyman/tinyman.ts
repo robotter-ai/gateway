@@ -149,8 +149,8 @@ export class Tinyman {
       quote.type === SwapQuoteType.Direct ? quote.data.quote.rate : 0;
     logger.info(
       `Best quote for ${baseToken.symbol}-${quoteToken.symbol}: ` +
-        `${price}` +
-        `${baseToken.symbol}.`
+      `${price}` +
+      `${baseToken.symbol}.`
     );
     const expectedPrice = isBuy === true ? 1 / price : price;
     const expectedAmount =

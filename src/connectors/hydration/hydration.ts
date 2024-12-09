@@ -3,7 +3,7 @@ import { Polkadot } from '../../chains/polkadot/polkadot';
 import { HydrationConfig } from './hydration.config';
 import { getPolkadotConfig } from '../../chains/polkadot/polkadot.config';
 import { percentRegexp } from '../../services/config-manager-v2';
-import { ExternalAsset, PoolBase, Trade } from '@galacticcouncil/sdk';
+import { ExternalAsset, PoolBase } from '@galacticcouncil/sdk';
 
 import { TradeRouter, PoolService, } from '@galacticcouncil/sdk';
 import { PriceRequest } from '../../amm/amm.requests';
@@ -83,11 +83,11 @@ export class Hydration {
         TOKEN_NOT_SUPPORTED_ERROR_CODE
       );
 
-    const baseAsset = { id: baseToken.id, decimals: baseToken.decimals };
-    const quoteAsset = {
-      id: quoteToken.id,
-      decimals: quoteToken.decimals,
-    };
+    // const baseAsset = { id: baseToken.id, decimals: baseToken.decimals };
+    // const quoteAsset = {
+    //   id: quoteToken.id,
+    //   decimals: quoteToken.decimals,
+    // };
 
     const amount = Number(req.amount) * <number>pow(10, baseToken.decimals);
     const isBuy: boolean = req.side === 'BUY';

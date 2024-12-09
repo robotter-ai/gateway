@@ -1,4 +1,4 @@
-POST https://{{host}}:{{port}}/
+GET https://{{host}}:{{port}}/
 Content-Type: application/json
 
 {
@@ -17,7 +17,7 @@ Content-Type: application/json
 
 ###
 
-GET https://{{host}}:{{port}}/amm/price
+POST https://{{host}}:{{port}}/amm/price
 Content-Type: application/json
 
 {

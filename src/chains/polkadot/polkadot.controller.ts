@@ -1,24 +1,19 @@
-import { EstimateGasResponse } from '../../amm/amm.requests';
-import { validateEstimateGasRequest, validatePolkadotBalanceRequest, } from './polkadot.validators';
+import { validatePolkadotBalanceRequest, } from './polkadot.validators';
 import {
   BalanceRequest,
-
-  PollRequest,
-  PollResponse,
 } from '../../network/network.requests';
 import { Polkadot } from './polkadot';
-import { EstimateGasRequest } from './polkadot.types';
 
 
-async function getInitializedPolkadot(network: string): Promise<Polkadot> {
-  const polkadot = await Polkadot.getInstance(network);
+// async function getInitializedPolkadot(network: string): Promise<Polkadot> {
+//   const polkadot = await Polkadot.getInstance(network);
 
-  if (!polkadot.ready()) {
-    await polkadot.init();
-  }
+//   if (!polkadot.ready()) {
+//     await polkadot.init();
+//   }
 
-  return polkadot;
-}
+//   return polkadot;
+// }
 
 export class PolkadotController {
 
@@ -43,6 +38,7 @@ export class PolkadotController {
       balances: balances,
     };
   }
+  
 
 
 

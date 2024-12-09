@@ -2,13 +2,10 @@ import { Hydration } from './hydration';
 import {
   PriceRequest,
   PriceResponse,
-  TradeResponse,
 } from '../../amm/amm.requests';
 import { Polkadot } from '../../chains/polkadot/polkadot';
-import { HttpException, PRICE_FAILED_ERROR_CODE, PRICE_FAILED_ERROR_MESSAGE, SWAP_PRICE_EXCEEDS_LIMIT_PRICE_ERROR_CODE, SWAP_PRICE_EXCEEDS_LIMIT_PRICE_ERROR_MESSAGE, TRADE_FAILED_ERROR_CODE, TRADE_FAILED_ERROR_MESSAGE, UNKNOWN_ERROR_ERROR_CODE, UNKNOWN_ERROR_MESSAGE } from '../../services/error-handler';
+import { HttpException, PRICE_FAILED_ERROR_CODE, PRICE_FAILED_ERROR_MESSAGE, UNKNOWN_ERROR_ERROR_CODE, UNKNOWN_ERROR_MESSAGE } from '../../services/error-handler';
 import { latency } from '../../services/base';
-import Decimal from 'decimal.js-light';
-import { logger } from 'ethers';
 
 
 

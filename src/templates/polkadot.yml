@@ -1,9 +1,6 @@
 networks:
   mainnet:
     chainId: mainnet
-    nodeUrl: 'wss://rpc.polkadot.io'
-    tokenPriceApi: 'https://api.coingecko.com/api/v3/simple/price'
-
-   
+    nodeURL: 'wss://rpc.polkadot.io' 
 nativeCurrencySymbol: DOT
 gasLimitEstimate: 500000

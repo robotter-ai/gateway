@@ -3,13 +3,14 @@ import { Polkadot } from '../../chains/polkadot/polkadot';
 import { HydrationConfig } from './hydration.config';
 import { getPolkadotConfig } from '../../chains/polkadot/polkadot.config';
 import { percentRegexp } from '../../services/config-manager-v2';
-import { ExternalAsset, PoolBase } from '@galacticcouncil/sdk';
+import { ExternalAsset, PoolBase, Trade } from '@galacticcouncil/sdk';
 
 import { TradeRouter, PoolService, } from '@galacticcouncil/sdk';
-import { ApiPromise, WsProvider } from '@polkadot/api';
 import { PriceRequest } from '../../amm/amm.requests';
 import { HttpException, TOKEN_NOT_SUPPORTED_ERROR_CODE, TOKEN_NOT_SUPPORTED_ERROR_MESSAGE } from '../../services/error-handler';
 import { pow } from 'mathjs';
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { logger } from 'ethers';
 
 export class Hydration {
   private static _instances: LRUCache<string, Hydration>;
@@ -93,7 +94,11 @@ export class Hydration {
     const queryPools: PoolBase[] = await trade.getPools()
     const pool: PoolBase | undefined = queryPools.find((query) => query.id === req.poolId)
     const price = await trade.getBestSpotPrice(req.base, req.quote)
-
+    logger.info(
+      `Best quote for ${baseToken.symbol}-${quoteToken.symbol}: ` +
+      `${price}` +
+      `${baseToken.symbol}.`
+    );
     const expectedPrice = isBuy === true ? 1 / Number(price) : Number(price);
     const expectedAmount =
       req.side === 'BUY'
@@ -102,6 +107,17 @@ export class Hydration {
 
     return { expectedAmount, expectedPrice, amount, pool };
   }
+
+  // async executeTrade(
+  //   account: Account,
+  //   quote: SwapQuote,
+  //   isBuy: boolean
+  // ): Promise<Trade> {
+
+
+  //   logger.info(`Swap transaction Id: ${tx.txnID}`);
+
+  // }
   getSlippage(): number {
     const allowedSlippage = this._config.allowedSlippage;
     const nd = allowedSlippage.match(percentRegexp);

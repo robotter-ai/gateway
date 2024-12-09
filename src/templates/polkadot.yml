@@ -5,5 +5,5 @@ networks:
     tokenPriceApi: 'https://api.coingecko.com/api/v3/simple/price'
 
    
-nativeCurrencySymbol: POLK
+nativeCurrencySymbol: DOT
 gasLimitEstimate: 500000

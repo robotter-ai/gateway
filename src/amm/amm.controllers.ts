@@ -36,8 +36,8 @@ import {
 } from '../connectors/tinyman/tinyman.controllers';
 import {
   price as hydrationPrice,
-  trade as hydrationTrade
-
+  trade as hydrationTrade,
+  estimateGas as hydrationEstimageGas,
 } from '../connectors/hydration/hydration.controllers';
 
 import {
@@ -86,13 +86,11 @@ export async function price(req: PriceRequest): Promise<PriceResponse> {
   } else if ('routerAbi' in connector) {
     // we currently use the presence of routerAbi to distinguish Uniswapish from RefAMMish
     return uniswapPrice(<Ethereumish>chain, connector, req);
-
-  }
-  else if (connector instanceof Hydration) {
+  } else if (connector instanceof Hydration) {
     return hydrationPrice(chain as unknown as Polkadot, connector, req);
+  } else {
+    return tinymanPrice(chain as unknown as Algorand, connector, req);
   }
-  else return tinymanPrice(chain as unknown as Algorand, connector, req);
-
 }
 
 export async function trade(req: TradeRequest): Promise<TradeResponse> {
@@ -204,14 +202,14 @@ export async function estimateGas(
   req: NetworkSelectionRequest
 ): Promise<EstimateGasResponse> {
   const chain = await getInitializedChain<
-    Algorand | Ethereumish | Tezosish | Osmosis
+    Algorand | Ethereumish | Tezosish | Osmosis | Polkadot
   >(req.chain, req.network);
   if (chain instanceof Osmosis) {
     return chain.controller.estimateGas(chain as unknown as Osmosis);
   }
 
-  const connector: Uniswapish | Tinyman | Plenty =
-    await getConnector<Uniswapish | Tinyman | Plenty>(
+  const connector: Uniswapish | Tinyman | Plenty | Hydration =
+    await getConnector<Uniswapish | Tinyman | Plenty | Hydration>(
       req.chain,
       req.network,
       req.connector
@@ -223,6 +221,8 @@ export async function estimateGas(
     return carbonEstimateGas(<Ethereumish>chain, connector);
   } else if ('routerAbi' in connector) {
     return uniswapEstimateGas(<Ethereumish>chain, connector);
+  } else if (connector instanceof Hydration) {
+    return hydrationEstimageGas(<Polkadot>chain, connector);
   } else {
     return tinymanEstimateGas(chain as unknown as Algorand, connector);
   }

@@ -1,0 +1,8 @@
+{
+  "chain": "polkadot",
+  "network": "mainnet",
+  "address": "$POLKADOT_ADDRESS",
+  "tokenSymbols": [
+    "POL"
+  ]
+}

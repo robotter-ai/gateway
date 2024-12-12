@@ -56,6 +56,7 @@ export async function getStatus(
     connections = connections.concat(
       algorandConnections ? Object.values(algorandConnections) : [],
     );
+
     const polkadotConnections = Polkadot.getConnectedInstances();
     connections = connections.concat(
       polkadotConnections ? Object.values(polkadotConnections) : [],

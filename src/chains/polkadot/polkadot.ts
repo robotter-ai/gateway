@@ -67,9 +67,11 @@ export class Polkadot {
   public get network(): string {
     return this._network;
   }
+
   public get storedAssetList(): Asset[] {
     return Object.values(this._assetMap);
   }
+
   public getAccountFromPrivateKey(mnemonic: string): {
     address: string;
     keypair: any;
@@ -78,9 +80,11 @@ export class Polkadot {
     const address = this._keyring.addFromSeed(keypair.sk).address;
     return { address, keypair };
   }
+
   public getAssetForSymbol(symbol: string): Asset | null {
     return this._assetMap[symbol] ? this._assetMap[symbol] : null;
   }
+
   public async getAccountInfo(accountAddress: string): Promise<any> {
     const accountInfo =
       await this._polkadot.query.system.account(accountAddress);

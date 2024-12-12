@@ -15,14 +15,14 @@ export type AssetsRequest = {
     assetSymbols?: string[];
 };
 
-export interface AlgorandAsset {
+export interface PolkadotAsset {
     symbol: string;
     assetId: number;
     decimals: number;
 }
 
 export type AssetsResponse = {
-    assets: AlgorandAsset[];
+    assets: PolkadotAsset[];
 };
 
 export interface OptInRequest {

@@ -20,6 +20,7 @@ import { OsmosisConfig } from '../chains/osmosis/osmosis.config';
 import { CarbonConfig } from './carbon/carbon.config';
 import { BalancerConfig } from './balancer/balancer.config';
 import { ETCSwapConfig } from './etcswap/etcswap.config';
+import { HydrationConfig } from './hydration/hydration.config';
 
 export namespace ConnectorsRoutes {
   export const router = Router();
@@ -153,6 +154,12 @@ export namespace ConnectorsRoutes {
             chain_type: ETCSwapConfig.config.chainType,
             available_networks: ETCSwapConfig.config.availableNetworks,
             additional_spenders: ['etcswap'],
+          },
+          {
+            name: 'hydration',
+            trading_type: HydrationConfig.config.tradingTypes,
+            chain_type: HydrationConfig.config.chainType,
+            available_networks: HydrationConfig.config.availableNetworks,
           },
         ],
       });

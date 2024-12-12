@@ -3,12 +3,12 @@ import { Polkadot } from '../../chains/polkadot/polkadot';
 import { HydrationConfig } from './hydration.config';
 import { getPolkadotConfig } from '../../chains/polkadot/polkadot.config';
 import { percentRegexp } from '../../services/config-manager-v2';
-import { ExternalAsset, PoolBase } from '@galacticcouncil/sdk';
+import { PoolBase } from '@galacticcouncil/sdk';
 
 import { TradeRouter, PoolService, } from '@galacticcouncil/sdk';
-import { PriceRequest } from '../../amm/amm.requests';
+import { PriceRequest, TradeRequest } from '../../amm/amm.requests';
 import { HttpException, TOKEN_NOT_SUPPORTED_ERROR_CODE, TOKEN_NOT_SUPPORTED_ERROR_MESSAGE } from '../../services/error-handler';
-import { pow } from 'mathjs';
+
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { logger } from 'ethers';
 
@@ -68,15 +68,17 @@ export class Hydration {
     const api = await ApiPromise.create({ provider: wsProvider });
     const poolService = new PoolService(api);
     const trade = new TradeRouter(poolService);
+    const asset = await trade.getAllAssets()
 
-    const baseToken: ExternalAsset | null = this.chain.getAssetForSymbol(
-      req.base
-    );
-    const quoteToken: ExternalAsset | null = this.chain.getAssetForSymbol(
-      req.quote
-    );
 
-    if (baseToken === null || quoteToken === null)
+    const tokenIdBase = asset.find(a => a.symbol === req.base)?.id ?? "0" //HDX default 
+    const tokenIdQuote = asset.find(a => a.symbol === req.quote)?.id ?? "10" // USDT default
+
+    const symbolBase = asset.find(a => req.base === a.symbol)?.symbol ?? "0" //HDX default 
+    const symbolQuote = asset.find(a => req.quote === a.symbol)?.symbol ?? "10" // USDT default
+
+
+    if (symbolBase === null || symbolQuote === null)
       throw new HttpException(
         500,
         TOKEN_NOT_SUPPORTED_ERROR_MESSAGE,
@@ -89,35 +91,51 @@ export class Hydration {
     //   decimals: quoteToken.decimals,
     // };
 
-    const amount = Number(req.amount) * <number>pow(10, baseToken.decimals);
+    // const amount = Number(req.amount) * <number>pow(10, baseToken.decimals);
     const isBuy: boolean = req.side === 'BUY';
     const queryPools: PoolBase[] = await trade.getPools()
     const pool: PoolBase | undefined = queryPools.find((query) => query.id === req.poolId)
-    const price = await trade.getBestSpotPrice(req.base, req.quote)
+
+
+
+
+
+    const price = await trade.getBestSpotPrice(tokenIdBase, tokenIdQuote)
     logger.info(
-      `Best quote for ${baseToken.symbol}-${quoteToken.symbol}: ` +
-      `${price}` +
-      `${baseToken.symbol}.`
+      `Best quote for ${symbolBase}-${symbolQuote}: ` +
+      `${price?.amount}` +
+      `${symbolBase}.`
     );
-    const expectedPrice = isBuy === true ? 1 / Number(price) : Number(price);
+    const expectedPrice = isBuy === true ? 1 / Number(price?.amount) : Number(price?.amount);
     const expectedAmount =
       req.side === 'BUY'
         ? Number(req.amount)
         : expectedPrice * Number(req.amount);
 
-    return { expectedAmount, expectedPrice, amount, pool };
+    return { expectedAmount, expectedPrice, pool };
   }
 
-  // async executeTrade(
-  //   account: Account,
-  //   quote: SwapQuote,
-  //   isBuy: boolean
-  // ): Promise<Trade> {
+  async executeTrade(
+    req: TradeRequest
+  ) {
+    const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+    const api = await ApiPromise.create({ provider: wsProvider });
+    const poolService = new PoolService(api);
+    const trade = new TradeRouter(poolService);
+    const asset = await trade.getAllAssets()
 
 
-  //   logger.info(`Swap transaction Id: ${tx.txnID}`);
+    const tokenBase = asset.find(a => a.symbol === req.base)?.id ?? "0" //HDX default 
+    const tokenQuote = asset.find(a => a.symbol === req.quote)?.id ?? "10" //  USDT default
 
-  // }
+    const getBuy = await trade.getBestBuy(tokenBase, tokenQuote, req.amount)
+    const getSell = await trade.getBestSell(tokenBase, tokenQuote, req.amount)
+
+    if (req.side === "BUY")
+      return getBuy
+    return getSell
+
+  }
   getSlippage(): number {
     const allowedSlippage = this._config.allowedSlippage;
     const nd = allowedSlippage.match(percentRegexp);

@@ -1,43 +1,41 @@
-GET https://{{host}}:{{port}}/
-Content-Type: application/json
+# GET https://{{host}}:{{port}}/
+# Content-Type: application/json
 
-{
-}
+# {
+# }
 
-###
+# ###
 
-POST https://{{host}}:{{port}}/chain/balances
-Content-Type: application/json
+# POST https://{{host}}:{{port}}/chain/balances
+# Content-Type: application/json
 
-{
-"chain": "", 
-"request": ""
+# {
+# "chain": "", 
+# "request": ""
 
-}
+# }
 
-###
+# ###
 
-POST https://{{host}}:{{port}}/amm/price
-Content-Type: application/json
+# POST https://{{host}}:{{port}}/amm/price
+# Content-Type: application/json
 
-{
-  "chain":  "",
-  "network": "",
-  "connector":  "",
-  "quote": "",
-  "base": "",
-  "amount": "",
-  "side": "",
-  "allowedSlippage": "",
-  "poolId": ""
-}
+# {
+#   "quote": "HDX",
+#   "base": "USDC",
+#   "amount": "1",
+#   "chain": "polkadot",
+#   "network": "mainnet",
+#   "connector": "hydration",
+#   "side": "BUY"
+# }
 
-###
+# ###
 
-POST https://{{host}}:{{port}}/
-Content-Type: application/json
+# POST https://{{host}}:{{port}}/
+# Content-Type: application/json
 
-{
-}
+# {
+# }
 
-###
+# ###

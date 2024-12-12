@@ -9,6 +9,7 @@ import { AssetClient, ExternalAsset } from '@galacticcouncil/sdk';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import { walletPath } from '../../services/base';
 import fse from 'fs-extra';
+import {getNotNullOrThrowError} from "./polkadot.helpers";
 
 export class Polkadot {
   private static _instances: Map<string, Polkadot> = new Map();
@@ -43,10 +44,15 @@ export class Polkadot {
     return this._network;
   }
   public static getInstance(network: string): Polkadot {
-    if (!Polkadot._instances.has(network)) {
-      throw new Error(`Instance for network ${network} is not initialized. Please initialize it asynchronously first.`);
+    if (Polkadot._instances === undefined) {
+      Polkadot._instances = new Map();
     }
-    return Polkadot._instances.get(network)!;
+
+    if (!(network in Polkadot._instances)) {
+      Polkadot._instances.set(network, new Polkadot(network));
+    }
+
+    return getNotNullOrThrowError<Polkadot>(Polkadot._instances.get(network));
   }
 
   public static getConnectedInstances(): { [name: string]: Polkadot } {
@@ -95,7 +101,6 @@ export class Polkadot {
     return mnemonicToSecretKey(mnemonic);
   }
   public async getAssetBalance(
-
     assetName: string
   ): Promise<string> {
     const polkadotAsset = this._asset;

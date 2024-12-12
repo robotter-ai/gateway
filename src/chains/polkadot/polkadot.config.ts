@@ -15,7 +15,7 @@ export function getPolkadotConfig(network: string):Config {
     network: {
       name: network,
       nodeURL: ConfigManagerV2.getInstance().get(
-        `polkadot.networks.${network}.nodeUrl`
+        `polkadot.networks.${network}.nodeURL`
       ),
       tokenPriceApi: ConfigManagerV2.getInstance().get(
         `polkadot.networks.${network}.tokenPriceApi`

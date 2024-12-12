@@ -36,6 +36,7 @@ import {
 } from '../connectors/tinyman/tinyman.controllers';
 import {
   price as hydrationPrice,
+  trade as hydrationTrade
 
 } from '../connectors/hydration/hydration.controllers';
 
@@ -96,14 +97,14 @@ export async function price(req: PriceRequest): Promise<PriceResponse> {
 
 export async function trade(req: TradeRequest): Promise<TradeResponse> {
   const chain = await getInitializedChain<
-    Algorand | Ethereumish | Tezosish | Osmosis
+    Algorand | Ethereumish | Tezosish | Osmosis | Polkadot
   >(req.chain, req.network);
   if (chain instanceof Osmosis) {
     return chain.controller.trade(chain as unknown as Osmosis, req);
   }
 
-  const connector: Uniswapish | Tinyman | Plenty =
-    await getConnector<Uniswapish | Tinyman | Plenty>(
+  const connector: Uniswapish | Tinyman | Plenty | Hydration =
+    await getConnector<Uniswapish | Tinyman | Plenty | Hydration>(
       req.chain,
       req.network,
       req.connector
@@ -115,6 +116,8 @@ export async function trade(req: TradeRequest): Promise<TradeResponse> {
     return carbonTrade(<Ethereumish>chain, connector, req);
   } else if ('routerAbi' in connector) {
     return uniswapTrade(<Ethereumish>chain, connector, req);
+  } else if (connector instanceof Hydration) {
+    return hydrationTrade(chain as unknown as Polkadot, connector, req);
   } else {
     return tinymanTrade(chain as unknown as Algorand, connector, req);
   }

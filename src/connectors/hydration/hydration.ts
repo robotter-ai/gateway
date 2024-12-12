@@ -5,9 +5,13 @@ import { getPolkadotConfig } from '../../chains/polkadot/polkadot.config';
 import { percentRegexp } from '../../services/config-manager-v2';
 import { PoolBase } from '@galacticcouncil/sdk';
 
-import { TradeRouter, PoolService, } from '@galacticcouncil/sdk';
+import { TradeRouter, PoolService } from '@galacticcouncil/sdk';
 import { PriceRequest, TradeRequest } from '../../amm/amm.requests';
-import { HttpException, TOKEN_NOT_SUPPORTED_ERROR_CODE, TOKEN_NOT_SUPPORTED_ERROR_MESSAGE } from '../../services/error-handler';
+import {
+  HttpException,
+  TOKEN_NOT_SUPPORTED_ERROR_CODE,
+  TOKEN_NOT_SUPPORTED_ERROR_MESSAGE,
+} from '../../services/error-handler';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { logger } from 'ethers';
@@ -19,12 +23,9 @@ export class Hydration {
   private _config: HydrationConfig.NetworkConfig;
   private _ready: boolean = false;
 
-
   constructor(network: string) {
     this._config = HydrationConfig.config;
     this.chain = Polkadot.getInstance(network);
-
-
   }
   public get storedAssetList(): PoolBase[] {
     return Object.values(this._poolMap);
@@ -51,7 +52,6 @@ export class Hydration {
     return Hydration._instances.get(network)!;
   }
 
-
   public async init() {
     if (!this.chain.ready()) {
       await this.chain.init();
@@ -68,21 +68,20 @@ export class Hydration {
     const api = await ApiPromise.create({ provider: wsProvider });
     const poolService = new PoolService(api);
     const trade = new TradeRouter(poolService);
-    const asset = await trade.getAllAssets()
+    const asset = await trade.getAllAssets();
 
+    const tokenIdBase = asset.find((a) => a.symbol === req.base)?.id ?? '0'; //HDX default
+    const tokenIdQuote = asset.find((a) => a.symbol === req.quote)?.id ?? '10'; // USDT default
 
-    const tokenIdBase = asset.find(a => a.symbol === req.base)?.id ?? "0" //HDX default 
-    const tokenIdQuote = asset.find(a => a.symbol === req.quote)?.id ?? "10" // USDT default
-
-    const symbolBase = asset.find(a => req.base === a.symbol)?.symbol ?? "0" //HDX default 
-    const symbolQuote = asset.find(a => req.quote === a.symbol)?.symbol ?? "10" // USDT default
-
+    const symbolBase = asset.find((a) => req.base === a.symbol)?.symbol ?? '0'; //HDX default
+    const symbolQuote =
+      asset.find((a) => req.quote === a.symbol)?.symbol ?? '10'; // USDT default
 
     if (symbolBase === null || symbolQuote === null)
       throw new HttpException(
         500,
         TOKEN_NOT_SUPPORTED_ERROR_MESSAGE,
-        TOKEN_NOT_SUPPORTED_ERROR_CODE
+        TOKEN_NOT_SUPPORTED_ERROR_CODE,
       );
 
     // const baseAsset = { id: baseToken.id, decimals: baseToken.decimals };
@@ -93,20 +92,19 @@ export class Hydration {
 
     // const amount = Number(req.amount) * <number>pow(10, baseToken.decimals);
     const isBuy: boolean = req.side === 'BUY';
-    const queryPools: PoolBase[] = await trade.getPools()
-    const pool: PoolBase | undefined = queryPools.find((query) => query.id === req.poolId)
+    const queryPools: PoolBase[] = await trade.getPools();
+    const pool: PoolBase | undefined = queryPools.find(
+      (query) => query.id === req.poolId,
+    );
 
-
-
-
-
-    const price = await trade.getBestSpotPrice(tokenIdBase, tokenIdQuote)
+    const price = await trade.getBestSpotPrice(tokenIdBase, tokenIdQuote);
     logger.info(
       `Best quote for ${symbolBase}-${symbolQuote}: ` +
-      `${price?.amount}` +
-      `${symbolBase}.`
+        `${price?.amount}` +
+        `${symbolBase}.`,
     );
-    const expectedPrice = isBuy === true ? 1 / Number(price?.amount) : Number(price?.amount);
+    const expectedPrice =
+      isBuy === true ? 1 / Number(price?.amount) : Number(price?.amount);
     const expectedAmount =
       req.side === 'BUY'
         ? Number(req.amount)
@@ -115,26 +113,21 @@ export class Hydration {
     return { expectedAmount, expectedPrice, pool };
   }
 
-  async executeTrade(
-    req: TradeRequest
-  ) {
+  async executeTrade(req: TradeRequest) {
     const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
     const api = await ApiPromise.create({ provider: wsProvider });
     const poolService = new PoolService(api);
     const trade = new TradeRouter(poolService);
-    const asset = await trade.getAllAssets()
+    const asset = await trade.getAllAssets();
 
+    const tokenBase = asset.find((a) => a.symbol === req.base)?.id ?? '0'; //HDX default
+    const tokenQuote = asset.find((a) => a.symbol === req.quote)?.id ?? '10'; //  USDT default
 
-    const tokenBase = asset.find(a => a.symbol === req.base)?.id ?? "0" //HDX default 
-    const tokenQuote = asset.find(a => a.symbol === req.quote)?.id ?? "10" //  USDT default
+    const getBuy = await trade.getBestBuy(tokenBase, tokenQuote, req.amount);
+    const getSell = await trade.getBestSell(tokenBase, tokenQuote, req.amount);
 
-    const getBuy = await trade.getBestBuy(tokenBase, tokenQuote, req.amount)
-    const getSell = await trade.getBestSell(tokenBase, tokenQuote, req.amount)
-
-    if (req.side === "BUY")
-      return getBuy
-    return getSell
-
+    if (req.side === 'BUY') return getBuy;
+    return getSell;
   }
   getSlippage(): number {
     const allowedSlippage = this._config.allowedSlippage;
@@ -143,7 +136,4 @@ export class Hydration {
     if (nd) slippage = Number(nd[1]) / Number(nd[2]);
     return slippage;
   }
-
-
-
 }

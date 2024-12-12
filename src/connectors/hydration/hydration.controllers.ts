@@ -1,5 +1,11 @@
 import { Hydration } from './hydration';
-import { EstimateGasResponse, PriceRequest, PriceResponse, TradeRequest, TradeResponse, } from '../../amm/amm.requests';
+import {
+  EstimateGasResponse,
+  PriceRequest,
+  PriceResponse,
+  TradeRequest,
+  TradeResponse,
+} from '../../amm/amm.requests';
 import { Polkadot } from '../../chains/polkadot/polkadot';
 import {
   HttpException,
@@ -12,36 +18,35 @@ import {
   TRADE_FAILED_ERROR_CODE,
   TRADE_FAILED_ERROR_MESSAGE,
   UNKNOWN_ERROR_ERROR_CODE,
-  UNKNOWN_ERROR_MESSAGE
+  UNKNOWN_ERROR_MESSAGE,
 } from '../../services/error-handler';
 import { latency } from '../../services/base';
 import Decimal from 'decimal.js-light';
 import { logger } from '../../services/logger';
 import { BigNumber } from '@galacticcouncil/sdk';
 
-
 export async function price(
   polkadot: Polkadot,
   hydration: Hydration,
-  req: PriceRequest
+  req: PriceRequest,
 ): Promise<PriceResponse> {
   // const trade = await hydration.estimateTrade(req);
   const startTimestamp: number = Date.now();
   let trade;
   try {
-    trade = await hydration.estimateTrade(req)
+    trade = await hydration.estimateTrade(req);
   } catch (e) {
     if (e instanceof Error) {
       throw new HttpException(
         500,
         PRICE_FAILED_ERROR_MESSAGE + e.message,
-        PRICE_FAILED_ERROR_CODE
+        PRICE_FAILED_ERROR_CODE,
       );
     } else {
       throw new HttpException(
         500,
         UNKNOWN_ERROR_MESSAGE,
-        UNKNOWN_ERROR_ERROR_CODE
+        UNKNOWN_ERROR_ERROR_CODE,
       );
     }
   }
@@ -60,13 +65,12 @@ export async function price(
     gasLimit: polkadot.gasLimit,
     gasCost: String(polkadot.gasCost),
   } as PriceResponse;
-
 }
 
 export async function trade(
   polkadot: Polkadot,
   hydration: Hydration,
-  req: TradeRequest
+  req: TradeRequest,
 ): Promise<TradeResponse> {
   const startTimestamp: number = Date.now();
 
@@ -80,26 +84,26 @@ export async function trade(
     throw new HttpException(
       500,
       TRADE_FAILED_ERROR_MESSAGE,
-      TRADE_FAILED_ERROR_CODE
+      TRADE_FAILED_ERROR_CODE,
     );
   }
 
   const estimatedPrice = trade.expectedPrice;
   logger.info(
     `Expected execution price is ${estimatedPrice}, ` +
-    `limit price is ${limitPrice}.`
+      `limit price is ${limitPrice}.`,
   );
 
   if (req.side === 'BUY') {
     if (limitPrice && new Decimal(estimatedPrice).gt(new Decimal(limitPrice))) {
-      logger.error('Swap price exceeded limit price.')
+      logger.error('Swap price exceeded limit price.');
       throw new HttpException(
         500,
         SWAP_PRICE_EXCEEDS_LIMIT_PRICE_ERROR_MESSAGE(
           estimatedPrice,
-          limitPrice
+          limitPrice,
         ),
-        SWAP_PRICE_EXCEEDS_LIMIT_PRICE_ERROR_CODE
+        SWAP_PRICE_EXCEEDS_LIMIT_PRICE_ERROR_CODE,
       );
     }
   } else {
@@ -109,14 +113,13 @@ export async function trade(
         500,
         SWAP_PRICE_LOWER_THAN_LIMIT_PRICE_ERROR_MESSAGE(
           estimatedPrice,
-          limitPrice
+          limitPrice,
         ),
-        SWAP_PRICE_LOWER_THAN_LIMIT_PRICE_ERROR_CODE
+        SWAP_PRICE_LOWER_THAN_LIMIT_PRICE_ERROR_CODE,
       );
     }
   }
   const queryTrade = await hydration.executeTrade(req);
-
 
   logger.info(`${req.side} swap has been executed.`);
 
@@ -139,7 +142,7 @@ export async function trade(
 }
 export async function estimateGas(
   polkadot: Polkadot,
-  _hydration: Hydration
+  _hydration: Hydration,
 ): Promise<EstimateGasResponse> {
   return {
     network: polkadot.network,
@@ -150,10 +153,3 @@ export async function estimateGas(
     gasCost: String(polkadot.gasCost),
   };
 }
-
-
-
-
-
-
-

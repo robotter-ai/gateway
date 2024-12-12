@@ -70,7 +70,10 @@ export class Polkadot {
   public get storedAssetList(): Asset[] {
     return Object.values(this._assetMap);
   }
-  public getAccountFromPrivateKey(mnemonic: string): { address: string; keypair: any } {
+  public getAccountFromPrivateKey(mnemonic: string): {
+    address: string;
+    keypair: any;
+  } {
     const keypair = mnemonicToSecretKey(mnemonic);
     const address = this._keyring.addFromSeed(keypair.sk).address;
     return { address, keypair };
@@ -79,7 +82,8 @@ export class Polkadot {
     return this._assetMap[symbol] ? this._assetMap[symbol] : null;
   }
   public async getAccountInfo(accountAddress: string): Promise<any> {
-    const accountInfo = await this._polkadot.query.system.account(accountAddress);
+    const accountInfo =
+      await this._polkadot.query.system.account(accountAddress);
     const accountData = accountInfo.toJSON() as any;
     return {
       free: accountData.data?.free || '0',
@@ -90,14 +94,20 @@ export class Polkadot {
   }
 
   public async getNativeBalance(accountAddress: string): Promise<string> {
-    const accountInfo = await this._polkadot.query.system.account(accountAddress);
+    const accountInfo =
+      await this._polkadot.query.system.account(accountAddress);
     const accountData = accountInfo.toJSON() as any;
     return accountData.data?.free || '0';
   }
 
-  public async getAssetBalance(accountAddress: string, assetId: number): Promise<string> {
-    const asset = await this._polkadot.query.assets.account(assetId, accountAddress);
-
+  public async getAssetBalance(
+    accountAddress: string,
+    assetId: number,
+  ): Promise<string> {
+    const asset = await this._polkadot.query.assets.account(
+      assetId,
+      accountAddress,
+    );
 
     const assetData = asset.toJSON() as any;
 
@@ -111,11 +121,16 @@ export class Polkadot {
   public async transfer(
     senderMnemonic: string,
     recipientAddress: string,
-    amount: number
+    amount: number,
   ): Promise<string> {
     const sender = this.getAccountFromPrivateKey(senderMnemonic);
-    const transfer = this._polkadot.tx.balances.transfer(recipientAddress, amount);
-    const accountInfo = await this._polkadot.query.system.account(sender.address);
+    const transfer = this._polkadot.tx.balances.transfer(
+      recipientAddress,
+      amount,
+    );
+    const accountInfo = await this._polkadot.query.system.account(
+      sender.address,
+    );
     const accountData = accountInfo.toJSON() as any;
     const nonce = accountData.nonce || 0;
     const signedTx = await transfer.signAsync(sender.keypair, { nonce });
@@ -127,7 +142,9 @@ export class Polkadot {
     const blockHash = await this._polkadot.rpc.chain.getBlockHash(txHash);
     const block = await this._polkadot.rpc.chain.getBlock(blockHash);
 
-    const tx = block.block.extrinsics.find((ext) => ext.hash.toHex() === txHash);
+    const tx = block.block.extrinsics.find(
+      (ext) => ext.hash.toHex() === txHash,
+    );
     if (!tx) throw new Error('Transaction not found.');
 
     return {
@@ -156,7 +173,11 @@ export class Polkadot {
     const [iv, encryptedKey] = encryptedMnemonic.split(':');
     const key = Buffer.alloc(32);
     key.write(password);
-    const decipher = createDecipheriv('aes-256-cbc', key, Buffer.from(iv, 'hex'));
+    const decipher = createDecipheriv(
+      'aes-256-cbc',
+      key,
+      Buffer.from(iv, 'hex'),
+    );
     const decrypted = Buffer.concat([
       decipher.update(Buffer.from(encryptedKey, 'hex')),
       decipher.final(),
@@ -166,7 +187,10 @@ export class Polkadot {
 
   public async getAccountFromAddress(address: string): Promise<any> {
     const path = `${walletPath}/${this._network}`;
-    const encryptedMnemonic: string = await fse.readFile(`${path}/${address}.json`, 'utf8');
+    const encryptedMnemonic: string = await fse.readFile(
+      `${path}/${address}.json`,
+      'utf8',
+    );
     const passphrase = ConfigManagerCertPassphrase.readPassphrase();
     if (!passphrase) {
       throw new Error('missing passphrase');

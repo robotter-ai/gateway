@@ -5,7 +5,6 @@ import {
   validatePolkadotOptInRequest,
 } from './polkadot.validators';
 import {
-
   AssetsRequest,
   AssetsResponse,
   BalanceRequest,
@@ -31,7 +30,10 @@ async function getInitializedPolkadot(network: string): Promise<Polkadot> {
 }
 
 export class PolkadotController {
-  static async poll(polkadot: Polkadot, req: PollRequest): Promise<PollResponse> {
+  static async poll(
+    polkadot: Polkadot,
+    req: PollRequest,
+  ): Promise<PollResponse> {
     validatePolkadotPollRequest(req);
     return polkadot.getTransaction(req.txHash);
   }
@@ -44,12 +46,17 @@ export class PolkadotController {
     const account = await chain.getAccountFromAddress(request.address);
 
     if (request.tokenSymbols.includes(chain.nativeTokenSymbol)) {
-      balances[chain.nativeTokenSymbol] = await chain.getNativeBalance(account.address);
+      balances[chain.nativeTokenSymbol] = await chain.getNativeBalance(
+        account.address,
+      );
     }
 
     for (const token of request.tokenSymbols) {
       if (token === chain.nativeTokenSymbol) continue;
-      balances[token] = await chain.getAssetBalance(account.address, Number(token));
+      balances[token] = await chain.getAssetBalance(
+        account.address,
+        Number(token),
+      );
     }
 
     return {
@@ -57,7 +64,10 @@ export class PolkadotController {
     };
   }
 
-  static async getTokens(polkadot: Polkadot, request: AssetsRequest): Promise<AssetsResponse> {
+  static async getTokens(
+    polkadot: Polkadot,
+    request: AssetsRequest,
+  ): Promise<AssetsResponse> {
     validatePolkadotAssetsRequest(request);
 
     const assets: any[] = [];
@@ -89,14 +99,14 @@ export class PolkadotController {
       throw new HttpException(
         500,
         `${TOKEN_NOT_SUPPORTED_ERROR_MESSAGE}${request.assetSymbol}`,
-        TOKEN_NOT_SUPPORTED_ERROR_CODE
+        TOKEN_NOT_SUPPORTED_ERROR_CODE,
       );
     }
 
     const transactionResponse = await polkadot.transfer(
       request.mnemonic,
       request.address,
-      0 // Opt-in typically involves sending a minimal transfer to enable the asset
+      0, // Opt-in typically involves sending a minimal transfer to enable the asset
     );
 
     return {

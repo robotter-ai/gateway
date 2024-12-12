@@ -2,14 +2,14 @@ import {
   mkRequestValidator,
   mkValidator,
   RequestValidator,
+  validateTxHash,
   Validator,
 } from '../../services/validators';
 
 const invalidAddressError: string = 'The provided Polkadot address is invalid.';
 const invalidAmountError: string = 'The amount must be a positive number.';
-const invalidFromAddressError: string = 'The from address is invalid.';
-const invalidToAddressError: string = 'The to address is invalid.';
-
+const invalidAssetSymbolError: string = 'The asset symbol is invalid.';
+const invalidNetworkError: string = 'The network param is not a string.';
 
 const validatePolkadotAddress = mkValidator(
   'address',
@@ -23,31 +23,34 @@ const validatePositiveAmount = mkValidator(
   (val) => typeof val === 'number' && val > 0
 );
 
-const validateFromAddress = mkValidator(
-  'from',
-  invalidFromAddressError,
-  (val) => typeof val === 'string' && val.length === 48
+const validateAssetSymbol = mkValidator(
+  'assetSymbol',
+  invalidAssetSymbolError,
+  (val) => typeof val === 'string' && /^[A-Z0-9]+$/.test(val)
 );
 
-const validateToAddress = mkValidator(
-  'to',
-  invalidToAddressError,
-  (val) => typeof val === 'string' && val.length === 48
-);
-
-export const invalidNetworkError: string = 'The network param is not a string.';
 export const validateNetwork: Validator = mkValidator(
   'network',
   invalidNetworkError,
   (val) => typeof val === 'string'
 );
+
+export const validatePolkadotPollRequest: RequestValidator = mkRequestValidator(
+  [validateNetwork, validateTxHash]
+);
+
 export const validatePolkadotBalanceRequest: RequestValidator = mkRequestValidator([
   validatePolkadotAddress,
   validateNetwork
 ]);
 
-export const validateEstimateGasRequest: RequestValidator = mkRequestValidator([
-  validateFromAddress,
-  validateToAddress,
-  validatePositiveAmount,
+export const validatePolkadotAssetsRequest: RequestValidator = mkRequestValidator([
+  validateNetwork,
+  validateAssetSymbol
+]);
+
+export const validatePolkadotOptInRequest: RequestValidator = mkRequestValidator([
+  validatePolkadotAddress,
+  validateAssetSymbol,
+  validateNetwork
 ]);

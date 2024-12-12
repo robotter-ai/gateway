@@ -53,6 +53,7 @@
     "@pancakeswap/v3-sdk": "^3.7.0",
     "@pangolindex/sdk": "^1.1.0",
     "@polkadot/api": "14.0.1",
+    "@polkadot/util-crypto": "^13.2.3",
     "@sushiswap/sdk": "^5.0.0-canary.116",
     "@taquito/rpc": "^17.0.0",
     "@taquito/signer": "^17.0.0",

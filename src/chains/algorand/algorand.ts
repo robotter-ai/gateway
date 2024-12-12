@@ -42,6 +42,7 @@ export class Algorand {
     assetListSource: string
   ) {
     this._network = network;
+
     const config = getAlgorandConfig(network);
     this.nativeTokenSymbol = config.nativeCurrencySymbol;
     this._algod = new Algodv2('', nodeUrl);

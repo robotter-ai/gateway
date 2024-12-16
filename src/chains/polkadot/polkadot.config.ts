@@ -4,13 +4,16 @@ export interface NetworkConfig {
   nodeURL: string;
   tokenPriceApi: string;
   maxLRUCacheInstances: number,
+  assetListType: string;
+  assetListSource: string;
 }
 export interface Config {
   network: NetworkConfig;
   nativeCurrencySymbol: string;
+
 }
 
-export function getPolkadotConfig(network: string):Config {
+export function getPolkadotConfig(network: string): Config {
   return {
     network: {
       name: network,
@@ -19,6 +22,12 @@ export function getPolkadotConfig(network: string):Config {
       ),
       tokenPriceApi: ConfigManagerV2.getInstance().get(
         `polkadot.networks.${network}.tokenPriceApi`
+      ),
+      assetListType: ConfigManagerV2.getInstance().get(
+        `polkadot.networks.${network}.assetListType`
+      ),
+      assetListSource: ConfigManagerV2.getInstance().get(
+        `polkadot.networks.${network}.assetListSource`
       ),
       maxLRUCacheInstances: 10,
     },

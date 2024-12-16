@@ -201,7 +201,7 @@ export async function getConnector<T>(
     connectorInstance = ETCSwap.getInstance(chain, network);
   } else if (chain === 'ethereum-classic' && connector === 'etcswapLP') {
     connectorInstance = ETCSwapLP.getInstance(chain, network);
-  } else if (chain === 'polkadot' && connector === 'hydration') {
+  } else if (connector === 'hydration') {
     connectorInstance = Hydration.getInstance(network);
   } else {
     throw new Error('unsupported chain or connector');

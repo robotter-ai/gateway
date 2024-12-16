@@ -30,7 +30,6 @@ export async function price(
   hydration: Hydration,
   req: PriceRequest,
 ): Promise<PriceResponse> {
-  // const trade = await hydration.estimateTrade(req);
   const startTimestamp: number = Date.now();
   let trade;
   try {
@@ -91,7 +90,7 @@ export async function trade(
   const estimatedPrice = trade.expectedPrice;
   logger.info(
     `Expected execution price is ${estimatedPrice}, ` +
-      `limit price is ${limitPrice}.`,
+    `limit price is ${limitPrice}.`,
   );
 
   if (req.side === 'BUY') {

@@ -19,7 +19,6 @@ import { AlgorandController } from './algorand.controller';
 type AssetListType = TokenListType;
 
 export class Algorand {
-  public nativeTokenSymbol;
   private _assetMap: Record<string, AlgorandAsset> = {};
   private static _instances: LRUCache<string, Algorand>;
   private _chain: string = 'algorand';
@@ -33,6 +32,7 @@ export class Algorand {
   public gasLimit: number;
   public gasCost: number;
   public controller: typeof AlgorandController;
+  public nativeTokenSymbol;
 
   constructor(
     network: string,
@@ -42,7 +42,6 @@ export class Algorand {
     assetListSource: string
   ) {
     this._network = network;
-
     const config = getAlgorandConfig(network);
     this.nativeTokenSymbol = config.nativeCurrencySymbol;
     this._algod = new Algodv2('', nodeUrl);

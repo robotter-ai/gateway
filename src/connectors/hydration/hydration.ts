@@ -100,8 +100,8 @@ export class Hydration {
     const price = await trade.getBestSpotPrice(tokenIdBase, tokenIdQuote);
     logger.info(
       `Best quote for ${symbolBase}-${symbolQuote}: ` +
-        `${price?.amount}` +
-        `${symbolBase}.`,
+      `${price?.amount}` +
+      `${symbolBase}.`,
     );
     const expectedPrice =
       isBuy === true ? 1 / Number(price?.amount) : Number(price?.amount);

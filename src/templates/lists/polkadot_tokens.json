@@ -1,0 +1,98 @@
+{
+    "name": "polkadot",
+    "tokens": [
+        {
+            "id": "0",
+            "name": "Hydration",
+            "symbol": "HDX",
+            "decimals": 12,
+            "icon": "HDX",
+            "type": "Token",
+            "isSufficient": true,
+            "existentialDeposit": "1000000000000",
+            "meta": null,
+            "location": null,
+            "isWhiteListed": null
+        },
+        {
+            "id": "5",
+            "name": "Polkadot",
+            "symbol": "DOT",
+            "decimals": 10,
+            "icon": "DOT",
+            "type": "Token",
+            "isSufficient": true,
+            "existentialDeposit": "17540000",
+            "meta": null,
+            "location": {
+                "parents": 1,
+                "interior": {}
+            },
+            "isWhiteListed": null
+        },
+        {
+            "id": "27",
+            "name": "Crust",
+            "symbol": "CRU",
+            "decimals": 12,
+            "icon": "CRU",
+            "type": "Token",
+            "isSufficient": true,
+            "existentialDeposit": "7874015748",
+            "meta": null,
+            "location": {
+                "parents": 1,
+                "interior": {}
+            },
+            "isWhiteListed": null
+        },
+        {
+            "id": "26",
+            "name": "Nodle",
+            "symbol": "NODL",
+            "decimals": 11,
+            "icon": "NODL",
+            "type": "Token",
+            "isSufficient": true,
+            "existentialDeposit": "109890109890",
+            "meta": null,
+            "location": {
+                "parents": 1,
+                "interior": {}
+            },
+            "isWhiteListed": null
+        },
+        {
+            "id": "10",
+            "name": "USDT (Polkadot Asset Hub)",
+            "symbol": "USDT",
+            "decimals": 6,
+            "icon": "USDT",
+            "type": "Token",
+            "isSufficient": true,
+            "existentialDeposit": "10000",
+            "meta": null,
+            "location": {
+                "parents": 1,
+                "interior": {}
+            },
+            "isWhiteListed": null
+        },
+        {
+            "id": "25",
+            "name": "Unique network",
+            "symbol": "UNQ",
+            "decimals": 18,
+            "icon": "UNQ",
+            "type": "Token",
+            "isSufficient": true,
+            "existentialDeposit": "1224384348939740000",
+            "meta": null,
+            "location": {
+                "parents": 1,
+                "interior": {}
+            },
+            "isWhiteListed": null
+        }
+    ]
+}

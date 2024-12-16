@@ -82,7 +82,7 @@ export async function addWallet(
         passphrase
       );
     } else if (connection instanceof Polkadot) {
-      address = connection.getAccountFromPrivateKey(req.privateKey).addr;
+      address = connection.getAccountFromPrivateKey(req.privateKey).address;
       encryptedPrivateKey = connection.encrypt(req.privateKey, passphrase);
     } else if (connection instanceof Xdc) {
       address = convertXdcAddressToEthAddress(

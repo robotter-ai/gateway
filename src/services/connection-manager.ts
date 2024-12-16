@@ -52,18 +52,18 @@ export type ChainUnion =
 export type Chain<T> = T extends Algorand
   ? Algorand
   : T extends Cosmos
-    ? Cosmos
-    : T extends Ethereumish
-      ? Ethereumish
-        : T extends Xdcish
-          ? Xdcish
-            : T extends Tezosish
-              ? Tezosish
-                : T extends Osmosis
-                  ? Osmosis
-                  : T extends Polkadot
-                    ? Polkadot
-                    : never;
+  ? Cosmos
+  : T extends Ethereumish
+  ? Ethereumish
+  : T extends Xdcish
+  ? Xdcish
+  : T extends Tezosish
+  ? Tezosish
+  : T extends Osmosis
+  ? Osmosis
+  : T extends Polkadot
+  ? Polkadot
+  : never;
 
 export class UnsupportedChainException extends Error {
   constructor(message?: string) {
@@ -147,14 +147,14 @@ export type ConnectorUnion =
 export type Connector<T> = T extends Uniswapish
   ? Uniswapish
   : T extends UniswapLPish
-    ? UniswapLPish
-      : T extends Tinyman
-        ? Tinyman
-          : T extends Plenty
-            ? Plenty
-              : T extends Hydration
-                ? Hydration
-                  : never;
+  ? UniswapLPish
+  : T extends Tinyman
+  ? Tinyman
+  : T extends Plenty
+  ? Plenty
+  : T extends Hydration
+  ? Hydration
+  : never;
 
 export async function getConnector<T>(
   chain: string,
@@ -201,7 +201,7 @@ export async function getConnector<T>(
     connectorInstance = ETCSwap.getInstance(chain, network);
   } else if (chain === 'ethereum-classic' && connector === 'etcswapLP') {
     connectorInstance = ETCSwapLP.getInstance(chain, network);
-  } else if (connector === 'hydration') {
+  } else if (chain === 'polkadot' && connector === 'hydration') {
     connectorInstance = Hydration.getInstance(network);
   } else {
     throw new Error('unsupported chain or connector');

@@ -3,7 +3,7 @@ import { Polkadot } from '../../chains/polkadot/polkadot';
 import { HydrationConfig } from './hydration.config';
 import { getPolkadotConfig } from '../../chains/polkadot/polkadot.config';
 import { percentRegexp } from '../../services/config-manager-v2';
-import { PoolBase } from '@galacticcouncil/sdk';
+import { BigNumber, PoolBase } from '@galacticcouncil/sdk';
 
 import { TradeRouter, PoolService } from '@galacticcouncil/sdk';
 import { PriceRequest, TradeRequest } from '../../amm/amm.requests';
@@ -122,13 +122,39 @@ export class Hydration {
 
     const tokenBase = asset.find((a) => a.symbol === req.base)?.id ?? '0'; //HDX default
     const tokenQuote = asset.find((a) => a.symbol === req.quote)?.id ?? '10'; //  USDT default
+    const wallet = this.chain.getAccountFromAddress(req.address)
+    const teste = wallet.sign("teste")
+    if (req.side === 'BUY') {
+      const getBuy = await trade.getBestBuy(tokenBase, tokenQuote, req.amount);
+      const buyTx = getBuy.toTx(BigNumber(Number(req.limitPrice))).hex
+      const extrinsic = api.tx(buyTx);
+      const nextNonce = await api.rpc.system.accountNextIndex(req.address);
+      const result = await extrinsic
+        .signAndSend(
+          req.address,
+          { nonce: nextNonce, }
 
-    const getBuy = await trade.getBestBuy(tokenBase, tokenQuote, req.amount);
+        )
+      console.log(result)
+      return getBuy;
+    }
     const getSell = await trade.getBestSell(tokenBase, tokenQuote, req.amount);
+    const sellTx = getSell.toTx(BigNumber(Number(req.limitPrice))).hex
+    const extrinsic = api.tx(sellTx);
+    const nextNonce = await api.rpc.system.accountNextIndex(req.address);
+    extrinsic
+      .signAndSend(
+        req.address,
+        { nonce: nextNonce },
 
-    if (req.side === 'BUY') return getBuy;
+      )
+      .catch((error: any) => {
+        console.log(error)
+      });
     return getSell;
   }
+
+
   getSlippage(): number {
     const allowedSlippage = this._config.allowedSlippage;
     const nd = allowedSlippage.match(percentRegexp);

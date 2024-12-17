@@ -1,15 +1,14 @@
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { getPolkadotConfig } from './polkadot.config';
-import { mnemonicToSecretKey } from 'algosdk';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 import fse from 'fs-extra';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import { TokenListType, walletPath } from '../../services/base';
 import { PollResponse } from './polkadot.requests';
-import { Asset } from './polkadot.types';
 import LRUCache from 'lru-cache';
 import axios from 'axios';
 import { promises as fs } from 'fs';
+import { Asset } from '@galacticcouncil/sdk';
 
 type AssetListType = TokenListType;
 export class Polkadot {
@@ -121,13 +120,14 @@ export class Polkadot {
   }
 
 
-  public getAccountFromPrivateKey(mnemonic: string): {
-    address: string;
-    keypair: any;
-  } {
-    const keypair = mnemonicToSecretKey(mnemonic);
-    const address = this._keyring.addFromSeed(keypair.sk).address;
-    return { address, keypair };
+  public getAccountFromAddress(address: string) {
+    const Account = this._keyring.addFromAddress(address);
+    return Account;
+  }
+  public getAccountFromPrivatekey(privateKey: string) {
+    const privateKeyUint8Array = new TextEncoder().encode(privateKey);
+    const Account = this._keyring.addFromAddress(privateKeyUint8Array);
+    return Account;
   }
 
   public getAssetForSymbol(symbol: string): Asset | null {
@@ -171,25 +171,25 @@ export class Polkadot {
     return assetData.balance.toString();
   }
 
-  public async transfer(
-    senderMnemonic: string,
-    recipientAddress: string,
-    amount: number,
-  ): Promise<string> {
-    const sender = this.getAccountFromPrivateKey(senderMnemonic);
-    const transfer = this._polkadot.tx.balances.transfer(
-      recipientAddress,
-      amount,
-    );
-    const accountInfo = await this._polkadot.query.system.account(
-      sender.address,
-    );
-    const accountData = accountInfo.toJSON() as any;
-    const nonce = accountData.nonce || 0;
-    const signedTx = await transfer.signAsync(sender.keypair, { nonce });
-    const result = await signedTx.send();
-    return result.toHex();
-  }
+  // public async transfer(
+  //   senderMnemonic: string,
+  //   recipientAddress: string,
+  //   amount: number,
+  // ): Promise<string> {
+  //   const sender = this.getAccountFromPrivateKey(senderMnemonic);
+  //   const transfer = this._polkadot.tx.balances.transfer(
+  //     recipientAddress,
+  //     amount,
+  //   );
+  //   const accountInfo = await this._polkadot.query.system.account(
+  //     sender.address,
+  //   );
+  //   const accountData = accountInfo.toJSON() as any;
+  //   const nonce = accountData.nonce || 0;
+  //   const signedTx = await transfer.signAsync(sender.keypair, { nonce });
+  //   const result = await signedTx.send();
+  //   return result.toHex();
+  // }
 
   public async getTransaction(txHash: string): Promise<PollResponse> {
     const blockHash = await this._polkadot.rpc.chain.getBlockHash(txHash);
@@ -219,7 +219,7 @@ export class Polkadot {
     return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
   }
 
-  public decrypt(encryptedMnemonic: string, password: string): string {
+  public decrypt(encryptedMnemonic: string, password: string) {
     const [iv, encryptedKey] = encryptedMnemonic.split(':');
     const key = Buffer.alloc(32);
     key.write(password);
@@ -235,28 +235,34 @@ export class Polkadot {
     return decrypted.toString();
   }
 
-  public async getAccountFromAddress(address: string): Promise<any> {
-    const path = `${walletPath}/${this._chain}`;
-    const encryptedMnemonic: string = await fse.readFile(
-      `${path}/${address}.json`,
-      'utf8',
-    );
-    const passphrase = ConfigManagerCertPassphrase.readPassphrase();
-    if (!passphrase) {
-      throw new Error('missing passphrase');
-    }
-    const mnemonic = this.decrypt(encryptedMnemonic, passphrase);
-    return this.getAccountFromPrivateKey(mnemonic);
-  }
+  // public async getAccountFromAddress(address: string): Promise<any> {
+  //   const path = `${walletPath}/${this._chain}`;
+  //   const encryptedPrivateKey: string = await fse.readFile(
+  //     `${path}/${address}.json`,
+  //     'utf8',
+  //   );
+  //   const passphrase = ConfigManagerCertPassphrase.readPassphrase();
+  //   if (!passphrase) {
+  //     throw new Error('missing passphrase');
+  //   }
+  //   const privatekey = this.decrypt(encryptedPrivateKey, passphrase);
+  //   return this.getAccountFromPrivateKey(privatekey);
+
+  // }
 
 
   private async loadAssets(): Promise<void> {
-    const assetData = await this.getAssetData();
+    const assetData: Asset[] = await this.getAssetData();
     for (const result of assetData) {
-      this._assetMap[result.unit_name.toUpperCase()] = {
-        symbol: result.unit_name.toUpperCase(),
-        assetId: +result.id,
+      this._assetMap[result.name.toUpperCase()] = {
+        symbol: result.name.toUpperCase(),
+        id: result.id,
         decimals: result.decimals,
+        existentialDeposit: result.existentialDeposit,
+        icon: result.icon,
+        isSufficient: result.isSufficient,
+        name: result.name,
+        type: result.type
       };
     }
   }

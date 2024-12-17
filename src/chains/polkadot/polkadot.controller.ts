@@ -2,32 +2,26 @@ import {
   validatePolkadotBalanceRequest,
   validatePolkadotPollRequest,
   validatePolkadotAssetsRequest,
-  validatePolkadotOptInRequest,
 } from './polkadot.validators';
 import {
   AssetsRequest,
   AssetsResponse,
   BalanceRequest,
-  OptInRequest,
   PollRequest,
   PollResponse,
 } from './polkadot.requests';
 import { Polkadot } from './polkadot';
-import {
-  HttpException,
-  TOKEN_NOT_SUPPORTED_ERROR_CODE,
-  TOKEN_NOT_SUPPORTED_ERROR_MESSAGE,
-} from '../../services/error-handler';
 
-async function getInitializedPolkadot(network: string): Promise<Polkadot> {
-  const polkadot = Polkadot.getInstance(network);
 
-  if (!polkadot.ready()) {
-    await polkadot.init();
-  }
+// async function getInitializedPolkadot(network: string): Promise<Polkadot> {
+//   const polkadot = Polkadot.getInstance(network);
 
-  return polkadot;
-}
+//   if (!polkadot.ready()) {
+//     await polkadot.init();
+//   }
+
+//   return polkadot;
+// }
 
 export class PolkadotController {
   static async poll(
@@ -89,29 +83,29 @@ export class PolkadotController {
     };
   }
 
-  static async approve(request: OptInRequest) {
-    validatePolkadotOptInRequest(request);
+  // static async approve(request: OptInRequest) {
+  //   validatePolkadotOptInRequest(request);
 
-    const polkadot = await getInitializedPolkadot(request.network);
-    const asset = polkadot.getAssetForSymbol(request.assetSymbol);
+  //   const polkadot = await getInitializedPolkadot(request.network);
+  //   const asset = polkadot.getAssetForSymbol(request.assetSymbol);
 
-    if (!asset) {
-      throw new HttpException(
-        500,
-        `${TOKEN_NOT_SUPPORTED_ERROR_MESSAGE}${request.assetSymbol}`,
-        TOKEN_NOT_SUPPORTED_ERROR_CODE,
-      );
-    }
+  //   if (!asset) {
+  //     throw new HttpException(
+  //       500,
+  //       `${TOKEN_NOT_SUPPORTED_ERROR_MESSAGE}${request.assetSymbol}`,
+  //       TOKEN_NOT_SUPPORTED_ERROR_CODE,
+  //     );
+  //   }
 
-    const transactionResponse = await polkadot.transfer(
-      request.mnemonic,
-      request.address,
-      0, // Opt-in typically involves sending a minimal transfer to enable the asset
-    );
+  //   const transactionResponse = await polkadot.transfer(
+  //     request.mnemonic,
+  //     request.address,
+  //     0, // Opt-in typically involves sending a minimal transfer to enable the asset
+  //   );
 
-    return {
-      assetId: asset.assetId,
-      transactionResponse,
-    };
-  }
+  //   return {
+  //     assetId: asset.id,
+  //     transactionResponse,
+  //   };
+  // }
 }

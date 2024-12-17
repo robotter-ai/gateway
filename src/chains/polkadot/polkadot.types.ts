@@ -47,18 +47,15 @@ export type GasEstimate = {
 };
 
 export interface Asset {
-  /**
-   * Identifier for the asset
-   */
-  assetId: number;
-  /**
-   * Symbol of the asset (e.g., DOT)
-   */
-  symbol: string;
-  /**
-   * Decimals for asset precision
-   */
-  decimals: number;
+  id: string;
+  name: string;
+  icon: string;
+  type: string;
+  existentialDeposit: string;
+  isSufficient: boolean;
+  location?: any;
+  meta?: Record<string, string>;
+  isWhiteListed?: boolean;
 }
 
 export interface BalanceResponse {

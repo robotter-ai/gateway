@@ -1,3 +1,5 @@
+import { Asset } from "@galacticcouncil/sdk";
+
 export interface PollRequest {
     network: string;
     txHash: string;
@@ -10,10 +12,11 @@ export type PollResponse = {
     fee: number;
 };
 
-export type AssetsRequest = {
-    network?: string;
-    assetSymbols?: string[];
-};
+export interface AssetsRequest {
+    chain?: string; //the target chain (e.g. ethereum, avalanche, or harmony)
+    network?: string; // the target network of the chain (e.g. mainnet)
+    tokenSymbols?: string[];
+}
 
 export interface PolkadotAsset {
     symbol: string;
@@ -22,7 +25,7 @@ export interface PolkadotAsset {
 }
 
 export type AssetsResponse = {
-    assets: PolkadotAsset[];
+    assets: Asset[] // using galacticcouncil sdk type
 };
 
 export interface OptInRequest {

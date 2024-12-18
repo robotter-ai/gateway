@@ -1,20 +1,19 @@
+import LRUCache from 'lru-cache';
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { getPolkadotConfig } from './polkadot.config';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
-import fse from 'fs-extra';
-import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
-import { TokenListType, walletPath } from '../../services/base';
+import { TokenListType } from '../../services/base';
 import { PollResponse } from './polkadot.requests';
-import LRUCache from 'lru-cache';
 import axios from 'axios';
-import { promises as fs } from 'fs';
 import { Asset } from '@galacticcouncil/sdk';
+import { promises as fs } from 'fs';
+import { PolkadotController } from './polkadot.controller';
 
 type AssetListType = TokenListType;
 export class Polkadot {
   private _assetMap: Record<string, Asset> = {};
   private static _instances: LRUCache<string, Polkadot>;
-  private _chain: string = 'polkadot';
+  private _chain: string = "polkadot";
   private _network: string;
   private _polkadot: ApiPromise;
   private _keyring: Keyring;
@@ -24,12 +23,13 @@ export class Polkadot {
   public gasPrice: number;
   public gasLimit: number;
   public gasCost: number;
+  public controller: typeof PolkadotController;
   public nativeTokenSymbol: string;
 
 
   constructor(
     network: string,
-    nodeURL: string,
+    // nodeURL: string,
     assetListType: AssetListType,
     assetListSource: string
   ) {
@@ -37,16 +37,21 @@ export class Polkadot {
     this._network = network
     this.nativeTokenSymbol = config.nativeCurrencySymbol;
     this.gasPrice = 0;
-    const provider = new WsProvider(nodeURL);
-    this._polkadot = new ApiPromise({ provider })
+    // const provider = new WsProvider(nodeURL);
+    // this._polkadot = await ApiPromise.create({ provider })
+    this._polkadot = null as unknown as any;
     this._keyring = new Keyring({ type: 'sr25519' });
     this._assetListType = assetListType;
     this._assetListSource = assetListSource;
     this.gasLimit = 0;
     this.gasCost = 0;
+    this.controller = PolkadotController;
   }
   public get polkadot(): ApiPromise {
     return this._polkadot;
+  }
+  public get chain(): string {
+    return this._chain;
   }
 
   public get network(): string {
@@ -63,8 +68,15 @@ export class Polkadot {
     return this._ready;
   }
   public async init(): Promise<void> {
+    const config = getPolkadotConfig(this._network);
+    const provider = new WsProvider(config.network.nodeURL);
+    this._polkadot = await ApiPromise.create({ provider })
     await this.loadAssets();
     this._ready = true;
+    return
+  }
+  async close() {
+    return;
   }
 
   public static getInstance(network: string): Polkadot {
@@ -76,21 +88,20 @@ export class Polkadot {
     }
     if (!Polkadot._instances.has(config.network.name)) {
       if (network !== null) {
-        const nodeUrl = config.network.nodeURL;
+        // const nodeUrl = config.network.nodeURL;
         const assetListType = config.network.assetListType as TokenListType;
         const assetListSource = config.network.assetListSource;
         Polkadot._instances.set(
           config.network.name,
           new Polkadot(
             network,
-            nodeUrl,
             assetListType,
             assetListSource
           )
         );
       } else {
         throw new Error(
-          `Algorand.getInstance received an unexpected network: ${network}.`
+          `Polkadot.getInstance received an unexpected network: ${network}.`
         );
       }
     }
@@ -113,20 +124,19 @@ export class Polkadot {
     return connectedInstances;
   }
 
-
   public async getCurrentBlockNumber(): Promise<number> {
     const header = await this._polkadot.rpc.chain.getHeader();
     return header.number.toNumber();
   }
 
-
   public getAccountFromAddress(address: string) {
     const Account = this._keyring.addFromAddress(address);
     return Account;
   }
+
   public getAccountFromPrivatekey(privateKey: string) {
     const privateKeyUint8Array = new TextEncoder().encode(privateKey);
-    const Account = this._keyring.addFromAddress(privateKeyUint8Array);
+    const Account = this._keyring.addFromSeed(privateKeyUint8Array);
     return Account;
   }
 
@@ -155,20 +165,13 @@ export class Polkadot {
 
   public async getAssetBalance(
     accountAddress: string,
-    assetId: number,
   ): Promise<string> {
-    const asset = await this._polkadot.query.assets.account(
-      assetId,
-      accountAddress,
-    );
+    const { parentHash } = await this._polkadot.rpc.chain.getHeader();
 
-    const assetData = asset.toJSON() as any;
+    const apiAt = await this._polkadot.at(parentHash);
+    const balance = await apiAt.query.system.account(accountAddress);
 
-    if (!assetData || !assetData.balance) {
-      return '0';
-    }
-
-    return assetData.balance.toString();
+    return balance.toString()
   }
 
   // public async transfer(
@@ -254,8 +257,8 @@ export class Polkadot {
   private async loadAssets(): Promise<void> {
     const assetData: Asset[] = await this.getAssetData();
     for (const result of assetData) {
-      this._assetMap[result.name.toUpperCase()] = {
-        symbol: result.name.toUpperCase(),
+      this._assetMap[result.symbol.toUpperCase()] = {
+        symbol: result.symbol.toUpperCase(),
         id: result.id,
         decimals: result.decimals,
         existentialDeposit: result.existentialDeposit,

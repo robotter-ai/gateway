@@ -1,7 +1,6 @@
 import {
-  validatePolkadotBalanceRequest,
   validatePolkadotPollRequest,
-  validatePolkadotAssetsRequest,
+  // validatePolkadotAssetsRequest,
 } from './polkadot.validators';
 import {
   AssetsRequest,
@@ -11,6 +10,7 @@ import {
   PollResponse,
 } from './polkadot.requests';
 import { Polkadot } from './polkadot';
+import { Asset } from '@galacticcouncil/sdk';
 
 
 // async function getInitializedPolkadot(network: string): Promise<Polkadot> {
@@ -33,11 +33,11 @@ export class PolkadotController {
   }
 
   static async balances(chain: Polkadot, request: BalanceRequest) {
-    validatePolkadotBalanceRequest(request);
+    // validatePolkadotBalanceRequest(request);
 
     const balances: Record<string, string> = {};
 
-    const account = await chain.getAccountFromAddress(request.address);
+    const account = chain.getAccountFromAddress(request.address);
 
     if (request.tokenSymbols.includes(chain.nativeTokenSymbol)) {
       balances[chain.nativeTokenSymbol] = await chain.getNativeBalance(
@@ -49,12 +49,11 @@ export class PolkadotController {
       if (token === chain.nativeTokenSymbol) continue;
       balances[token] = await chain.getAssetBalance(
         account.address,
-        Number(token),
       );
     }
 
     return {
-      balances,
+      balances: balances,
     };
   }
 
@@ -62,24 +61,25 @@ export class PolkadotController {
     polkadot: Polkadot,
     request: AssetsRequest,
   ): Promise<AssetsResponse> {
-    validatePolkadotAssetsRequest(request);
+    // validatePolkadotAssetsRequest(request);
 
-    const assets: any[] = [];
+    let assets: Asset[] = [];
 
-    if (!request.assetSymbols) {
-      assets.push(...polkadot.storedAssetList);
+    if (!request.tokenSymbols) {
+      assets = polkadot.storedAssetList
     } else {
-      const assetSymbols = Array.isArray(request.assetSymbols)
-        ? request.assetSymbols
-        : [request.assetSymbols];
-      for (const symbol of assetSymbols) {
-        const asset = polkadot.getAssetForSymbol(symbol);
-        if (asset) assets.push(asset);
+      let assetSymbols
+      if (typeof request.tokenSymbols === "string") {
+        assetSymbols = [request.tokenSymbols]
+      } else {
+        assetSymbols = request.tokenSymbols
+      }
+      for (const symbol of assetSymbols as []) {
+        assets.push(polkadot.getAssetForSymbol(symbol) as Asset)
       }
     }
-
     return {
-      assets,
+      assets: assets,
     };
   }
 

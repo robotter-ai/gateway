@@ -11,23 +11,18 @@ import {
   TOKEN_NOT_SUPPORTED_ERROR_CODE,
   TOKEN_NOT_SUPPORTED_ERROR_MESSAGE,
 } from '../../services/error-handler';
-
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { logger } from 'ethers';
 
 export class Hydration {
   private static _instances: LRUCache<string, Hydration>;
   private chain: Polkadot;
-  private _poolMap: Record<string, PoolBase> = {};
   private _config: HydrationConfig.NetworkConfig;
   private _ready: boolean = false;
 
   constructor(network: string) {
     this._config = HydrationConfig.config;
     this.chain = Polkadot.getInstance(network);
-  }
-  public get storedAssetList(): PoolBase[] {
-    return Object.values(this._poolMap);
   }
 
   public static getInstance(network: string): Hydration {
@@ -60,6 +55,14 @@ export class Hydration {
 
   public ready(): boolean {
     return this._ready;
+  }
+
+  getSlippage(): number {
+    const allowedSlippage = this._config.allowedSlippage;
+    const nd = allowedSlippage.match(percentRegexp);
+    let slippage = 0.0;
+    if (nd) slippage = Number(nd[1]) / Number(nd[2]);
+    return slippage;
   }
 
   async estimateTrade(req: PriceRequest) {
@@ -155,14 +158,5 @@ export class Hydration {
     //     console.log(error)
     //   });
     return getSell;
-  }
-
-
-  getSlippage(): number {
-    const allowedSlippage = this._config.allowedSlippage;
-    const nd = allowedSlippage.match(percentRegexp);
-    let slippage = 0.0;
-    if (nd) slippage = Number(nd[1]) / Number(nd[2]);
-    return slippage;
   }
 }

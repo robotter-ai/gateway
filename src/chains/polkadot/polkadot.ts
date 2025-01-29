@@ -28,7 +28,6 @@ export class Polkadot {
   public controller: typeof PolkadotController;
   public nativeTokenSymbol: string;
 
-
   constructor(
     network: string,
     // nodeURL: string,
@@ -107,7 +106,6 @@ export class Polkadot {
         );
       }
     }
-
     return Polkadot._instances.get(config.network.name) as Polkadot
   }
 

@@ -13,9 +13,8 @@ export type PollResponse = {
 };
 
 export interface AssetsRequest {
-    chain?: string; //the target chain (e.g. ethereum, avalanche, or harmony)
     network?: string; // the target network of the chain (e.g. mainnet)
-    tokenSymbols?: string[];
+    assetSymbols?: string[];
 }
 
 export interface PolkadotAsset {

@@ -6,6 +6,7 @@ import {
   AssetsRequest,
   AssetsResponse,
   BalanceRequest,
+  // PolkadotAsset,
   PollRequest,
   PollResponse,
 } from './polkadot.requests';
@@ -61,21 +62,25 @@ export class PolkadotController {
     polkadot: Polkadot,
     request: AssetsRequest,
   ): Promise<AssetsResponse> {
-    // validatePolkadotAssetsRequest(request);
+    // validateAssetsRequest(request);
 
     let assets: Asset[] = [];
 
-    if (!request.tokenSymbols) {
-      assets = polkadot.storedAssetList
+    if (!request.assetSymbols) {
+      assets = polkadot.storedAssetList;
     } else {
-      let assetSymbols
-      if (typeof request.tokenSymbols === "string") {
-        assetSymbols = [request.tokenSymbols]
+      let assetSymbols;
+      if (typeof request.assetSymbols === 'string') {
+        assetSymbols = [request.assetSymbols];
       } else {
-        assetSymbols = request.tokenSymbols
+        assetSymbols = request.assetSymbols;
       }
-      for (const symbol of assetSymbols as []) {
-        assets.push(polkadot.getAssetForSymbol(symbol) as Asset)
+      for (const a of assetSymbols as []) {
+        const asset = polkadot.getAssetForSymbol(a);
+        if (!asset) {
+          throw new Error(`Unsupported symbol: ${a}`);
+        }
+        assets.push(asset as Asset);
       }
     }
     return {

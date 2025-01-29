@@ -63,7 +63,7 @@ export const isTezosPrivateKey = (str: string): boolean => {
 // TODO check!!!
 export const isPolkadotPrivateKeyOrMnemonic = (str: string): boolean => {
   const parts = str.split(' ');
-  return parts.length === 25;
+  return parts.length === 12;
 };
 
 // given a request, look for a key called privateKey that is an Ethereum private key

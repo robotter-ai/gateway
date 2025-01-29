@@ -269,7 +269,7 @@ export class Polkadot {
     }
     const mnemonic = this.decrypt(encryptedMnemonic, passphrase);
     console.log(encryptedMnemonic)
-    
+     
 
     const newPair = this.keyring.addFromUri(mnemonic);
     return {

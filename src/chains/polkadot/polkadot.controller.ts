@@ -37,18 +37,18 @@ export class PolkadotController {
 
     const balances: Record<string, string> = {};
 
-    const account = chain.getAccountFromAddress(request.address);
+    // const account = chain.getAccountFromAddress(request.address);
 
     if (request.tokenSymbols.includes(chain.nativeTokenSymbol)) {
       balances[chain.nativeTokenSymbol] = await chain.getNativeBalance(
-        account.address,
+        request.address,
       );
     }
 
     for (const token of request.tokenSymbols) {
       if (token === chain.nativeTokenSymbol) continue;
       balances[token] = await chain.getAssetBalance(
-        account.address,
+        request.address,
       );
     }
 

@@ -2,12 +2,14 @@ import LRUCache from 'lru-cache';
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { getPolkadotConfig } from './polkadot.config';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
-import { TokenListType } from '../../services/base';
+import { TokenListType, walletPath } from '../../services/base';
 import { PollResponse } from './polkadot.requests';
 import axios from 'axios';
 import { Asset } from '@galacticcouncil/sdk';
 import { promises as fs } from 'fs';
 import { PolkadotController } from './polkadot.controller';
+import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
+import fse from 'fs-extra';
 
 type AssetListType = TokenListType;
 export class Polkadot {
@@ -129,17 +131,6 @@ export class Polkadot {
     return header.number.toNumber();
   }
 
-  public getAccountFromAddress(address: string) {
-    const Account = this._keyring.addFromAddress(address);
-    return Account;
-  }
-
-  public getAccountFromPrivatekey(privateKey: string) {
-    const privateKeyUint8Array = new TextEncoder().encode(privateKey);
-    const Account = this._keyring.addFromSeed(privateKeyUint8Array);
-    return Account;
-  }
-
   public getAssetForSymbol(symbol: string): Asset | null {
     return this._assetMap[symbol] ? this._assetMap[symbol] : null;
   }
@@ -211,48 +202,81 @@ export class Polkadot {
     };
   }
 
-
-
   public encrypt(mnemonic: string, password: string): string {
     const iv = randomBytes(16);
     const key = Buffer.alloc(32);
     key.write(password);
+
+    // @ts-ignore
     const cipher = createCipheriv('aes-256-cbc', key, iv);
+    // @ts-ignore
     const encrypted = Buffer.concat([cipher.update(mnemonic), cipher.final()]);
+
     return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
   }
 
-  public decrypt(encryptedMnemonic: string, password: string) {
+  public decrypt(encryptedMnemonic: string, password: string): string {
     const [iv, encryptedKey] = encryptedMnemonic.split(':');
     const key = Buffer.alloc(32);
     key.write(password);
+    // @ts-ignore
     const decipher = createDecipheriv(
       'aes-256-cbc',
       key,
       Buffer.from(iv, 'hex'),
     );
-    const decrypted = Buffer.concat([
+
+    const decrpyted = Buffer.concat([
+      // @ts-ignore
       decipher.update(Buffer.from(encryptedKey, 'hex')),
+      // @ts-ignore
       decipher.final(),
     ]);
-    return decrypted.toString();
+
+    return decrpyted.toString();
   }
 
-  // public async getAccountFromAddress(address: string): Promise<any> {
-  //   const path = `${walletPath}/${this._chain}`;
-  //   const encryptedPrivateKey: string = await fse.readFile(
-  //     `${path}/${address}.json`,
-  //     'utf8',
-  //   );
-  //   const passphrase = ConfigManagerCertPassphrase.readPassphrase();
-  //   if (!passphrase) {
-  //     throw new Error('missing passphrase');
-  //   }
-  //   const privatekey = this.decrypt(encryptedPrivateKey, passphrase);
-  //   return this.getAccountFromPrivateKey(privatekey);
+  public async getAccountFromPrivateKey(
+    seed: string,
+  ): Promise<{ publicKey: string;
+     address: string 
+    }> {
+      //Extracts the phrase, path and password from a SURI format for specifying secret keys <secret>/<soft-key>//<hard-key>///<password> (the ///password may be omitted, and /<soft-key> and //<hard-key> maybe repeated and mixed). The secret can be a hex string, mnemonic phrase or a string (to be padded)
 
-  // }
+    const keyPair = this.keyring.addFromUri(seed); 
+    const formatedPublicKey = keyPair.publicKey.toString()
+    const address = keyPair.address
 
+    return {
+      publicKey:formatedPublicKey,
+      address
+    }
+  }
+
+  async getAccountFromAddress(
+    address: string,
+  ): Promise<{ publicKey: string;
+    //  secretKey: string
+     }> {
+    const path = `${walletPath}/${this._chain}`;
+    const encryptedMnemonic: string = await fse.readFile(
+      `${path}/${address}.json`,
+      'utf8',
+    );
+    const passphrase = ConfigManagerCertPassphrase.readPassphrase();
+    if (!passphrase) {
+      throw new Error('missing passphrase');
+    }
+    const mnemonic = this.decrypt(encryptedMnemonic, passphrase);
+    console.log(encryptedMnemonic)
+    
+
+    const newPair = this.keyring.addFromUri(mnemonic);
+    return {
+      publicKey: newPair.publicKey.toString(),
+      // secretKey: keyPair.secretKey.toString('base64url'),
+    };
+  }
 
   private async loadAssets(): Promise<void> {
     const assetData: Asset[] = await this.getAssetData();

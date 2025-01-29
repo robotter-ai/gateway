@@ -9,6 +9,7 @@ import { Xdc } from '../chains/xdc/xdc';
 import { Tezos } from '../chains/tezos/tezos';
 import { Telos } from '../chains/telos/telos';
 import { Osmosis } from '../chains/osmosis/osmosis';
+import { Solana } from '../chains/solana/solana';
 import { MadMeerkat } from '../connectors/mad_meerkat/mad_meerkat';
 import { Openocean } from '../connectors/openocean/openocean';
 import { Pangolin } from '../connectors/pangolin/pangolin';
@@ -38,6 +39,7 @@ import { Balancer } from '../connectors/balancer/balancer';
 import { ETCSwapLP } from '../connectors/etcswap/etcswap.lp';
 import { EthereumClassicChain } from '../chains/ethereum-classic/ethereum-classic';
 import { ETCSwap } from '../connectors/etcswap/etcswap';
+import { Jupiter } from '../connectors/jupiter/jupiter';
 import { Hydration } from '../connectors/hydration/hydration';
 import { Polkadot } from '../chains/polkadot/polkadot';
 export type ChainUnion =
@@ -47,6 +49,7 @@ export type ChainUnion =
   | Xdcish
   | Tezosish
   | Osmosis
+  | Solana
   | Polkadot;
 
 export type Chain<T> = T extends Algorand
@@ -61,7 +64,9 @@ export type Chain<T> = T extends Algorand
   ? Tezosish
   : T extends Osmosis
   ? Osmosis
-  : T extends Polkadot
+                    : T extends Solana
+                    ? Solana
+      : T extends Polkadot
   ? Polkadot
   : never;
 
@@ -104,6 +109,8 @@ export async function getChainInstance(
     connection = Algorand.getInstance(network);
   } else if (chain === 'ethereum') {
     connection = Ethereum.getInstance(network);
+  } else if (chain === 'solana') {
+    connection = Solana.getInstance(network);
   } else if (chain === 'avalanche') {
     connection = Avalanche.getInstance(network);
   } else if (chain === 'harmony') {
@@ -143,15 +150,18 @@ export type ConnectorUnion =
   | Tinyman
   | Plenty
   | Curve
+  | Jupiter
   | Hydration;
 export type Connector<T> = T extends Uniswapish
   ? Uniswapish
   : T extends UniswapLPish
-  ? UniswapLPish
-  : T extends Tinyman
-  ? Tinyman
-  : T extends Plenty
-  ? Plenty
+    ? UniswapLPish
+      : T extends Tinyman
+        ? Tinyman
+        : T extends Plenty
+          ? Plenty
+          : T extends Jupiter
+            ? Jupiter
   : T extends Hydration
   ? Hydration
   : never;
@@ -167,6 +177,8 @@ export async function getConnector<T>(
     connectorInstance = Uniswap.getInstance(chain, network);
   } else if (connector === 'uniswapLP') {
     connectorInstance = UniswapLP.getInstance(chain, network);
+  } else if (connector === 'jupiter') {
+    connectorInstance = Jupiter.getInstance(network);
   } else if (connector === 'quickswap') {
     connectorInstance = Quickswap.getInstance(chain, network);
   } else if (connector === 'pangolin') {

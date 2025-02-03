@@ -1,8 +1,13 @@
-import { price, trade, estimateGas } from '../../../src/connectors/dedust/dedust.controllers';
+import { estimateGas, price, trade } from '../../../src/connectors/dedust/dedust.controllers';
 import { HttpException } from '../../../src/services/error-handler';
 import { Dedust } from '../../../src/connectors/dedust/dedust';
 import { Ton } from '../../../src/chains/ton/ton';
 import { latency } from '../../../src/services/base';
+import { OpenedContract } from '@ton/core';
+import { Asset, Pool, VaultJetton, VaultNative } from '@dedust/sdk';
+import { DedustConfig } from '../../../src/connectors/dedust/dedust.config';
+import { TradeRequest } from '../../../src/amm/amm.requests';
+import DedustQuote = DedustConfig.DedustQuote;
 
 
 enum Side { BUY = 'BUY', SELL = 'SELL', }
@@ -17,6 +22,8 @@ const startTimestamp: number = Date.now();
 describe('Dedust Controller', () => {
     let mockTon: jest.Mocked<Ton>;
     let mockDedust: jest.Mocked<Dedust>;
+    let _trade: DedustQuote;
+    let _req: TradeRequest;
 
     beforeEach(() => {
         mockTon = {
@@ -33,18 +40,39 @@ describe('Dedust Controller', () => {
             estimateTrade: jest.fn(),
             executeTrade: jest.fn(),
         } as unknown as jest.Mocked<Dedust>;
+
+        _trade = {
+            pool: {} as OpenedContract<Pool>,
+              vault: {} as OpenedContract<VaultNative | VaultJetton>,
+              amount: BigInt(100),
+              fromAsset: {} as Asset,
+              toAsset: {} as Asset,
+              expectedOut: BigInt(95),
+              priceImpact: 0.02,
+              tradeFee: BigInt(1),
+        } as DedustQuote
+
+        _req = {
+            address: 'mockAddress',
+            base: 'TON',
+            quote: 'USDT',
+            amount: '10',
+            limitPrice: '10',
+            side: Side.SELL,
+            chain: 'ton',
+            network: 'mainnet',
+        };
     });
 
     describe('price', () => {
         it('should return a valid PriceResponse on success', async () => {
+
             mockTon.ready.mockReturnValue(true);
             mockDedust.ready.mockReturnValue(true);
-
             mockDedust.estimateTrade.mockResolvedValue({
                 expectedAmount: 100,
                 expectedPrice: 10,
-                // @ts-ignore
-                trade: 'mockTrade',
+                trade: _trade,
             });
             const req = { base: 'TON', quote: 'USDT', amount: '10', side: Side.SELL, chain: 'ton', network: 'mainnet' };
 
@@ -75,12 +103,10 @@ describe('Dedust Controller', () => {
 
             mockTon.ready.mockReturnValue(true);
             mockDedust.ready.mockReturnValue(true);
-
             mockDedust.estimateTrade.mockResolvedValue({
                 expectedAmount: 100,
                 expectedPrice: 10,
-                // @ts-ignore
-                trade: 'mockTrade',
+                trade: _trade,
             });
 
             const req = { base: 'TON', quote: 'USDT', amount: '10', side: Side.BUY, chain: 'ton', network: 'mainnet' };
@@ -122,30 +148,20 @@ describe('Dedust Controller', () => {
 
     describe('trade', () => {
         it('should return a valid TradeResponse on successful trade execution', async () => {
+
             mockTon.ready.mockReturnValue(true);
             mockDedust.ready.mockReturnValue(true);
             mockDedust.estimateTrade.mockResolvedValue({
                 expectedAmount: 100,
                 expectedPrice: 10,
-                // @ts-ignore
-                trade: 'mockTrade',
+                trade: _trade,
             });
             mockDedust.executeTrade.mockResolvedValue({
                 success: true,
                 txId: 'mockTxHash',
             });
 
-            const req = {
-                address: 'mockAddress',
-                base: 'TON',
-                quote: 'USDT',
-                amount: '10',
-                limitPrice: '10',
-                side: Side.SELL,
-                chain: 'ton',
-                network: 'mainnet',
-            };
-            const response = await trade(mockTon, mockDedust, req);
+            const response = await trade(mockTon, mockDedust, _req);
 
             expect(response).toEqual({
                 network: 'testnet',
@@ -167,7 +183,7 @@ describe('Dedust Controller', () => {
 
         it('should throw HttpException if limit price is exceeded for a BUY order', async () => {
 
-            jest.mock('asyncHandler', () => ({
+            jest.mock('../../../src/services/error-handler', () => ({
                 executeTrade: jest.fn().mockResolvedValue({
                     success: false,
                     message: 'Mock trade error',
@@ -179,22 +195,10 @@ describe('Dedust Controller', () => {
             mockDedust.estimateTrade.mockResolvedValue({
                 expectedAmount: 100,
                 expectedPrice: 12,
-                // @ts-ignore
-                trade: 'mockTrade',
+                trade: _trade,
             });
 
-            const req = {
-                address: 'mockAddress',
-                base: 'TON',
-                quote: 'USDT',
-                amount: '10',
-                limitPrice: '12',
-                side: Side.BUY,
-                chain: 'ton',
-                network: 'mainnet',
-            };
-
-            await expect(trade(mockTon, mockDedust, req)).rejects.toThrow(HttpException);
+            await expect(trade(mockTon, mockDedust, _req)).rejects.toThrow(HttpException);
             // @ts-ignore
             // await expect(trade(mockTon, mockDedust, req)).rejects.toThrow(
             //   "Swap price 15 exceeds limitPrice 12."
@@ -224,7 +228,7 @@ describe('Dedust Controller', () => {
 
             await expect(estimateGas(mockTon, mockDedust)).rejects.toThrow(HttpException);
             await expect(estimateGas(mockTon, mockDedust)).rejects.toThrow(
-              'Service uninitialized: TON or Dedust'
+              /TON or Dedust was called before being initialized/
             );
         });
     });

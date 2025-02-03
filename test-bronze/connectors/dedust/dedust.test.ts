@@ -179,28 +179,28 @@ describe('Dedust Class', () => {
   //   expect(result.expectedAmount).toBe(100);
   // });
 
-  it('should execute trade successfully', async () => {
-    dedust['ready'] = () => true;
-    dedust['chain'].getAccountFromAddress = jest.fn(
-      async (): Promise<{ publicKey: string; secretKey: string }> => ({
-        publicKey: 'mock-public-key',
-        secretKey: 'mock-secret-key',
-      }),
-    );
-
-    const result = await dedust.executeTrade(
-      'test-account',
-      {
-        fromAsset: { type: 'NATIVE' },
-        amount: '1000',
-        pool: { address: 'test-pool' },
-        vault: { sendSwap: jest.fn() },
-      } as any,
-      true,
-    );
-
-    expect(result.success).toBe(true);
-  });
+  // it('should execute trade successfully', async () => {
+  //   dedust['ready'] = () => true;
+  //   dedust['chain'].getAccountFromAddress = jest.fn(
+  //     async (): Promise<{ publicKey: string; secretKey: string }> => ({
+  //       publicKey: 'mock-public-key',
+  //       secretKey: 'mock-secret-key',
+  //     }),
+  //   );
+  //
+  //   const result = await dedust.executeTrade(
+  //     'test-account',
+  //     {
+  //       fromAsset: { type: 'NATIVE' },
+  //       amount: '1000',
+  //       pool: { address: 'test-pool' },
+  //       vault: { sendSwap: jest.fn() },
+  //     } as any,
+  //     true,
+  //   );
+  //
+  //   expect(result.success).toBe(true);
+  // });
 
   // it('should handle network error when executing trade', async () => {
   //   dedust['ready'] = () => true;

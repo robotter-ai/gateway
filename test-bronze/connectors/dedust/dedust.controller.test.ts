@@ -1,6 +1,7 @@
 import {
     price,
     trade,
+  estimateGas,
 } from '../../../src/connectors/dedust/dedust.controllers';
 import {
     AMOUNT_LESS_THAN_MIN_AMOUNT_ERROR_CODE,
@@ -15,12 +16,14 @@ import {
     TRADE_FAILED_ERROR_CODE,
     TRADE_FAILED_ERROR_MESSAGE, UniswapishPriceError
 } from '../../../src/services/error-handler';
-import { PriceRequest } from '../../../src/amm/amm.requests';
+import { EstimateGasResponse, PriceRequest } from '../../../src/amm/amm.requests';
+import { Ton } from '../../../src/chains/ton/ton';
+import { Dedust } from '../../../src/connectors/dedust/dedust';
 
 jest.mock('../../../src/chains/ton/ton');
 jest.mock('../../../src/connectors/dedust/dedust');
 const mockTon = {
-    network: 'test-network',
+    network: 'testnet',
     gasPrice: 100,
     nativeTokenSymbol: 'TON',
     gasLimit: 21000,
@@ -40,6 +43,7 @@ describe('Dedust Controllers - Error Handling', () => {
 
     describe('price', () => {
         it('should throw HttpException when UniswapishPriceError occurs', async () => {
+
             const req: PriceRequest = {
                 base: 'TON',
                 quote: 'AIOTX',
@@ -61,6 +65,112 @@ describe('Dedust Controllers - Error Handling', () => {
               })
             );
         });
+
+      it('should throw HttpException when UniswapishPriceError occurs during estimation', async () => {
+        mockDedust.estimateTrade.mockRejectedValue(new UniswapishPriceError('Price error'));
+
+        await expect(
+          trade(mockTon as any, mockDedust as any, {
+            address: 'mock-address',
+            base: 'TON',
+            quote: 'AIOTX',
+            amount: '100',
+            side: 'BUY',
+            limitPrice: '1.5',
+            chain: 'ton',
+            network: 'testnet',
+          })
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: 'Price error',
+            status: 500,
+            errorCode: TRADE_FAILED_ERROR_CODE,
+          })
+        );
+      });
+
+      it('should throw HttpException when insufficient funds error occurs during estimation', async () => {
+        mockDedust.estimateTrade.mockRejectedValue(new Error('insufficient funds'));
+
+        await expect(
+          trade(mockTon as any, mockDedust as any, {
+            address: 'mock-address',
+            base: 'TON',
+            quote: 'AIOTX',
+            amount: '100',
+            side: 'BUY',
+            limitPrice: '1.5',
+            chain: 'ton',
+            network: 'testnet',
+          })
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: INSUFFICIENT_FUNDS_ERROR_MESSAGE,
+            status: 400,
+            errorCode: INSUFFICIENT_FUNDS_ERROR_CODE,
+          })
+        );
+      });
+
+      it('should throw HttpException when min amount error occurs during execution', async () => {
+        mockDedust.estimateTrade.mockResolvedValue({
+          expectedAmount: '150',
+          expectedPrice: '1.5',
+          trade: 'mock-trade-data',
+        });
+
+        mockDedust.executeTrade.mockRejectedValue(new Error('min amount'));
+
+        await expect(
+          trade(mockTon as any, mockDedust as any, {
+            address: 'mock-address',
+            base: 'TON',
+            quote: 'AIOTX',
+            amount: '100',
+            side: 'BUY',
+            limitPrice: '1.5',
+            chain: 'ton',
+            network: 'testnet',
+          })
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: AMOUNT_LESS_THAN_MIN_AMOUNT_ERROR_MESSAGE,
+            status: 400,
+            errorCode: AMOUNT_LESS_THAN_MIN_AMOUNT_ERROR_CODE,
+          })
+        );
+      });
+
+      it('should throw HttpException when unknown error occurs during execution', async () => {
+        mockDedust.estimateTrade.mockResolvedValue({
+          expectedAmount: '150',
+          expectedPrice: '1.5',
+          trade: 'mock-trade-data',
+        });
+
+        mockDedust.executeTrade.mockRejectedValue(new Error('unknown error'));
+
+        await expect(
+          trade(mockTon as any, mockDedust as any, {
+            address: 'mock-address',
+            base: 'TON',
+            quote: 'AIOTX',
+            amount: '100',
+            side: 'BUY',
+            limitPrice: '1.5',
+            chain: 'ton',
+            network: 'testnet',
+          })
+        ).rejects.toThrow(
+          expect.objectContaining({
+            message: expect.stringContaining(TRADE_FAILED_ERROR_MESSAGE),
+            status: 500,
+            errorCode: TRADE_FAILED_ERROR_CODE,
+          })
+        );
+      });
+
+
 
         it('should throw HttpException when insufficient funds error occurs', async () => {
             mockDedust.estimateTrade.mockRejectedValue(new Error('insufficient funds'));
@@ -163,7 +273,7 @@ describe('Dedust Controllers - Error Handling', () => {
 
             expect(response).toEqual(
               expect.objectContaining({
-                  network: 'test-network',
+                  network: 'testnet',
                   base: 'TON',
                   quote: 'AIOTX',
                   amount: '100',
@@ -260,6 +370,47 @@ describe('Dedust Controllers - Error Handling', () => {
             );
         });
 
+      it('should return TradeResponse when trade is executed successfully', async () => {
+        mockDedust.estimateTrade.mockResolvedValue({
+          expectedAmount: '150',
+          expectedPrice: '1.5',
+          trade: 'mock-trade-data',
+        });
+
+        mockDedust.executeTrade.mockResolvedValue({
+          success: true,
+          txId: 'mock-tx-id',
+        });
+
+        const result = await trade(mockTon as any, mockDedust as any, {
+          address: 'mock-address',
+          base: 'TON',
+          quote: 'AIOTX',
+          amount: '100',
+          side: 'BUY',
+          limitPrice: '1.5',
+          chain: 'ton',
+          network: 'testnet',
+        });
+
+        expect(result).toEqual({
+          network: 'testnet',
+          timestamp: expect.any(Number),
+          latency: expect.any(Number),
+          base: 'TON',
+          quote: 'AIOTX',
+          amount: '100',
+          rawAmount: '100',
+          expectedIn: '150',
+          price: '1.5',
+          gasPrice: mockTon.gasPrice,
+          gasPriceToken: mockTon.nativeTokenSymbol,
+          gasLimit: mockTon.gasLimit,
+          gasCost: String(mockTon.gasCost),
+          txHash: 'mock-tx-id',
+        });
+      });
+
         it('should throw HttpException when network error occurs during trade', async () => {
             mockDedust.executeTrade.mockRejectedValue(new Error('network error'));
 
@@ -283,6 +434,8 @@ describe('Dedust Controllers - Error Handling', () => {
             );
         });
     });
+
+
 
     it('should throw HttpException when a network error occurs during execution', async () => {
         mockDedust.estimateTrade.mockResolvedValue({
@@ -312,4 +465,31 @@ describe('Dedust Controllers - Error Handling', () => {
           }),
         );
     });
+
+  describe('estimateGas', () => {
+    it('must return the Estimated Response object correctly', async () => {
+
+      const mockTon: Ton = {
+        network: 'mainnet',
+        gasPrice: 100,
+        nativeTokenSymbol: 'TON',
+        gasLimit: 21000,
+        gasCost: 2100000,
+        // @ts-ignore
+        timestamp: Date.now(),
+        gasPriceToken: 'TON',
+      };
+
+      const result: EstimateGasResponse = await estimateGas(mockTon, mockDedust as unknown as Dedust);
+
+      expect(result).toEqual({
+        network: 'mainnet',
+        timestamp: expect.any(Number),
+        gasPrice: 100,
+        gasPriceToken: 'TON',
+        gasLimit: 21000,
+        gasCost: '2100000',
+      });
+    });
+  });
 });

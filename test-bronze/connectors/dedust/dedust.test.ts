@@ -125,7 +125,7 @@ jest.mock('@dedust/sdk', () => ({
 }));
 
 jest.mock('@ton/ton', () => ({
-  toNano: jest.fn((value: string) => BigInt(parseInt(value))), // Ensure numeric conversion
+  toNano: jest.fn((value: string) => BigInt(parseInt(value))),
   Address: {
     parse: jest.fn(() => ({
       toString: jest.fn(() => 'parsed-valid-ton-address'),
@@ -147,7 +147,6 @@ describe('Dedust Class', () => {
     dedustInstance = Dedust.getInstance('testnet');
     dedustInstance['_ready'] = true;
 
-    // Mock the factory with all necessary methods
     dedustInstance['factory'] = {
       address: 'mock-factory-address',
       getPool: jest.fn(() => Promise.resolve({
@@ -170,7 +169,6 @@ describe('Dedust Class', () => {
       })),
     } as any;
 
-    // Update chain mock
     dedustInstance['chain'] = {
       ready: jest.fn(() => true),
       init: jest.fn(() => Promise.resolve()),
@@ -219,7 +217,7 @@ describe('Dedust Class', () => {
 
   describe('Instance Methods', () => {
     it('init should initialize the chain and set the ready state', async () => {
-      dedustInstance['chain'].ready = jest.fn(() => false); // Simulate chain not ready
+      dedustInstance['chain'].ready = jest.fn(() => false);
       await dedustInstance.init();
       expect(dedustInstance['chain'].init).toHaveBeenCalled();
       expect(dedustInstance.ready()).toBe(true);
@@ -301,7 +299,6 @@ describe('Dedust Class', () => {
     });
 
     it('should throw an error if pool is not found for asset pair', async () => {
-      // Mock "getPool" to throw an error explicitly
       jest.spyOn(dedustInstance['factory'], 'getPool').mockImplementationOnce(() => {
         throw new Error('Invalid or unsupported pool');
       });
@@ -315,7 +312,6 @@ describe('Dedust Class', () => {
         network: 'testnet',
       };
 
-      // Verify that estimateTrade correctly rejects with the error
       await expect(dedustInstance.estimateTrade(priceRequest)).rejects.toThrow(
           /Invalid or unsupported pool/,
       );
@@ -323,7 +319,7 @@ describe('Dedust Class', () => {
 
     it('should fall back gracefully when transaction status is incorrect', async () => {
       jest.spyOn(dedustInstance['factory'], 'getNativeVault').mockResolvedValueOnce({
-        getReadinessStatus: jest.fn(() => Promise.resolve('NOT_READY')), // Simulate "NOT_READY" state
+        getReadinessStatus: jest.fn(() => Promise.resolve('NOT_READY')),
         sendSwap: jest.fn(() => Promise.resolve({ success: false })),
       } as any);
 
@@ -341,7 +337,7 @@ describe('Dedust Class', () => {
       const invalidRequest: PriceRequest = {
         base: 'TON',
         quote: 'AIOTX',
-        amount: 'invalid-amount', // Non-numeric value
+        amount: 'invalid-amount',
         side: 'BUY',
         chain: 'ton',
         network: 'testnet',
@@ -353,7 +349,6 @@ describe('Dedust Class', () => {
     });
 
     it('should throw an error for invalid base or quote tokens', async () => {
-      // Invalid base and valid quote
       const invalidBaseRequest: PriceRequest = {
         base: 'INVALID_TOKEN',
         quote: 'TON',
@@ -368,7 +363,6 @@ describe('Dedust Class', () => {
           `${TOKEN_NOT_SUPPORTED_ERROR_MESSAGE}INVALID_TOKEN or TON`,
       );
 
-      // Valid base and invalid quote
       const invalidQuoteRequest: PriceRequest = {
         base: 'TON',
         quote: 'INVALID_TOKEN',
@@ -404,7 +398,6 @@ describe('Dedust Class', () => {
     });
 
     it('should throw an error when jetton vault cannot be retrieved', async () => {
-      // Mock getJettonVault to throw an error
       jest.spyOn(dedustInstance['factory'], 'getJettonVault').mockRejectedValue(
           new Error('Invalid jetton vault'),
       );
@@ -427,13 +420,13 @@ describe('Dedust Class', () => {
       const mockQuote = {
         expectedOut: BigInt(100),
         fromAsset: { type: AssetType.NATIVE },
-        toAsset: { type: AssetType.JETTON, address: 'mock-jetton-address' }, // Add valid `toAsset`
-        priceImpact: 2.5, // Mocked price impact
-        tradeFee: BigInt(5), // Mocked trade fee
+        toAsset: { type: AssetType.JETTON, address: 'mock-jetton-address' },
+        priceImpact: 2.5,
+        tradeFee: BigInt(5),
         pool: { address: 'mock-pool-address' },
         vault: {
-          sendSwap: jest.fn(() => Promise.resolve()), // Mocked sendSwap
-        }, // Mock native vault
+          sendSwap: jest.fn(() => Promise.resolve()),
+        },
         amount: BigInt(100),
       };
 
@@ -463,7 +456,7 @@ describe('Dedust Class', () => {
         const invalidPriceRequest: PriceRequest = {
           base: 'TON',
           quote: 'AIOTX',
-          amount: '0', // Invalid amount
+          amount: '0',
           side: 'BUY',
           chain: 'ton',
           network: 'testnet',
@@ -476,8 +469,8 @@ describe('Dedust Class', () => {
 
       it('should handle the base as jetton and quote as TON', async () => {
         const validRequest: PriceRequest = {
-          base: 'AIOTX', // Jetton
-          quote: 'TON', // Native asset
+          base: 'AIOTX',
+          quote: 'TON',
           amount: '50',
           side: 'BUY',
           chain: 'ton',
@@ -494,20 +487,18 @@ describe('Dedust Class', () => {
       it('should correctly validate and execute a trade', async () => {
         const tradeRequest: [string, any, boolean] = ['mock-wallet-address', { payload: 'mock-payload' }, true];
 
-        // Explicitly mock executeTrade to return a success response
         jest.spyOn(dedustInstance, 'executeTrade').mockImplementationOnce(async () => ({
           success: true,
           txId: 'mock-tx-hash',
         }));
 
-        // Call the method and test assertions
         const result = await dedustInstance.executeTrade(...tradeRequest);
         expect(result.success).toBe(true);
         expect(result.txId).toBe('mock-tx-hash');
       });
 
       it('should throw a generic error if execution fails unexpectedly', async () => {
-        const tradeRequest: [string, any, boolean] = ['mock-wallet-address', null, true]; // Invalid payload
+        const tradeRequest: [string, any, boolean] = ['mock-wallet-address', null, true];
 
         jest.spyOn(dedustInstance, 'executeTrade').mockImplementation(async () => {
           throw new Error('Unexpected error during trade execution');

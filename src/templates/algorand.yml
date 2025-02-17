@@ -4,13 +4,13 @@ networks:
     nodeURL: https://xna-mainnet-api.algonode.cloud
     indexerURL: https://mainnet-idx.algonode.cloud
     assetListType: URL
-    assetListSource: 'https://mainnet.analytics.tinyman.org/api/v1/assets/?limit=1000&is_pool_member=true&with_statistics=false&verified_only=true'
+    assetListSource: 'https://hydration.api.subscan.io/api/scan/token'
   testnet:
     chainId: testnet
     nodeURL: https://testnet-api.algonode.network
     indexerURL: https://testnet-idx.algonode.cloud
     assetListType: URL
-    assetListSource: 'https://testnet.analytics.tinyman.org/api/v1/assets/?limit=1000&is_pool_member=true&with_statistics=false&verified_only=true'
+    assetListSource: 'https://hydration.api.subscan.io/api/scan/token'
 
 nativeCurrencySymbol: ALGO
 gasLimitEstimate: 500000

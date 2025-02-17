@@ -23,7 +23,6 @@ import {
 import { latency } from '../../services/base';
 import Decimal from 'decimal.js-light';
 import { logger } from '../../services/logger';
-import { BigNumber } from '@galacticcouncil/sdk';
 
 export async function price(
   polkadot: Polkadot,
@@ -32,8 +31,10 @@ export async function price(
 ): Promise<PriceResponse> {
   const startTimestamp: number = Date.now();
   let trade;
+  let tradeHuman;
   try {
     trade = await hydration.estimateTrade(req);
+    tradeHuman = trade.toHuman();
   } catch (e) {
     if (e instanceof Error) {
       throw new HttpException(
@@ -49,6 +50,7 @@ export async function price(
       );
     }
   }
+
   return {
     network: polkadot.network,
     timestamp: startTimestamp,
@@ -57,8 +59,8 @@ export async function price(
     quote: req.quote,
     amount: req.amount,
     rawAmount: req.amount,
-    expectedAmount: String(trade.expectedAmount), // TODO implement blalblab!!!
-    price: String(trade.expectedPrice),
+    expectedAmount: tradeHuman.amountOut,
+    price: tradeHuman.amountOut,
     gasPrice: polkadot.gasPrice,
     gasPriceToken: polkadot.nativeTokenSymbol,
     gasLimit: polkadot.gasLimit,
@@ -75,10 +77,11 @@ export async function trade(
 
   const limitPrice = req.limitPrice;
   // const account: Account = await polkadot.getAccountFromAddress(req.address);
-
   let trade;
+  let tradeHuman;
   try {
     trade = await hydration.estimateTrade(<PriceRequest>req);
+    tradeHuman = trade.toHuman();
   } catch (e) {
     throw new HttpException(
       500,
@@ -90,7 +93,7 @@ export async function trade(
   const estimatedPrice = trade.expectedPrice;
   logger.info(
     `Expected execution price is ${estimatedPrice}, ` +
-    `limit price is ${limitPrice}.`,
+      `limit price is ${limitPrice}.`,
   );
 
   if (req.side === 'BUY') {
@@ -118,7 +121,7 @@ export async function trade(
       );
     }
   }
-  const queryTrade = await hydration.executeTrade(req);
+  const txHash = await hydration.executeTrade(req.address, trade);
 
   logger.info(`${req.side} swap has been executed.`);
 
@@ -130,15 +133,16 @@ export async function trade(
     quote: req.quote,
     amount: req.amount,
     rawAmount: req.amount,
-    expectedIn: String(trade.expectedAmount),
-    price: String(estimatedPrice),
+    price: tradeHuman.amountOut,
+    expectedIn: tradeHuman.amountOut,
     gasPrice: polkadot.gasPrice,
     gasPriceToken: polkadot.nativeTokenSymbol,
     gasLimit: polkadot.gasLimit,
     gasCost: String(polkadot.gasCost),
-    txHash: queryTrade.toTx(BigNumber(Number(req.limitPrice))).hex,
+    txHash: txHash,
   };
 }
+
 export async function estimateGas(
   polkadot: Polkadot,
   _hydration: Hydration,

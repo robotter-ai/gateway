@@ -3,22 +3,26 @@ import { Polkadot } from '../../chains/polkadot/polkadot';
 import { HydrationConfig } from './hydration.config';
 import { getPolkadotConfig } from '../../chains/polkadot/polkadot.config';
 import { percentRegexp } from '../../services/config-manager-v2';
-import { PoolBase, } from '@galacticcouncil/sdk';
-import { TradeRouter, PoolService } from '@galacticcouncil/sdk';
-import { PriceRequest, TradeRequest } from '../../amm/amm.requests';
+import {
+  TradeRouter,
+  PoolService,
+  Trade,
+  BigNumber,
+} from '@galacticcouncil/sdk';
+import { PriceRequest } from '../../amm/amm.requests';
 import {
   HttpException,
   TOKEN_NOT_SUPPORTED_ERROR_CODE,
   TOKEN_NOT_SUPPORTED_ERROR_MESSAGE,
 } from '../../services/error-handler';
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { logger } from 'ethers';
 
 export class Hydration {
   private static _instances: LRUCache<string, Hydration>;
   private chain: Polkadot;
   private _config: HydrationConfig.NetworkConfig;
   private _ready: boolean = false;
+  private wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
 
   constructor(network: string) {
     this._config = HydrationConfig.config;
@@ -57,106 +61,94 @@ export class Hydration {
     return this._ready;
   }
 
-  getSlippage(): number {
+  getSlippage(): BigNumber {
     const allowedSlippage = this._config.allowedSlippage;
     const nd = allowedSlippage.match(percentRegexp);
     let slippage = 0.0;
     if (nd) slippage = Number(nd[1]) / Number(nd[2]);
-    return slippage;
+    return BigNumber(slippage * 10 ** 12);
   }
 
-  async estimateTrade(req: PriceRequest) {
-    const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
-    const api = await ApiPromise.create({ provider: wsProvider });
+
+  public async getAllTokens() {
+    const api = await ApiPromise.create({ provider: this.wsProvider });
     const poolService = new PoolService(api);
-    const trade = new TradeRouter(poolService);
-    const asset = await trade.getAllAssets();
+    await poolService.syncRegistry();
+    const tradeRouter = new TradeRouter(poolService);
+    return await tradeRouter.getAllAssets();
+  }
 
-    const tokenIdBase = asset.find((a) => a.symbol === req.base)?.id ?? '0'; //HDX default
-    const tokenIdQuote = asset.find((a) => a.symbol === req.quote)?.id ?? '10'; // USDT default
+  async estimateTrade(req: PriceRequest): Promise<Trade> {
+    const api = await ApiPromise.create({ provider: this.wsProvider });
+    const poolService = new PoolService(api);
+    await poolService.syncRegistry();
+    const tradeRouter = new TradeRouter(poolService);
+    const asset = await tradeRouter.getAllAssets();
+    const tokenIdBase = asset.find((a) => a.symbol === req.base).id;
+    const tokenIdQuote = asset.find((a) => a.symbol === req.quote).id;
 
-    const symbolBase = asset.find((a) => req.base === a.symbol)?.symbol ?? '0'; //HDX default
-    const symbolQuote =
-      asset.find((a) => req.quote === a.symbol)?.symbol ?? '10'; // USDT default
-
-    if (symbolBase === null || symbolQuote === null)
+    if (tokenIdBase === null || tokenIdQuote === null)
       throw new HttpException(
         500,
         TOKEN_NOT_SUPPORTED_ERROR_MESSAGE,
         TOKEN_NOT_SUPPORTED_ERROR_CODE,
       );
 
-    // const baseAsset = { id: baseToken.id, decimals: baseToken.decimals };
-    // const quoteAsset = {
-    //   id: quoteToken.id,
-    //   decimals: quoteToken.decimals,
-    // };
-
-    // const amount = Number(req.amount) * <number>pow(10, baseToken.decimals);
     const isBuy: boolean = req.side === 'BUY';
-    const queryPools: PoolBase[] = await trade.getPools();
-    const pool: PoolBase | undefined = queryPools.find(
-      (query) => query.id === req.poolId,
-    );
 
-    const price = await trade.getBestSpotPrice(tokenIdBase, tokenIdQuote);
-    logger.info(
-      `Best quote for ${symbolBase}-${symbolQuote}: ` +
-      `${price?.amount}` +
-      `${symbolBase}.`,
-    );
-    const expectedPrice =
-      isBuy === true ? 1 / Number(price?.amount) : Number(price?.amount);
-    const expectedAmount =
-      req.side === 'BUY'
-        ? Number(req.amount)
-        : expectedPrice * Number(req.amount);
+    const tokenIn = isBuy ? tokenIdBase : tokenIdQuote;
+    const tokenOut = isBuy ? tokenIdQuote : tokenIdBase;
 
-    return { expectedAmount, expectedPrice, pool };
+    const trade = await tradeRouter.getBestBuy(tokenIn, tokenOut, req.amount);
+
+    return trade;
   }
 
-  async executeTrade(req: TradeRequest) {
-    const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
-    const api = await ApiPromise.create({ provider: wsProvider });
+  async executeTrade(address: string, trade: Trade) {
+    const api = await ApiPromise.create({ provider: this.wsProvider });
     const poolService = new PoolService(api);
-    const trade = new TradeRouter(poolService);
-    const asset = await trade.getAllAssets();
+    await poolService.syncRegistry();
 
-    const tokenBase = asset.find((a) => a.symbol === req.base)?.id ?? '0'; //HDX default
-    const tokenQuote = asset.find((a) => a.symbol === req.quote)?.id ?? '10'; //  USDT default
-    // const json = this.chain.keyring.addFromAddress("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY").toJson();
-    // const wallet = this.chain.keyring.addFromJson(json)
-    // wallet.unlock("RXuSb6PyBv!08SN*@qBhZk&QJb3jOKH*3V&Y%E9DuhdH1Fq*6ZBjGz8S1PYGDn!jWJ83eHJ9cQW#OK97NF@LU5gpbGcpoTuMP@TR")
+    console.log(this.getSlippage(), new BigNumber('10000000000000000'));
 
-    if (req.side === 'BUY') {
-      const getBuy = await trade.getBestBuy(tokenBase, tokenQuote, req.amount);
-      // const buyTx = getBuy.toTx(BigNumber(Number(req.limitPrice))).hex
-      // const extrinsic = api.tx(buyTx);
-      // const nextNonce = await api.rpc.system.accountNextIndex(req.address);
-      // const result = await extrinsic
-      //   .signAndSend(
-      //     wallet,
-      //     {
-      //       nonce: nextNonce
-      //     }
+    const slippage = new BigNumber('10000000000000000'); //this.getSlippage()
+    const transaction = trade.toTx(slippage).get() as any;
 
-      //   )
-      // console.log(result)
-      return getBuy;
-    }
-    const getSell = await trade.getBestSell(tokenBase, tokenQuote, req.amount);
-    // const sellTx = getSell.toTx(BigNumber(Number(req.limitPrice))).hex
-    // const extrinsic = api.tx(sellTx);
-    // const nextNonce = await api.rpc.system.accountNextIndex(req.address);
-    // extrinsic
-    //   .signAndSend(
-    //     req.address,
-    //     { nonce: nextNonce },
+    const keyringPair = await this.chain.getAccountFromAddress(address);
 
-    //   )
-    //   .catch((error: any) => {
-    //     console.log(error)
-    //   });
-    return getSell;
+    return new Promise((resolve, reject) => {
+      try {
+        transaction.signAndSend(keyringPair, (result) => {
+          if (result.dispatchError) {
+            if (result.dispatchError.isModule) {
+              // Decodifica o erro utilizando o registry da API
+              const decoded = api.registry.findMetaError(
+                result.dispatchError.asModule,
+              );
+              const { name } = decoded;
+              reject(
+                new Error(
+                  `Hydration.executeTrade received an unexpected error: ${name}.`,
+                ),
+              );
+            } else {
+              reject(
+                new Error(
+                  `Hydration.executeTrade received an unexpected error: ${result.dispatchError.toString()}.`,
+                ),
+              );
+            }
+          } else {
+            if (result.status.type === 'InBlock') {
+              const txHash = JSON.parse(result.status.toString()).inBlock;
+              console.log('Swap done! TX HASH:', txHash);
+              resolve(txHash);
+            }
+          }
+        });
+      } catch (error: any) {
+        reject(error.message);
+      }
+    });
   }
 }

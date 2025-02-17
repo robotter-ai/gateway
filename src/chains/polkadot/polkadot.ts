@@ -15,7 +15,7 @@ type AssetListType = TokenListType;
 export class Polkadot {
   private _assetMap: Record<string, Asset> = {};
   private static _instances: LRUCache<string, Polkadot>;
-  private _chain: string = "polkadot";
+  private _chain: string = 'polkadot';
   private _network: string;
   private _polkadot: ApiPromise;
   private _keyring: Keyring;
@@ -32,14 +32,12 @@ export class Polkadot {
     network: string,
     // nodeURL: string,
     assetListType: AssetListType,
-    assetListSource: string
+    assetListSource: string,
   ) {
     const config = getPolkadotConfig(network);
-    this._network = network
+    this._network = network;
     this.nativeTokenSymbol = config.nativeCurrencySymbol;
     this.gasPrice = 0;
-    // const provider = new WsProvider(nodeURL);
-    // this._polkadot = await ApiPromise.create({ provider })
     this._polkadot = null as unknown as any;
     this._keyring = new Keyring({ type: 'sr25519' });
     this._assetListType = assetListType;
@@ -71,10 +69,10 @@ export class Polkadot {
   public async init(): Promise<void> {
     const config = getPolkadotConfig(this._network);
     const provider = new WsProvider(config.network.nodeURL);
-    this._polkadot = await ApiPromise.create({ provider })
+    this._polkadot = await ApiPromise.create({ provider });
     await this.loadAssets();
     this._ready = true;
-    return
+    return;
   }
   async close() {
     return;
@@ -94,19 +92,15 @@ export class Polkadot {
         const assetListSource = config.network.assetListSource;
         Polkadot._instances.set(
           config.network.name,
-          new Polkadot(
-            network,
-            assetListType,
-            assetListSource
-          )
+          new Polkadot(network, assetListType, assetListSource),
         );
       } else {
         throw new Error(
-          `Polkadot.getInstance received an unexpected network: ${network}.`
+          `Polkadot.getInstance received an unexpected network: ${network}.`,
         );
       }
     }
-    return Polkadot._instances.get(config.network.name) as Polkadot
+    return Polkadot._instances.get(config.network.name) as Polkadot;
   }
 
   public static getConnectedInstances(): { [name: string]: Polkadot } {
@@ -116,7 +110,7 @@ export class Polkadot {
       for (const instance of keys) {
         if (instance !== undefined) {
           connectedInstances[instance] = this._instances.get(
-            instance
+            instance,
           ) as Polkadot;
         }
       }
@@ -146,42 +140,26 @@ export class Polkadot {
   }
 
   public async getNativeBalance(accountAddress: string): Promise<string> {
-    const accountInfo =
-      await this._polkadot.query.system.account(accountAddress);
-    const accountData = accountInfo.toJSON() as any;
-    return accountData.data?.free || '0';
+    const accountInfo = (await this._polkadot.query.system.account(
+      accountAddress,
+    )) as any;
+    return String(accountInfo.data?.free) || '0';
   }
 
   public async getAssetBalance(
     accountAddress: string,
+    tokenSymbol: string,
   ): Promise<string> {
-    const { parentHash } = await this._polkadot.rpc.chain.getHeader();
+    console.log(tokenSymbol, this._assetMap);
 
-    const apiAt = await this._polkadot.at(parentHash);
-    const balance = await apiAt.query.system.account(accountAddress);
+    const token = this._assetMap[tokenSymbol]
 
-    return balance.toString()
+    const assetBalance = (await this._polkadot.query.tokens.accounts(
+      accountAddress,
+      token.id,
+    )) as any;
+    return String(assetBalance.free);
   }
-
-  // public async transfer(
-  //   senderMnemonic: string,
-  //   recipientAddress: string,
-  //   amount: number,
-  // ): Promise<string> {
-  //   const sender = this.getAccountFromPrivateKey(senderMnemonic);
-  //   const transfer = this._polkadot.tx.balances.transfer(
-  //     recipientAddress,
-  //     amount,
-  //   );
-  //   const accountInfo = await this._polkadot.query.system.account(
-  //     sender.address,
-  //   );
-  //   const accountData = accountInfo.toJSON() as any;
-  //   const nonce = accountData.nonce || 0;
-  //   const signedTx = await transfer.signAsync(sender.keypair, { nonce });
-  //   const result = await signedTx.send();
-  //   return result.toHex();
-  // }
 
   public async getTransaction(txHash: string): Promise<PollResponse> {
     const blockHash = await this._polkadot.rpc.chain.getBlockHash(txHash);
@@ -236,26 +214,19 @@ export class Polkadot {
 
   public async getAccountFromPrivateKey(
     seed: string,
-  ): Promise<{ publicKey: string;
-     address: string 
-    }> {
-      //Extracts the phrase, path and password from a SURI format for specifying secret keys <secret>/<soft-key>//<hard-key>///<password> (the ///password may be omitted, and /<soft-key> and //<hard-key> maybe repeated and mixed). The secret can be a hex string, mnemonic phrase or a string (to be padded)
+  ): Promise<{ keyPair: any; address: string }> {
+    //Extracts the phrase, path and password from a SURI format for specifying secret keys <secret>/<soft-key>//<hard-key>///<password> (the ///password may be omitted, and /<soft-key> and //<hard-key> maybe repeated and mixed). The secret can be a hex string, mnemonic phrase or a string (to be padded)
 
-    const keyPair = this.keyring.addFromUri(seed); 
-    const formatedPublicKey = keyPair.publicKey.toString()
-    const address = keyPair.address
+    const keyPair = this.keyring.addFromUri(seed);
+    const address = keyPair.address;
 
     return {
-      publicKey:formatedPublicKey,
-      address
-    }
+      keyPair,
+      address,
+    };
   }
 
-  async getAccountFromAddress(
-    address: string,
-  ): Promise<{ publicKey: string;
-    //  secretKey: string
-     }> {
+  async getAccountFromAddress(address: string) {
     const path = `${walletPath}/${this._chain}`;
     const encryptedMnemonic: string = await fse.readFile(
       `${path}/${address}.json`,
@@ -266,14 +237,9 @@ export class Polkadot {
       throw new Error('missing passphrase');
     }
     const mnemonic = this.decrypt(encryptedMnemonic, passphrase);
-    console.log(encryptedMnemonic)
-     
+    console.log(encryptedMnemonic);
 
-    const newPair = this.keyring.addFromUri(mnemonic);
-    return {
-      publicKey: newPair.publicKey.toString(),
-      // secretKey: keyPair.secretKey.toString('base64url'),
-    };
+    return this.keyring.addFromUri(mnemonic);
   }
 
   private async loadAssets(): Promise<void> {
@@ -287,7 +253,7 @@ export class Polkadot {
         icon: result.icon,
         isSufficient: result.isSufficient,
         name: result.name,
-        type: result.type
+        type: result.type,
       };
     }
   }
@@ -307,5 +273,4 @@ export class Polkadot {
   public get storedTokenList() {
     return this._assetMap;
   }
-
 }

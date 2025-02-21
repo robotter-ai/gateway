@@ -150,17 +150,116 @@ export class Polkadot {
     accountAddress: string,
     tokenSymbol: string,
   ): Promise<string> {
-    console.log(tokenSymbol, this._assetMap);
-
-    const token = this._assetMap[tokenSymbol]
-
-    const assetBalance = (await this._polkadot.query.tokens.accounts(
-      accountAddress,
-      token.id,
-    )) as any;
-    return String(assetBalance.free);
+    console.log(`Fetching balance for ${tokenSymbol}...`);
+  
+    const token = this._assetMap[tokenSymbol];
+    if (!token) {
+      throw new Error(`Token ${tokenSymbol} not found in asset map.`);
+    }
+  
+    console.log("Checking available query modules...");
+    console.log("this._polkadot.query.balances:", !!this._polkadot.query.balances);
+    console.log("this._polkadot.query.assets:", !!this._polkadot.query.assets);
+    console.log("this._polkadot.query.tokens:", !!this._polkadot.query.tokens);
+    console.log("this._polkadot.query.xcmPallet:", !!this._polkadot.query.xcmPallet);
+  
+    try {
+      // 1. Native Token (DOT) → Use `system.account`
+      if (tokenSymbol === this.nativeTokenSymbol) {
+        console.log("Fetching native DOT balance...");
+        const accountInfo = await this._polkadot.query.system.account(accountAddress);
+        console.log("Raw system.account result:", accountInfo.toHuman());
+  
+        const parsed = accountInfo.toJSON() as { data?: { free?: string } };
+        return parsed?.data?.free ?? "0";
+      }
+    
+      // 2. Check `balances.account`
+      if (this._polkadot.query.balances?.account) {
+        console.log(`Using balances.account for ${tokenSymbol}...`);
+        const balanceInfo = await this._polkadot.query.balances.account(accountAddress);
+        console.log(`balances.account result for ${tokenSymbol}:`, balanceInfo.toHuman());
+  
+        const parsed = balanceInfo.toJSON() as { free?: string };
+        if (parsed?.free && parsed.free !== "0") {
+          console.log(`Found balance in balances.account: ${parsed.free}`);
+          return parsed.free;
+        }
+      }
+  
+      // 3. Try Asset Hub (Parachain 1000)
+      if (this._polkadot.query.assets?.account) {
+        console.log(`Trying Asset Hub for ${tokenSymbol}...`);
+        const assetBalance = await this._polkadot.query.assets.account(
+          accountAddress,
+          token.id
+        );
+        console.log(`Asset Hub balance result for ${tokenSymbol}:`, assetBalance.toHuman());
+  
+        const parsed = assetBalance.toJSON() as { balance?: string };
+        if (parsed?.balance && parsed.balance !== "0") {
+          console.log(`Found balance in Asset Hub: ${parsed.balance}`);
+          return parsed.balance;
+        }
+      }
+  
+      // 4. Fetch from Subscan API
+      console.log(`Balances.account returned 0. Fetching ${tokenSymbol} balance from Subscan API...`);
+  
+      const response = await axios.post(
+        "https://polkadot.api.subscan.io/api/scan/account/tokens",
+        { address: accountAddress },
+        { headers: { "Content-Type": "application/json" } }
+      );
+  
+      console.log("Subscan API response:", response.data);
+  
+      if (response.data.code !== 0) {
+        console.error(`Subscan API returned an error: ${response.data.message}`);
+        return "0";
+      }
+  
+      // Extract token balances from response
+      const tokens = response.data.data?.tokens || response.data.data?.native || [];
+      console.log(`Available tokens from Subscan:`, tokens);
+  
+      if (Array.isArray(tokens)) {
+        const tokenData = tokens.find((t: any) => t.symbol === tokenSymbol);
+        if (tokenData) {
+          console.log(`Subscan API balance for ${tokenSymbol}:`, tokenData.balance);
+          return String(tokenData.balance);
+        }
+      } else {
+        console.warn(`Unexpected Subscan response format for ${tokenSymbol}:`, tokens);
+      }
+  
+      // 5. Fetch from Hydration API as a last resort
+      console.log(`Fetching ${tokenSymbol} balance from Hydration API...`);
+  
+      const hydrationResponse = await axios.post(
+        "https://hydration.api.yourservice.com/account/balance",
+        { address: accountAddress, token: tokenSymbol },
+        { headers: { "Content-Type": "application/json" } }
+      );
+  
+      console.log("Hydration API response:", hydrationResponse.data);
+  
+      if (hydrationResponse.data.success) {
+        console.log(`Hydration API balance for ${tokenSymbol}:`, hydrationResponse.data.balance);
+        return String(hydrationResponse.data.balance);
+      }
+  
+    } catch (error) {
+      console.error(`Error fetching balance for ${tokenSymbol}:`, error);
+    }
+  
+    console.warn(`No valid balance source found for ${tokenSymbol}. Returning 0.`);
+    return "0";
   }
-
+  
+  
+  
+  
   public async getTransaction(txHash: string): Promise<PollResponse> {
     const blockHash = await this._polkadot.rpc.chain.getBlockHash(txHash);
     const block = await this._polkadot.rpc.chain.getBlock(blockHash);

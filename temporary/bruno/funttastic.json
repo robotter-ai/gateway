@@ -1,0 +1,376 @@
+{
+  "info": {
+    "name": "funttastic",
+    "description": "",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "bruno",
+      "event": []
+    },
+    {
+      "name": "root",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "https://localhost:15888/",
+          "protocol": "https",
+          "host": [
+            "localhost:15888/"
+          ],
+          "path": [],
+          "query": [
+            {
+              "key": "",
+              "value": ""
+            }
+          ],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "hummingbot",
+      "item": [
+        {
+          "name": "chain",
+          "item": [
+            {
+              "name": "chain balances",
+              "event": [],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/chain/balances",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "chain",
+                    "balances"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"5HKTQCEWuuA9bJEqFbAEsbwFQfEe5tXrbZXWj7yQpuxVSHKt\",\n  \"tokenSymbols\": [\n    \"USDT\",\n    \"HDX\",\n    \"DOT\"\n  ],\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"connector\": \"hydration\",\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "chain poll",
+              "event": [],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/chain/poll/",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "chain",
+                    "poll",
+                    ""
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"txHash\":\"<fill>\",\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"connector\": \"hydration\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "chain tokens",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/chain/tokens?chain=polkadot&network=mainnet",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "chain",
+                    "tokens"
+                  ],
+                  "query": [
+                    {
+                      "key": "chain",
+                      "value": "polkadot"
+                    },
+                    {
+                      "key": "network",
+                      "value": "mainnet"
+                    },
+                    {
+                      "key": "tokenSymbols",
+                      "value": ""
+                    }
+                  ],
+                  "variable": []
+                }
+              }
+            },
+            {
+              "name": "chain config",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/chain/config?chain=polkadot&network=mainnet",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "chain",
+                    "config"
+                  ],
+                  "query": [
+                    {
+                      "key": "chain",
+                      "value": "polkadot"
+                    },
+                    {
+                      "key": "network",
+                      "value": "mainnet"
+                    },
+                    {
+                      "key": "",
+                      "value": ""
+                    }
+                  ],
+                  "variable": []
+                }
+              }
+            },
+            {
+              "name": "chain status",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/chain/status?chain=polkadot&network=mainnet",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "chain",
+                    "status"
+                  ],
+                  "query": [
+                    {
+                      "key": "chain",
+                      "value": "polkadot"
+                    },
+                    {
+                      "key": "network",
+                      "value": "mainnet"
+                    }
+                  ],
+                  "variable": []
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "connector",
+          "item": [
+            {
+              "name": "amm estimateGas",
+              "event": [],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/amm/estimateGas",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "amm",
+                    "estimateGas"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"connector\": \"hydration\" // can be undefined\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "amm price",
+              "event": [],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/amm/price",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "amm",
+                    "price"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quote\": \"USDT\",\n  \"base\": \"DOT\",\n  \"amount\": \"1\",\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"connector\": \"hydation\",\n  \"side\": \"BUY\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "amm trade",
+              "event": [],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/amm/trade",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "amm",
+                    "trade"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quote\": \"HDX\",\n  \"base\": \"DOT\",\n  \"chain\":\"polkadot\",\n  \"connector\":\"hydration\",\n  \"network\":\"mainnet\",\n  \"amount\":\"0.001\",\n  \"address\":\"<fill>\",\n  \"side\": \"BUY\",\n  \"limitPrice\": \"\", // can be undefined\n  \"nonce\": \"\",// can be undefined\n  \"maxFeePerGas\": \"\",// can be undefined\n  \"maxPriorityFeePerGas\": \"\",// can be undefined\n  \"allowedSlippage\": \"\",// can be undefined\n  \"poolId\": \"\" // can be undefined\n}\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "wallet",
+          "item": [
+            {
+              "name": "wallet add",
+              "event": [],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/wallet/add",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "wallet",
+                    "add"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"privateKey\": \"parrot ten describe muscle girl else group canyon ecology flash exchange goose\",\n  \"address\": \"\", //can be undefined\n  \"accountId\": \"\" //can be undefined\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": []
+}

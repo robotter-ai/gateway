@@ -67,85 +67,12 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"address\": \"5HKTQCEWuuA9bJEqFbAEsbwFQfEe5tXrbZXWj7yQpuxVSHKt\",\n  \"tokenSymbols\": [\n    \"USDT\",\n    \"HDX\",\n    \"DOT\"\n  ],\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"connector\": \"hydration\",\n}",
+                  "raw": "{\n  \"address\": \"5HKTQCEWuuA9bJEqFbAEsbwFQfEe5tXrbZXWj7yQpuxVSHKt\",\n  \"tokenSymbols\": [\n    \"USDT\",\n    \"HDX\",\n    \"DOT\"\n  ],\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"connector\": \"hydration\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
                     }
                   }
-                }
-              }
-            },
-            {
-              "name": "chain poll",
-              "event": [],
-              "request": {
-                "method": "POST",
-                "header": [],
-                "auth": {
-                  "type": "noauth"
-                },
-                "description": "",
-                "url": {
-                  "raw": "https://localhost:15888/chain/poll/",
-                  "protocol": "https",
-                  "host": [
-                    "localhost:15888"
-                  ],
-                  "path": [
-                    "chain",
-                    "poll",
-                    ""
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"txHash\":\"<fill>\",\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"connector\": \"hydration\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "name": "chain tokens",
-              "event": [],
-              "request": {
-                "method": "GET",
-                "header": [],
-                "auth": {
-                  "type": "noauth"
-                },
-                "description": "",
-                "url": {
-                  "raw": "https://localhost:15888/chain/tokens?chain=polkadot&network=mainnet",
-                  "protocol": "https",
-                  "host": [
-                    "localhost:15888"
-                  ],
-                  "path": [
-                    "chain",
-                    "tokens"
-                  ],
-                  "query": [
-                    {
-                      "key": "chain",
-                      "value": "polkadot"
-                    },
-                    {
-                      "key": "network",
-                      "value": "mainnet"
-                    },
-                    {
-                      "key": "tokenSymbols",
-                      "value": ""
-                    }
-                  ],
-                  "variable": []
                 }
               }
             },
@@ -188,6 +115,41 @@
               }
             },
             {
+              "name": "chain poll",
+              "event": [],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/chain/poll/",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "chain",
+                    "poll",
+                    ""
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"txHash\":\"<fill>\",\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"connector\": \"hydration\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
               "name": "chain status",
               "event": [],
               "request": {
@@ -215,6 +177,44 @@
                     {
                       "key": "network",
                       "value": "mainnet"
+                    }
+                  ],
+                  "variable": []
+                }
+              }
+            },
+            {
+              "name": "chain tokens",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "url": {
+                  "raw": "https://localhost:15888/chain/tokens?chain=polkadot&network=mainnet",
+                  "protocol": "https",
+                  "host": [
+                    "localhost:15888"
+                  ],
+                  "path": [
+                    "chain",
+                    "tokens"
+                  ],
+                  "query": [
+                    {
+                      "key": "chain",
+                      "value": "polkadot"
+                    },
+                    {
+                      "key": "network",
+                      "value": "mainnet"
+                    },
+                    {
+                      "key": "tokenSymbols",
+                      "value": ""
                     }
                   ],
                   "variable": []
@@ -285,7 +285,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"quote\": \"USDT\",\n  \"base\": \"DOT\",\n  \"amount\": \"1\",\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"connector\": \"hydation\",\n  \"side\": \"BUY\"\n}",
+                  "raw": "{\n  \"base\": \"DOT\",\n  \"quote\": \"USDT\",\n  \"amount\": \"1\",\n  \"chain\": \"polkadot\",\n  \"network\": \"mainnet\",\n  \"connector\": \"hydration\",\n  \"side\": \"BUY\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -319,7 +319,7 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"quote\": \"HDX\",\n  \"base\": \"DOT\",\n  \"chain\":\"polkadot\",\n  \"connector\":\"hydration\",\n  \"network\":\"mainnet\",\n  \"amount\":\"0.001\",\n  \"address\":\"<fill>\",\n  \"side\": \"BUY\",\n  \"limitPrice\": \"\", // can be undefined\n  \"nonce\": \"\",// can be undefined\n  \"maxFeePerGas\": \"\",// can be undefined\n  \"maxPriorityFeePerGas\": \"\",// can be undefined\n  \"allowedSlippage\": \"\",// can be undefined\n  \"poolId\": \"\" // can be undefined\n}\n",
+                  "raw": "{\n  \"base\": \"HDX\",\n  \"quote\": \"USDT\",\n  \"chain\":\"polkadot\",\n  \"connector\":\"hydration\",\n  \"network\":\"mainnet\",\n  \"amount\":\"2\",\n  \"address\":\"5HKTQCEWuuA9bJEqFbAEsbwFQfEe5tXrbZXWj7yQpuxVSHKt\",\n  \"side\": \"SELL\",\n  \"limitPrice\": \"\", // can be undefined\n  \"nonce\": \"\",// can be undefined\n  \"maxFeePerGas\": \"\",// can be undefined\n  \"maxPriorityFeePerGas\": \"\",// can be undefined\n  \"allowedSlippage\": \"\",// can be undefined\n  \"poolId\": \"\" // can be undefined\n}\n",
                   "options": {
                     "raw": {
                       "language": "json"

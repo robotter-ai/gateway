@@ -180,10 +180,10 @@ export class Polkadot {
     const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
     const api = await ApiPromise.create({ provider: wsProvider });
 
-    const assetBalance = await api.query.tokens.accounts(
+    const assetBalance = (await api.query.tokens.accounts(
       accountAddress,
       token.id,
-    );
+    )) as any;
     return String(assetBalance?.free || '0');
   }
 

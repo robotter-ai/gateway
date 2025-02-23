@@ -10,6 +10,7 @@ import { promises as fs } from 'fs';
 import { PolkadotController } from './polkadot.controller';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import fse from 'fs-extra';
+import { BN } from 'bn.js';
 
 type AssetListType = TokenListType;
 export class Polkadot {
@@ -17,7 +18,7 @@ export class Polkadot {
   private static _instances: LRUCache<string, Polkadot>;
   private _chain: string = 'polkadot';
   private _network: string;
-  private _polkadot: ApiPromise;
+  private polkadotApi: ApiPromise;
   private _keyring: Keyring;
   private _assetListType: AssetListType;
   private _assetListSource: string;
@@ -25,12 +26,13 @@ export class Polkadot {
   public gasPrice: number;
   public gasLimit: number;
   public gasCost: number;
+  public nodeUrl: string;
   public controller: typeof PolkadotController;
   public nativeTokenSymbol: string;
 
   constructor(
     network: string,
-    // nodeURL: string,
+    nodeUrl: string,
     assetListType: AssetListType,
     assetListSource: string,
   ) {
@@ -38,7 +40,8 @@ export class Polkadot {
     this._network = network;
     this.nativeTokenSymbol = config.nativeCurrencySymbol;
     this.gasPrice = 0;
-    this._polkadot = null as unknown as any;
+    this.nodeUrl = nodeUrl;
+    this.polkadotApi = new ApiPromise({ provider: new WsProvider(nodeUrl) });
     this._keyring = new Keyring({ type: 'sr25519' });
     this._assetListType = assetListType;
     this._assetListSource = assetListSource;
@@ -47,7 +50,7 @@ export class Polkadot {
     this.controller = PolkadotController;
   }
   public get polkadot(): ApiPromise {
-    return this._polkadot;
+    return this.polkadotApi;
   }
   public get chain(): string {
     return this._chain;
@@ -67,9 +70,8 @@ export class Polkadot {
     return this._ready;
   }
   public async init(): Promise<void> {
-    const config = getPolkadotConfig(this._network);
-    const provider = new WsProvider(config.network.nodeURL);
-    this._polkadot = await ApiPromise.create({ provider });
+    const provider = new WsProvider(this.nodeUrl);
+    this.polkadotApi = await ApiPromise.create({ provider });
     await this.loadAssets();
     this._ready = true;
     return;
@@ -87,12 +89,12 @@ export class Polkadot {
     }
     if (!Polkadot._instances.has(config.network.name)) {
       if (network !== null) {
-        // const nodeUrl = config.network.nodeURL;
+        const nodeUrl = config.network.nodeURL;
         const assetListType = config.network.assetListType as TokenListType;
         const assetListSource = config.network.assetListSource;
         Polkadot._instances.set(
           config.network.name,
-          new Polkadot(network, assetListType, assetListSource),
+          new Polkadot(network, nodeUrl, assetListType, assetListSource),
         );
       } else {
         throw new Error(
@@ -119,7 +121,7 @@ export class Polkadot {
   }
 
   public async getCurrentBlockNumber(): Promise<number> {
-    const header = await this._polkadot.rpc.chain.getHeader();
+    const header = await this.polkadotApi.rpc.chain.getHeader();
     return header.number.toNumber();
   }
 
@@ -129,7 +131,7 @@ export class Polkadot {
 
   public async getAccountInfo(accountAddress: string): Promise<any> {
     const accountInfo =
-      await this._polkadot.query.system.account(accountAddress);
+      await this.polkadotApi.query.system.account(accountAddress);
     const accountData = accountInfo.toJSON() as any;
     return {
       free: accountData.data?.free || '0',
@@ -139,31 +141,55 @@ export class Polkadot {
     };
   }
 
+  public formatBalanceValue(
+    value: typeof BN,
+    decimals = 12,
+    fractionDigits = 3,
+  ): string {
+    // fator para reduzir os decimais
+    const factor = new BN(10).pow(new BN(decimals - fractionDigits));
+    //@ts-ignore
+    const rounded = value.divRound(factor);
+    // Separa a parte inteira e a parte fracionária
+    const divisorForFraction = new BN(10).pow(new BN(fractionDigits));
+    const whole = rounded.div(divisorForFraction);
+    const fraction = rounded.mod(divisorForFraction);
+    // Garante que a parte fracionária tenha o número correto de dígitos (com zeros à esquerda, se necessário)
+    const fractionStr = fraction.toString().padStart(fractionDigits, '0');
+    return `${whole.toString()}.${fractionStr}`;
+  }
+
   public async getNativeBalance(accountAddress: string): Promise<string> {
-    const accountInfo = (await this._polkadot.query.system.account(
-      accountAddress,
-    )) as any;
-    return String(accountInfo.data?.free) || '0';
+    const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+    const api = await ApiPromise.create({ provider: wsProvider });
+    //@ts-ignore
+
+    const { data: balance } = await api.query.system.account(accountAddress);
+
+    //@ts-ignore
+
+    return String(this.formatBalanceValue(balance.free)) || '0';
   }
 
   public async getAssetBalance(
     accountAddress: string,
     tokenSymbol: string,
   ): Promise<string> {
-    console.log(tokenSymbol, this._assetMap);
+    const token = this._assetMap[tokenSymbol];
+    if (!token) {
+      throw new Error(`Token ${tokenSymbol} não encontrado`);
+    }
+    const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+    const api = await ApiPromise.create({ provider: wsProvider });
 
-    const token = this._assetMap[tokenSymbol]
-
-    const assetBalance = (await this._polkadot.query.tokens.accounts(
-      accountAddress,
-      token.id,
-    )) as any;
-    return String(assetBalance.free);
+    const assetBalance = await api.query.tokens.accounts(accountAddress, token.id);
+    //@ts-ignore
+    return String(assetBalance?.free || '0');
   }
 
   public async getTransaction(txHash: string): Promise<PollResponse> {
-    const blockHash = await this._polkadot.rpc.chain.getBlockHash(txHash);
-    const block = await this._polkadot.rpc.chain.getBlock(blockHash);
+    const blockHash = await this.polkadotApi.rpc.chain.getBlockHash(txHash);
+    const block = await this.polkadotApi.rpc.chain.getBlock(blockHash);
 
     const tx = block.block.extrinsics.find(
       (ext) => ext.hash.toHex() === txHash,

@@ -26,23 +26,31 @@ export class PolkadotController {
     // validatePolkadotBalanceRequest(request);
 
     const balances: Record<string, string> = {};
-    if (request.tokenSymbols.includes(chain.nativeTokenSymbol)) {
-      balances[chain.nativeTokenSymbol] = await chain.getNativeBalance(
-        request.address,
-      );
-    }
 
-    for (const tokenSymbol of request.tokenSymbols) {
-      if (tokenSymbol === chain.nativeTokenSymbol) continue;
-      balances[tokenSymbol] = await chain.getAssetBalance(
-        request.address,
-        tokenSymbol,
-      );
-    }
+    try {
 
-    return {
-      balances: balances,
-    };
+      if (request.tokenSymbols.includes("HDX")) {
+        balances["HDX"] = await chain.getNativeBalance(request.address);
+      }
+
+      for (const tokenSymbol of request.tokenSymbols) {
+        if (tokenSymbol === "HDX") continue;
+        try {
+          balances[tokenSymbol] = await chain.getAssetBalance(
+            request.address,
+            tokenSymbol
+          );
+        } catch (error) {
+          console.error(`Erro ao buscar balanço do token ${tokenSymbol}:`, error);
+          balances[tokenSymbol] = '0';
+        }
+      }
+
+      return { balances };
+
+    } catch (error) {
+      throw new Error(`Erro ao consultar balanços: ${error.message}`);
+    }
   }
 
   static async getTokens(

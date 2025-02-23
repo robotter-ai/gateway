@@ -26,31 +26,24 @@ export class PolkadotController {
 
     const balances: Record<string, string> = {};
 
-    try {
-      if (request.tokenSymbols.includes('HDX')) {
-        balances['HDX'] = await chain.getNativeBalance(request.address);
-      }
-
-      for (const tokenSymbol of request.tokenSymbols) {
-        if (tokenSymbol === 'HDX') continue;
-        try {
-          balances[tokenSymbol] = await chain.getAssetBalance(
-            request.address,
-            tokenSymbol,
-          );
-        } catch (error) {
-          console.error(
-            `Erro ao buscar balanço do token ${tokenSymbol}:`,
-            error,
-          );
-          balances[tokenSymbol] = '0';
-        }
-      }
-
-      return { balances };
-    } catch (error) {
-      throw new Error(`Erro ao consultar balanços: ${error.message}`);
+    if (request.tokenSymbols.includes('HDX')) {
+      balances['HDX'] = await chain.getNativeBalance(request.address);
     }
+
+    for (const tokenSymbol of request.tokenSymbols) {
+      if (tokenSymbol === 'HDX') continue;
+      try {
+        balances[tokenSymbol] = await chain.getAssetBalance(
+          request.address,
+          tokenSymbol,
+        );
+      } catch (error) {
+        console.error(`Erro ao buscar balanço do token ${tokenSymbol}:`, error);
+        balances[tokenSymbol] = '0';
+      }
+    }
+
+    return { balances };
   }
 
   static async getTokens(
@@ -78,6 +71,7 @@ export class PolkadotController {
         assets.push(asset as Asset);
       }
     }
+
     return {
       assets: assets,
     };

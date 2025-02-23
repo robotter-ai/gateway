@@ -10,7 +10,7 @@ import { promises as fs } from 'fs';
 import { PolkadotController } from './polkadot.controller';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import fse from 'fs-extra';
-import { BN } from 'bn.js';
+import { BigNumber } from 'bignumber.js';
 
 type AssetListType = TokenListType;
 export class Polkadot {
@@ -141,23 +141,6 @@ export class Polkadot {
     };
   }
 
-  public formatBalanceValue(
-    value: any,
-    decimals = 12,
-    fractionDigits = 3,
-  ): string {
-    // fator para reduzir os decimais
-    const factor = new BN(10).pow(new BN(decimals - fractionDigits));
-    const rounded = value.divRound(factor);
-    // Separa a parte inteira e a parte fracionária
-    const divisorForFraction = new BN(10).pow(new BN(fractionDigits));
-    const whole = rounded.div(divisorForFraction);
-    const fraction = rounded.mod(divisorForFraction);
-    // Garante que a parte fracionária tenha o número correto de dígitos (com zeros à esquerda, se necessário)
-    const fractionStr = fraction.toString().padStart(fractionDigits, '0');
-    return `${whole.toString()}.${fractionStr}`;
-  }
-
   public async getNativeBalance(accountAddress: string): Promise<string> {
     const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
     const api = await ApiPromise.create({ provider: wsProvider });
@@ -166,7 +149,11 @@ export class Polkadot {
       accountAddress,
     )) as any;
 
-    return String(this.formatBalanceValue(balance.free)) || '0';
+    const decimals = this._assetMap['HDX'].decimals || 12;
+
+    return BigNumber(balance.free?.toString() ?? '0')
+      .div(BigNumber(Math.pow(10, decimals)))
+      .toFixed(decimals);
   }
 
   public async getAssetBalance(
@@ -184,7 +171,12 @@ export class Polkadot {
       accountAddress,
       token.id,
     )) as any;
-    return String(assetBalance?.free || '0');
+
+    const freeBalance = new BigNumber(String(assetBalance?.free || 0))
+      .div(new BigNumber(Math.pow(10, token.decimals)))
+      .toFixed(token.decimals);
+
+    return freeBalance;
   }
 
   public async getTransaction(txHash: string): Promise<PollResponse> {

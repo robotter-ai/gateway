@@ -69,7 +69,6 @@ export class Hydration {
     return BigNumber(slippage * 10 ** 12);
   }
 
-
   public async getAllTokens() {
     const api = await ApiPromise.create({ provider: this.wsProvider });
     const poolService = new PoolService(api);
@@ -99,7 +98,7 @@ export class Hydration {
     const tokenIn = isBuy ? tokenIdBase : tokenIdQuote;
     const tokenOut = isBuy ? tokenIdQuote : tokenIdBase;
 
-    const trade = await tradeRouter.getBestBuy(tokenIn, tokenOut, req.amount);
+    const trade = await tradeRouter.getBestSell(tokenIn, tokenOut, req.amount);
 
     return trade;
   }

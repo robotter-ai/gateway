@@ -142,13 +142,12 @@ export class Polkadot {
   }
 
   public formatBalanceValue(
-    value: typeof BN,
+    value: any,
     decimals = 12,
     fractionDigits = 3,
   ): string {
     // fator para reduzir os decimais
     const factor = new BN(10).pow(new BN(decimals - fractionDigits));
-    //@ts-ignore
     const rounded = value.divRound(factor);
     // Separa a parte inteira e a parte fracionária
     const divisorForFraction = new BN(10).pow(new BN(fractionDigits));
@@ -162,11 +161,10 @@ export class Polkadot {
   public async getNativeBalance(accountAddress: string): Promise<string> {
     const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
     const api = await ApiPromise.create({ provider: wsProvider });
-    //@ts-ignore
 
-    const { data: balance } = await api.query.system.account(accountAddress);
-
-    //@ts-ignore
+    const { data: balance } = (await api.query.system.account(
+      accountAddress,
+    )) as any;
 
     return String(this.formatBalanceValue(balance.free)) || '0';
   }
@@ -182,8 +180,10 @@ export class Polkadot {
     const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
     const api = await ApiPromise.create({ provider: wsProvider });
 
-    const assetBalance = await api.query.tokens.accounts(accountAddress, token.id);
-    //@ts-ignore
+    const assetBalance = await api.query.tokens.accounts(
+      accountAddress,
+      token.id,
+    );
     return String(assetBalance?.free || '0');
   }
 
@@ -209,9 +209,7 @@ export class Polkadot {
     const key = Buffer.alloc(32);
     key.write(password);
 
-    // @ts-ignore
     const cipher = createCipheriv('aes-256-cbc', key, iv);
-    // @ts-ignore
     const encrypted = Buffer.concat([cipher.update(mnemonic), cipher.final()]);
 
     return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
@@ -221,7 +219,6 @@ export class Polkadot {
     const [iv, encryptedKey] = encryptedMnemonic.split(':');
     const key = Buffer.alloc(32);
     key.write(password);
-    // @ts-ignore
     const decipher = createDecipheriv(
       'aes-256-cbc',
       key,
@@ -229,9 +226,7 @@ export class Polkadot {
     );
 
     const decrpyted = Buffer.concat([
-      // @ts-ignore
       decipher.update(Buffer.from(encryptedKey, 'hex')),
-      // @ts-ignore
       decipher.final(),
     ]);
 

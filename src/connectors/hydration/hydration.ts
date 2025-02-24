@@ -108,9 +108,8 @@ export class Hydration {
     const poolService = new PoolService(api);
     await poolService.syncRegistry();
 
-    console.log(this.getSlippage(), new BigNumber('10000000000000000'));
 
-    const slippage = new BigNumber('10000000000000000'); //this.getSlippage()
+    const slippage = new BigNumber('1'); //this.getSlippage()
     const transaction = trade.toTx(slippage).get() as any;
 
     const keyringPair = await this.chain.getAccountFromAddress(address);

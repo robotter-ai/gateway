@@ -67,7 +67,7 @@ Content-Type: application/json
   "chain": "{{chain}}",
   "network": "{{network}}",
   "connector": "{{connector}}",
-  "txHash":"<fill>"
+  "txHash":"{{txHash}}"
 }
 
 ###

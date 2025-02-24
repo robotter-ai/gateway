@@ -1,4 +1,41 @@
-GET https://{{host}}:{{port}}/
+GET https://{{host}}:{{port}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+POST https://{{host}}:{{port}}/wallet/add
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "privateKey": "{{walletMnemonic}}",
+  "address": null,
+  "accountId": null
+}
+
+###
+
+GET https://{{host}}:{{port}}/chain/status?chain={{chain}}&network={{network}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+GET https://{{host}}:{{port}}/chain/config?chain={{chain}}&network={{network}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+GET https://{{host}}:{{port}}/chain/tokens?chain={{chain}}&network={{network}}
 Content-Type: application/json
 
 {
@@ -10,9 +47,38 @@ POST https://{{host}}:{{port}}/chain/balances
 Content-Type: application/json
 
 {
-"chain": "",
-"request": ""
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "connector": "{{connector}}",
+  "address": "{{walletPublicKey}}",
+  "tokenSymbols": [
+    "USDT",
+    "HDX",
+    "DOT"
+  ]
+}
 
+###
+
+POST https://{{host}}:{{port}}/chain/poll
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "connector": "{{connector}}",
+  "txHash":"<fill>"
+}
+
+###
+
+POST https://{{host}}:{{port}}/amm/estimateGas
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "connector": "{{connector}}"
 }
 
 ###
@@ -21,21 +87,35 @@ POST https://{{host}}:{{port}}/amm/price
 Content-Type: application/json
 
 {
- "quote": "HDX",
- "base": "USDC",
- "amount": "1",
- "chain": "polkadot",
- "network": "mainnet",
- "connector": "hydration",
- "side": "BUY"
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "connector": "{{connector}}",
+  "base": "DOT",
+  "quote": "USDT",
+  "amount": "1",
+  "side": "BUY"
 }
 
 ###
 
-POST https://{{host}}:{{port}}/
+POST https://{{host}}:{{port}}/amm/trade
 Content-Type: application/json
 
 {
+  "chain":"{{chain}}",
+  "connector":"{{connector}}",
+  "network":"{{network}}",
+  "base": "HDX",
+  "quote": "USDT",
+  "amount":"1",
+  "address":"{{walletPublicKey}}",
+  "side": "SELL",
+  "limitPrice": null,
+  "nonce": null,
+  "maxFeePerGas": null,
+  "maxPriorityFeePerGas": null,
+  "allowedSlippage": null,
+  "poolId": null
 }
 
 ###

@@ -1,7 +1,6 @@
 import { AvailableNetworks } from '../../services/config-manager-types';
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
 
-
 export namespace HydrationConfig {
   export interface NetworkConfig {
     allowedSlippage: string;
@@ -12,12 +11,10 @@ export namespace HydrationConfig {
 
   export const config: NetworkConfig = {
     allowedSlippage: ConfigManagerV2.getInstance().get(
-      'hydration.allowedSlippage'
+      'hydration.allowedSlippage',
     ),
     tradingTypes: ['AMM'],
     chainType: 'POLKADOT',
-    availableNetworks: [
-      { chain: 'polkadot', networks: ['mainnet'] },
-    ],
+    availableNetworks: [{ chain: 'polkadot', networks: ['mainnet'] }],
   };
 }

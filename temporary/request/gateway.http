@@ -90,7 +90,7 @@ Content-Type: application/json
   "chain": "{{chain}}",
   "network": "{{network}}",
   "connector": "{{connector}}",
-  "base": "DOT",
+  "base": "HDX",
   "quote": "USDT",
   "amount": "1",
   "side": "BUY"
@@ -103,8 +103,8 @@ Content-Type: application/json
 
 {
   "chain":"{{chain}}",
-  "connector":"{{connector}}",
   "network":"{{network}}",
+  "connector":"{{connector}}",
   "base": "HDX",
   "quote": "USDT",
   "amount":"1",

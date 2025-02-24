@@ -93,12 +93,26 @@ export class Hydration {
         TOKEN_NOT_SUPPORTED_ERROR_CODE,
       );
 
-    const isBuy: boolean = req.side === 'BUY';
-
-    const tokenIn = isBuy ? tokenIdBase : tokenIdQuote;
-    const tokenOut = isBuy ? tokenIdQuote : tokenIdBase;
-
-    const trade = await tradeRouter.getBestSell(tokenIn, tokenOut, req.amount);
+    let trade: Trade;
+    if (req.side === 'BUY') {
+      trade = await tradeRouter.getBestBuy(
+        tokenIdQuote,
+        tokenIdBase,
+        req.amount,
+      );
+    } else if (req.side === 'SELL') {
+      trade = await tradeRouter.getBestSell(
+        tokenIdBase,
+        tokenIdQuote,
+        req.amount,
+      );
+    } else {
+      throw new HttpException(
+        500,
+        'Hydration.estimateTrade received an unexpected side.',
+        500,
+      );
+    }
 
     return trade;
   }
@@ -108,8 +122,7 @@ export class Hydration {
     const poolService = new PoolService(api);
     await poolService.syncRegistry();
 
-
-    const slippage = new BigNumber('1'); //this.getSlippage()
+    const slippage = new BigNumber('10');
     const transaction = trade.toTx(slippage).get() as any;
 
     const keyringPair = await this.chain.getAccountFromAddress(address);

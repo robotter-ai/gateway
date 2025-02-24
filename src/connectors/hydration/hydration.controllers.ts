@@ -60,11 +60,11 @@ export async function price(
     amount: req.amount,
     rawAmount: req.amount,
     expectedAmount: tradeHuman.amountOut,
-    price: tradeHuman.amountOut,
+    price: tradeHuman.spotPrice,
     gasPrice: polkadot.gasPrice,
     gasPriceToken: polkadot.nativeTokenSymbol,
     gasLimit: polkadot.gasLimit,
-    gasCost: String(polkadot.gasCost),
+    gasCost: tradeHuman.tradeFee,
   } as PriceResponse;
 }
 
@@ -133,12 +133,12 @@ export async function trade(
     quote: req.quote,
     amount: req.amount,
     rawAmount: req.amount,
-    price: tradeHuman.amountOut,
+    price: tradeHuman.spotPrice,
     expectedIn: tradeHuman.amountOut,
     gasPrice: polkadot.gasPrice,
     gasPriceToken: polkadot.nativeTokenSymbol,
     gasLimit: polkadot.gasLimit,
-    gasCost: String(polkadot.gasCost),
+    gasCost: tradeHuman.tradeFee,
     txHash: txHash,
   };
 }

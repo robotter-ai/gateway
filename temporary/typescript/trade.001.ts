@@ -1,4 +1,3 @@
-// Necessary imports
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 import {
@@ -9,30 +8,22 @@ import {
 } from '@galacticcouncil/sdk';
 
 async function test001() {
-  // Waits for WASM interface initialization
   await cryptoWaitReady();
 
-  // Parameters for the swap
-  const tokenIn = '1000010'; // 'HDX'; // Example: 'HDX'
-  const tokenOut = '23'; // 'USDT'; // Example: 'USDT'
+  const tokenIn = '1000010'; // 'HDX'
+  const tokenOut = '23'; // 'USDT'
   const amountOut = new BigNumber('1'); // Output amount
 
-  // Initializes the provider and Polkadot API
   const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
   const api = await ApiPromise.create({ provider: wsProvider });
 
-  // Configures Keyring and the account (sender)
   const keyring = new Keyring({ type: 'sr25519' });
-  const keyPair = keyring.addFromUri(
-    'parrot ten describe muscle girl else group canyon ecology flash exchange goose',
-  );
+  const keyPair = keyring.addFromUri(process.env.MNEMONIC);
 
-  // Initializes the PoolService and TradeRouter
   const poolService = new PoolService(api);
   await poolService.syncRegistry();
   const tradeRouter = new TradeRouter(poolService);
 
-  // Fetches the best buy route for the tokens
   const trade: Trade = await tradeRouter.getBestBuy(
     tokenIn,
     tokenOut,
@@ -48,9 +39,9 @@ async function test001() {
     console.log(`Estimated output amount: ${trade.amountOut}`);
 
     // 1% slippage
-    const slippage = new BigNumber('1');
+    const tradeLimit = new BigNumber('1');
 
-    const transaction = trade.toTx(slippage).get<any>();
+    const transaction = trade.toTx(tradeLimit).get<any>();
 
     let txHash = '';
     let error = '';

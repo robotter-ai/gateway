@@ -1,34 +1,43 @@
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-import {
-  BigNumber,
-  PoolService,
-  Trade,
-  TradeRouter,
-} from '@galacticcouncil/sdk';
+import { BigNumber, PoolService, Trade, TradeRouter, } from '@galacticcouncil/sdk';
 
-async function test001() {
+const hdxId = '0';
+const usdtId = '10';
+const buyHDXWithUSDTAmount = BigNumber('1');
+const sellHDXForUSDTAmount = BigNumber('1');
+const buyUSDTWithHDXAmount = BigNumber('0.1');
+const sellUSDTForHDXAmount = BigNumber('0.1');
+const ONE = BigNumber('1');
+const maxSlippage = BigNumber('0.01'); // 1%
+
+let api: ApiPromise;
+let keyPair: any;
+let tradeRouter: TradeRouter;
+
+async function initializeAPI() {
   await cryptoWaitReady();
-
-  const tokenIn = '1000010'; // 'HDX'
-  const tokenOut = '23'; // 'USDT'
-  const amountOut = new BigNumber('1'); // Output amount
-
   const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
-  const api = await ApiPromise.create({ provider: wsProvider });
+  api = await ApiPromise.create({ provider: wsProvider });
 
   const keyring = new Keyring({ type: 'sr25519' });
-  const keyPair = keyring.addFromUri(process.env.MNEMONIC);
+  keyPair = keyring.addFromUri(process.env.MNEMONIC);
 
   const poolService = new PoolService(api);
   await poolService.syncRegistry();
-  const tradeRouter = new TradeRouter(poolService);
+  tradeRouter = new TradeRouter(poolService);
+}
 
-  const trade: Trade = await tradeRouter.getBestBuy(
-    tokenIn,
-    tokenOut,
-    amountOut,
-  );
+async function executeTrade(
+  tokenIn: string,
+  tokenOut: string,
+  amount: BigNumber,
+  side: 'buy' | 'sell',
+) {
+  const trade: Trade =
+    side === 'buy'
+      ? await tradeRouter.getBestBuy(tokenIn, tokenOut, amount)
+      : await tradeRouter.getBestSell(tokenIn, tokenOut, amount);
 
   if (trade) {
     console.log(
@@ -36,10 +45,26 @@ async function test001() {
         .map((pool) => pool.poolAddress)
         .join(' -> ')}`,
     );
-    console.log(`Estimated output amount: ${trade.amountOut}`);
+    console.log(
+      `Estimated ${side === 'buy' ? 'output' : 'input'} amount: ${side === 'buy' ? trade.amountOut : trade.amountIn}`,
+    );
 
-    // 1% slippage
-    const tradeLimit = new BigNumber('1');
+    let tradeLimit: BigNumber;
+    if (side === 'buy') {
+      // tradeLimit = new BigNumber(trade.amountIn).times(ONE.minus(maxSlippage)); // minAmountIn
+      tradeLimit = new BigNumber(trade.amountIn)
+        .times(ONE.plus(maxSlippage))
+        .integerValue(BigNumber.ROUND_CEIL); // maxAmountIn
+      // tradeLimit = new BigNumber(trade.amountOut).times(ONE.minus(maxSlippage)); // minAmountOut
+      // tradeLimit = new BigNumber(trade.amountOut).times(ONE.plus(maxSlippage)); // maxAmountOut
+    } else if (side === 'sell') {
+      // tradeLimit = new BigNumber(trade.amountIn).times(ONE.minus(maxSlippage)); // minAmountIn
+      // tradeLimit = new BigNumber(trade.amountIn).times(ONE.plus(maxSlippage)); // maxAmountIn
+      tradeLimit = new BigNumber(trade.amountOut).times(ONE.minus(maxSlippage)); // minAmountOut
+      // tradeLimit = new BigNumber(trade.amountOut).times(ONE.plus(maxSlippage)); // maxAmountOut
+    } else {
+      throw new Error('Invalid side');
+    }
 
     const transaction = trade.toTx(tradeLimit).get<any>();
 
@@ -49,7 +74,6 @@ async function test001() {
     await transaction.signAndSend(keyPair, (result) => {
       if (result.dispatchError) {
         if (result.dispatchError.isModule) {
-          // Decodes error using API registry
           const decoded = api.registry.findMetaError(
             result.dispatchError.asModule,
           );
@@ -79,4 +103,77 @@ async function test001() {
   }
 }
 
-test001().catch((error) => console.error('Error in the main process:', error));
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function test01() {
+  const tokenIn = hdxId;
+  const tokenOut = usdtId;
+  const amount = buyHDXWithUSDTAmount; // Low amount
+  return executeTrade(tokenIn, tokenOut, amount, 'buy'); // Buy HDX with USDT
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function test02() {
+  const tokenIn = usdtId;
+  const tokenOut = hdxId;
+  const amount = buyUSDTWithHDXAmount; // Low amount
+  return executeTrade(tokenIn, tokenOut, amount, 'buy'); // Buy USDT with HDX
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function test03() {
+  const tokenIn = ''; // 'HDX'
+  const tokenOut = usdtId;
+  const amount = sellHDXForUSDTAmount; // Low amount
+  return executeTrade(tokenIn, tokenOut, amount, 'sell'); // Sell HDX for USDT
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function test04() {
+  const tokenIn = ''; // 'USDT'
+  const tokenOut = hdxId;
+  const amount = sellUSDTForHDXAmount; // Low amount
+  return executeTrade(tokenIn, tokenOut, amount, 'sell'); // Sell USDT for HDX
+}
+
+(async () => {
+  try {
+    await initializeAPI();
+    console.log('Starting swap operations...');
+    try {
+      console.log('\n\nStarting test01...');
+      console.log(await test01());
+    } catch (error) {
+      console.error(error);
+    } finally {
+      console.log('Finished test01.\n\n');
+    }
+    try {
+      console.log('\n\nStarting test02...');
+      console.log(await test02());
+    } catch (error) {
+      console.error(error);
+    } finally {
+      console.log('Finished test02.\n\n');
+    }
+    try {
+      console.log('\n\nStarting test03...');
+      console.log(await test03());
+    } catch (error) {
+      console.error(error);
+    } finally {
+      console.log('Finished test03.\n\n');
+    }
+    try {
+      console.log('\n\nStarting test04...');
+      console.log(await test04());
+    } catch (error) {
+      console.error(error);
+    } finally {
+      console.log('Finished test04.\n\n');
+    }
+  } catch (error) {
+    console.error('Error in the main process:', error);
+  } finally {
+    console.log('Finished swap operations.');
+  }
+})();

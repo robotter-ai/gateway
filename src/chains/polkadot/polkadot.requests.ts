@@ -1,27 +1,10 @@
-import { Asset } from '@galacticcouncil/sdk';
-
-export interface PollRequest {
-  network: string;
-  txHash: string;
-}
-
-export type PollResponse = {
-  currentBlock: number;
-  txBlock: number | null;
-  txHash: string;
-  fee: number;
-};
+import { Asset } from "@galacticcouncil/sdk";
 
 export interface AssetsRequest {
   network?: string; // the target network of the chain (e.g. mainnet)
   assetSymbols?: string[];
 }
 
-export interface PolkadotAsset {
-  symbol: string;
-  assetId: number;
-  decimals: number;
-}
 
 export type AssetsResponse = {
   assets: Asset[]; // using galacticcouncil sdk type

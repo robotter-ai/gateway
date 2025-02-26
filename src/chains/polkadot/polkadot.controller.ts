@@ -18,8 +18,6 @@ export class PolkadotController {
   }
 
   static async balances(chain: Polkadot, request: BalanceRequest) {
-    // validatePolkadotBalanceRequest(request);
-
     const balances: Record<string, string> = {};
 
     if (request.tokenSymbols.includes('HDX')) {
@@ -46,7 +44,6 @@ export class PolkadotController {
     polkadot: Polkadot,
     request: AssetsRequest,
   ): Promise<AssetsResponse> {
-    // validateAssetsRequest(request);
 
     let assets: Asset[] = [];
 

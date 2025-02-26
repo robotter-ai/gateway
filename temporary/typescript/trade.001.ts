@@ -6,6 +6,7 @@ import {
   Trade,
   TradeRouter,
 } from '@galacticcouncil/sdk';
+import axios from 'axios';
 
 const tokens = {
   hdx: {
@@ -125,6 +126,91 @@ async function initializeAPI() {
   const poolService = new PoolService(api);
   await poolService.syncRegistry();
   tradeRouter = new TradeRouter(poolService);
+}
+
+/**
+ * Retrieves extrinsic (transaction) information from Subscan.
+ *
+ * @param txHash - The extrinsic (transaction) hash (e.g. "0x1234abcd...")
+ * @returns A promise resolving to the extrinsic information.
+ */
+async function getTransaction(txHash: string): Promise<any> {
+  const url = 'https://hydration.api.subscan.io/api/scan/extrinsic';
+
+  const headers = {
+    'Content-Type': 'application/json',
+    // 'X-API-Key': 'YOUR_API_KEY', // Uncomment and set if required
+  };
+
+  const body = {
+    hash: txHash,
+  };
+
+  const response = await axios.post<any>(url, body, {
+    headers,
+  });
+
+  return response.data;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function getTransaction2(txHash: string): Promise<{
+  status: string;
+  confirmations?: number;
+  blockNumber?: number;
+  blockHash?: string;
+  extrinsic?: any;
+}> {
+  // Get the latest finalized block header to determine the current finalized block number.
+  const finalizedHead = await api.rpc.chain.getFinalizedHead();
+  const finalizedHeader = await api.rpc.chain.getHeader(finalizedHead);
+  const finalizedBlockNumber = finalizedHeader.number.toNumber();
+
+  // Define how many recent blocks to search.
+  const searchDepth = 200;
+  let foundExtrinsic = null;
+  let foundBlockNumber: number | undefined;
+  let foundBlockHash: string | undefined;
+
+  // Get the latest block number.
+  const currentHeader = await api.rpc.chain.getHeader();
+  const currentBlockNumber = currentHeader.number.toNumber();
+
+  // Search backwards through recent blocks.
+  for (let i = currentBlockNumber; i > currentBlockNumber - searchDepth; i--) {
+    const blockHash = await api.rpc.chain.getBlockHash(i);
+    const block = await api.rpc.chain.getBlock(blockHash);
+    for (const extrinsic of block.block.extrinsics) {
+      if (extrinsic.hash.toHex() === txHash) {
+        foundExtrinsic = extrinsic;
+        foundBlockNumber = i;
+        foundBlockHash = blockHash.toHex();
+        break;
+      }
+    }
+    if (foundExtrinsic) break;
+  }
+
+  if (!foundExtrinsic) {
+    // If not found, we assume the transaction is still pending or not yet indexed.
+    return {
+      status: 'pending',
+      extrinsic: null,
+    };
+  }
+
+  // Calculate the number of confirmations.
+  const confirmations = finalizedBlockNumber - (foundBlockNumber as number);
+  // For example, we consider the transaction "finalized" once it has 12 or more confirmations.
+  const status = confirmations >= 12 ? 'finalized' : 'in block';
+
+  return {
+    status,
+    confirmations,
+    blockNumber: foundBlockNumber,
+    blockHash: foundBlockHash,
+    extrinsic: foundExtrinsic.toHuman(), // Convert extrinsic details to a human‑readable format.
+  };
 }
 
 async function getBalances(
@@ -338,10 +424,16 @@ async function test04() {
 (async () => {
   await initializeAPI();
 
+  console.log(
+    await getTransaction(
+      '0xb0ef02c202f0b16a7d08608f1f3c52e7d915c71da2e50416089223c043588eb0',
+    ),
+  );
+
   // console.log(await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']));
 
-  console.log(await test01());
-  console.log(await test02());
-  console.log(await test03());
-  console.log(await test04());
+  // console.log(await test01());
+  // console.log(await test02());
+  // console.log(await test03());
+  // console.log(await test04());
 })();

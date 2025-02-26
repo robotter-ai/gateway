@@ -3,7 +3,6 @@ import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { getPolkadotConfig } from './polkadot.config';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 import { TokenListType, walletPath } from '../../services/base';
-import { PollResponse } from './polkadot.requests';
 import axios from 'axios';
 import { Asset } from '@galacticcouncil/sdk';
 import { promises as fs } from 'fs';
@@ -11,6 +10,8 @@ import { PolkadotController } from './polkadot.controller';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import fse from 'fs-extra';
 import { BigNumber } from 'bignumber.js';
+import { HydrationTransaction } from '../../chains/polkadot/polkadot.requests';
+import { PollResponse } from '../../network/network.requests';
 
 type AssetListType = TokenListType;
 export class Polkadot {
@@ -179,21 +180,40 @@ export class Polkadot {
     return freeBalance;
   }
 
+  /**
+   * Retrieves extrinsic (transaction) information from Subscan.
+   *
+   * @param txHash - The extrinsic (transaction) hash (e.g. "0x1234abcd...")
+   * @returns A promise resolving to the extrinsic information.
+   */
   public async getTransaction(txHash: string): Promise<PollResponse> {
-    const blockHash = await this.polkadotApi.rpc.chain.getBlockHash(txHash);
-    const block = await this.polkadotApi.rpc.chain.getBlock(blockHash);
+    const url = 'https://hydration.api.subscan.io/api/scan/extrinsic';
 
-    const tx = block.block.extrinsics.find(
-      (ext) => ext.hash.toHex() === txHash,
-    );
-    if (!tx) throw new Error('Transaction not found.');
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    const body = {
+      hash: txHash,
+    };
+
+    const response = await axios.post<HydrationTransaction>(url, body, {
+      headers,
+    });
+
+    const transaction: HydrationTransaction = response.data;
 
     return {
-      currentBlock: block.block.header.number.toNumber(),
-      txBlock: block.block.header.number.toNumber(),
-      txHash: txHash,
-      fee: 0, // Fee can be computed based on transaction details if required
-    };
+      network: null,
+      timestamp: transaction.generated_at,
+      currentBlock: null,
+      txHash: transaction.data.extrinsic_hash,
+      txStatus: transaction.data.success ? 'success' : 'failed',
+      txBlock: transaction.data.block_hash,
+      txData: transaction.data,
+      txReceipt: null,
+      tokenId: null,
+    } as unknown as PollResponse;
   }
 
   public encrypt(mnemonic: string, password: string): string {

@@ -1,16 +1,12 @@
+import { validatePolkadotPollRequest } from './polkadot.validators';
+import { Polkadot } from './polkadot';
+import { Asset } from '@galacticcouncil/sdk';
+import { AssetsRequest, AssetsResponse } from './polkadot.requests';
 import {
-  validatePolkadotPollRequest,
-  // validatePolkadotAssetsRequest,
-} from './polkadot.validators';
-import {
-  AssetsRequest,
-  AssetsResponse,
   BalanceRequest,
   PollRequest,
   PollResponse,
-} from './polkadot.requests';
-import { Polkadot } from './polkadot';
-import { Asset } from '@galacticcouncil/sdk';
+} from '../../network/network.requests';
 
 export class PolkadotController {
   static async poll(
@@ -18,7 +14,7 @@ export class PolkadotController {
     req: PollRequest,
   ): Promise<PollResponse> {
     validatePolkadotPollRequest(req);
-    return polkadot.getTransaction(req.txHash);
+    return await polkadot.getTransaction(req.txHash);
   }
 
   static async balances(chain: Polkadot, request: BalanceRequest) {

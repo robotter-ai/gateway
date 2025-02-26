@@ -1,4 +1,5 @@
 import { Hydration } from './hydration';
+// noinspection ES6PreferShortImport
 import {
   EstimateGasResponse,
   PriceRequest,
@@ -6,7 +7,9 @@ import {
   TradeRequest,
   TradeResponse,
 } from '../../amm/amm.requests';
+// noinspection ES6PreferShortImport
 import { Polkadot } from '../../chains/polkadot/polkadot';
+// noinspection ES6PreferShortImport
 import {
   HttpException,
   PRICE_FAILED_ERROR_CODE,
@@ -20,8 +23,10 @@ import {
   UNKNOWN_ERROR_ERROR_CODE,
   UNKNOWN_ERROR_MESSAGE,
 } from '../../services/error-handler';
+// noinspection ES6PreferShortImport
 import { latency } from '../../services/base';
 import Decimal from 'decimal.js-light';
+// noinspection ES6PreferShortImport
 import { logger } from '../../services/logger';
 
 export async function price(
@@ -30,8 +35,8 @@ export async function price(
   req: PriceRequest,
 ): Promise<PriceResponse> {
   const startTimestamp: number = Date.now();
-  let trade;
-  let tradeHuman;
+  let trade: any;
+  let tradeHuman: any;
   try {
     trade = await hydration.estimateTrade(req);
     tradeHuman = trade.toHuman();
@@ -76,9 +81,8 @@ export async function trade(
   const startTimestamp: number = Date.now();
 
   const limitPrice = req.limitPrice;
-  // const account: Account = await polkadot.getAccountFromAddress(req.address);
-  let trade;
-  let tradeHuman;
+  let trade: any;
+  let tradeHuman: any;
   try {
     trade = await hydration.estimateTrade(<PriceRequest>req);
     tradeHuman = trade.toHuman();

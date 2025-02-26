@@ -1,13 +1,15 @@
 import { validatePolkadotPollRequest } from './polkadot.validators';
 import { Polkadot } from './polkadot';
-import { Asset } from '@galacticcouncil/sdk';
-import { AssetsRequest, AssetsResponse } from './polkadot.requests';
 // noinspection ES6PreferShortImport
 import {
   BalanceRequest,
   PollRequest,
   PollResponse,
+  TokensRequest,
+  TokensResponse,
 } from '../../network/network.requests';
+// noinspection ES6PreferShortImport
+import { TokenInfo } from '../../chains/ethereum/ethereum-base';
 
 export class PolkadotController {
   static async poll(
@@ -44,32 +46,40 @@ export class PolkadotController {
     return { balances };
   }
 
+  // noinspection JSUnusedGlobalSymbols
   static async getTokens(
     polkadot: Polkadot,
-    request: AssetsRequest,
-  ): Promise<AssetsResponse> {
-    let assets: Asset[] = [];
+    request: TokensRequest,
+  ): Promise<TokensResponse> {
+    const tokens: TokenInfo[] = [];
 
-    if (!request.assetSymbols) {
-      assets = polkadot.storedAssetList;
+    let assetSymbols: string[];
+    if (!request.tokenSymbols) {
+      assetSymbols = polkadot.storedAssetList.map((a) => a.symbol);
+    } else if (typeof request.tokenSymbols === 'string') {
+      assetSymbols = [request.tokenSymbols];
     } else {
-      let assetSymbols: string[];
-      if (typeof request.assetSymbols === 'string') {
-        assetSymbols = [request.assetSymbols];
-      } else {
-        assetSymbols = request.assetSymbols;
+      assetSymbols = request.tokenSymbols;
+    }
+
+    for (const a of assetSymbols as []) {
+      const rawToken = polkadot.getAssetForSymbol(a);
+      if (!rawToken) {
+        throw new Error(`Unsupported symbol: ${a}`);
       }
-      for (const a of assetSymbols as []) {
-        const asset = polkadot.getAssetForSymbol(a);
-        if (!asset) {
-          throw new Error(`Unsupported symbol: ${a}`);
-        }
-        assets.push(asset as Asset);
-      }
+      const token = {
+        chainId: null,
+        address: rawToken.id,
+        name: rawToken.name,
+        symbol: rawToken.symbol,
+        decimals: rawToken.decimals,
+      } as TokenInfo;
+
+      tokens.push(token);
     }
 
     return {
-      assets: assets,
+      tokens: tokens,
     };
   }
 }

@@ -1,4 +1,6 @@
+// noinspection ES6PreferShortImport
 import { AvailableNetworks } from '../../services/config-manager-types';
+// noinspection ES6PreferShortImport
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
 
 export namespace HydrationConfig {

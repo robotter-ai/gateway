@@ -13,9 +13,9 @@ import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-
 import fse from 'fs-extra';
 import { BigNumber } from 'bignumber.js';
 // noinspection ES6PreferShortImport
-import { HydrationTransaction } from '../../chains/polkadot/polkadot.requests';
-// noinspection ES6PreferShortImport
 import { PollResponse } from '../../network/network.requests';
+// noinspection ES6PreferShortImport
+import { HydrationTransaction } from '../../connectors/hydration/hydration.types';
 
 type AssetListType = TokenListType;
 export class Polkadot {

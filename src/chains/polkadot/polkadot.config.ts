@@ -1,34 +1,43 @@
 // noinspection ES6PreferShortImport
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
-export interface NetworkConfig {
+
+export interface NetworkConfiguration {
   name: string;
   nodeURL: string;
-  maxLRUCacheInstances: number;
+  maximumLRUCacheInstances: number;
   assetListType: string;
   assetListSource: string;
 }
-export interface Config {
-  network: NetworkConfig;
+
+export interface PolkadotConfiguration {
+  network: NetworkConfiguration;
   nativeCurrencySymbol: string;
 }
 
-export function getPolkadotConfig(network: string): Config {
+export function getPolkadotConfiguration(
+  network: string,
+): PolkadotConfiguration {
+  const configManager = ConfigManagerV2.getInstance();
+
+  const nodeURL = configManager.get(`polkadot.networks.${network}.nodeURL`);
+  const assetListType = configManager.get(
+    `polkadot.networks.${network}.assetListType`,
+  );
+  const assetListSource = configManager.get(
+    `polkadot.networks.${network}.assetListSource`,
+  );
+  const nativeCurrencySymbol = configManager.get(
+    `polkadot.nativeCurrencySymbol`,
+  );
+
   return {
     network: {
       name: network,
-      nodeURL: ConfigManagerV2.getInstance().get(
-        `polkadot.networks.${network}.nodeURL`,
-      ),
-      assetListType: ConfigManagerV2.getInstance().get(
-        `polkadot.networks.${network}.assetListType`,
-      ),
-      assetListSource: ConfigManagerV2.getInstance().get(
-        `polkadot.networks.${network}.assetListSource`,
-      ),
-      maxLRUCacheInstances: 10,
+      nodeURL: nodeURL,
+      assetListType: assetListType,
+      assetListSource: assetListSource,
+      maximumLRUCacheInstances: 10,
     },
-    nativeCurrencySymbol: ConfigManagerV2.getInstance().get(
-      `polkadot.nativeCurrencySymbol`,
-    ),
+    nativeCurrencySymbol: nativeCurrencySymbol,
   };
 }

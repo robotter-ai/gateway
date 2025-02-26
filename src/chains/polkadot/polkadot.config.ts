@@ -14,6 +14,8 @@ export interface PolkadotConfiguration {
   nativeCurrencySymbol: string;
 }
 
+const DEFAULT_MAX_LRU_CACHE_INSTANCES = 10;
+
 export function getPolkadotConfiguration(
   network: string,
 ): PolkadotConfiguration {
@@ -33,11 +35,11 @@ export function getPolkadotConfiguration(
   return {
     network: {
       name: network,
-      nodeURL: nodeURL,
-      assetListType: assetListType,
-      assetListSource: assetListSource,
-      maximumLRUCacheInstances: 10,
+      nodeURL,
+      assetListType,
+      assetListSource,
+      maximumLRUCacheInstances: DEFAULT_MAX_LRU_CACHE_INSTANCES,
     },
-    nativeCurrencySymbol: nativeCurrencySymbol,
+    nativeCurrencySymbol,
   };
 }

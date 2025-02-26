@@ -1,5 +1,5 @@
 /**
- * internal_server_http.J
+ * Internal server HTTP response.
  */
 export interface HydrationTransaction {
   code?: number;
@@ -10,7 +10,7 @@ export interface HydrationTransaction {
 }
 
 /**
- * subscan_internal_model.ExtrinsicDetail
+ * Subscan internal extrinsic detail.
  */
 export interface SubscanInternalModelExtrinsicDetail {
   account_display?: SubscanInternalModelAccountDisplay;
@@ -43,12 +43,12 @@ export interface SubscanInternalModelExtrinsicDetail {
 }
 
 /**
- * subscan_internal_model.AccountDisplay
+ * Subscan account display.
  */
 export interface SubscanInternalModelAccountDisplay {
   account_index?: string;
   /**
-   * Current network account
+   * Current network account address.
    */
   address?: string;
   display?: string;
@@ -58,7 +58,7 @@ export interface SubscanInternalModelAccountDisplay {
   judgements?: SubscanInternalModelRegistrationJudgementJson[];
   merkle?: SubscanInternalModelMerkleTag;
   /**
-   * Parent account
+   * Parent account.
    */
   parent?: Parent;
   people?: SubscanInternalModelSampleIdentity;
@@ -66,7 +66,7 @@ export interface SubscanInternalModelAccountDisplay {
 }
 
 /**
- * subscan_internal_model.EvmAccountDisplay
+ * Subscan EVM account display.
  */
 export interface SubscanInternalModelEvmAccountDisplay {
   contract_name?: string;
@@ -75,7 +75,7 @@ export interface SubscanInternalModelEvmAccountDisplay {
 }
 
 /**
- * subscan_internal_model.RegistrationJudgementJson
+ * Subscan registration judgement.
  */
 export interface SubscanInternalModelRegistrationJudgementJson {
   index?: number;
@@ -84,7 +84,7 @@ export interface SubscanInternalModelRegistrationJudgementJson {
 }
 
 /**
- * subscan_internal_model.MerkleTag
+ * Subscan merkle tag.
  */
 export interface SubscanInternalModelMerkleTag {
   address_type?: string;
@@ -95,9 +95,7 @@ export interface SubscanInternalModelMerkleTag {
 }
 
 /**
- * Parent account
- *
- * subscan_internal_model.AccountParentJson
+ * Parent account.
  */
 export interface Parent {
   address?: string;
@@ -108,7 +106,7 @@ export interface Parent {
 }
 
 /**
- * subscan_internal_model.SampleIdentity
+ * Subscan sample identity.
  */
 export interface SubscanInternalModelSampleIdentity {
   display?: string;
@@ -119,7 +117,7 @@ export interface SubscanInternalModelSampleIdentity {
 }
 
 /**
- * subscan_internal_model.ExtrinsicError
+ * Subscan extrinsic error.
  */
 export interface SubscanInternalModelExtrinsicError {
   batch_index?: number;
@@ -131,7 +129,7 @@ export interface SubscanInternalModelExtrinsicError {
 }
 
 /**
- * subscan_internal_model.ChainEventJson
+ * Subscan chain event.
  */
 export interface SubscanInternalModelChainEventJson {
   block_num?: number;
@@ -149,7 +147,7 @@ export interface SubscanInternalModelChainEventJson {
 }
 
 /**
- * subscan_internal_model.Lifetime
+ * Subscan lifetime information.
  */
 export interface SubscanInternalModelLifetime {
   birth?: number;
@@ -158,7 +156,7 @@ export interface SubscanInternalModelLifetime {
 }
 
 /**
- * subscan_internal_model.MultisigJson
+ * Subscan multisig information.
  */
 export interface SubscanInternalModelMultisigJson {
   call_hash?: string;
@@ -173,7 +171,7 @@ export interface SubscanInternalModelMultisigJson {
 }
 
 /**
- * subscan_internal_model.MultiAction
+ * Subscan multi action enum.
  */
 export enum SubscanInternalModelMultiAction {
   // noinspection JSUnusedGlobalSymbols
@@ -184,7 +182,7 @@ export enum SubscanInternalModelMultiAction {
 }
 
 /**
- * subscan_internal_model.ExtrinsicParam
+ * Subscan extrinsic parameter.
  */
 export interface SubscanInternalModelExtrinsicParam {
   name?: string;
@@ -195,7 +193,7 @@ export interface SubscanInternalModelExtrinsicParam {
 }
 
 /**
- * subscan_internal_model.ExtrinsicSubCallJson
+ * Subscan extrinsic sub-call.
  */
 export interface SubscanInternalModelExtrinsicSubCallJson {
   account?: SubscanInternalModelAccountDisplay;
@@ -210,7 +208,7 @@ export interface SubscanInternalModelExtrinsicSubCallJson {
 }
 
 /**
- * subscan_libs_substrate.MetadataModuleError
+ * Subscan substrate metadata module error.
  */
 export interface SubscanLibsSubstrateMetadataModuleError {
   doc?: string[];
@@ -221,7 +219,7 @@ export interface SubscanLibsSubstrateMetadataModuleError {
 }
 
 /**
- * subscan_internal_model.TransferJson
+ * Subscan transfer information.
  */
 export interface SubscanInternalModelTransferJson {
   amount?: number;

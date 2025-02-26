@@ -7,48 +7,14 @@ import {
   Validator,
 } from '../../services/validators';
 
-// const invalidAddressError: string = 'The provided Polkadot address is invalid.';
-// const invalidAmountError: string = 'The amount must be a positive number.';
-// const invalidAssetSymbolError: string = 'The asset symbol is invalid.';
-const invalidNetworkError: string = 'The network param is not a string.';
-
-// const validatePolkadotAddress = mkValidator(
-//   'address',
-//   invalidAddressError,
-//   (val) => typeof val === 'string' && val.length === 48,
-// );
-
-// const validatePositiveAmount = mkValidator(
-//   'amount',
-//   invalidAmountError,
-//   (val) => typeof val === 'number' && val > 0
-// );
-
-// const validateAssetSymbol = mkValidator(
-//   'tokenSymbol',
-//   invalidAssetSymbolError,
-//   (val) => typeof val === 'string' && /^[A-Z0-9]+$/.test(val),
-// );
+const INVALID_NETWORK_ERROR = 'The network parameter must be a string.';
 
 export const validateNetwork: Validator = mkValidator(
   'network',
-  invalidNetworkError,
+  INVALID_NETWORK_ERROR,
   (val) => typeof val === 'string',
 );
 
 export const validatePolkadotPollRequest: RequestValidator = mkRequestValidator(
   [validateNetwork, validateTxHash],
 );
-
-// export const validatePolkadotBalanceRequest: RequestValidator =
-//   mkRequestValidator([validatePolkadotAddress, validateNetwork]);
-//
-// export const validatePolkadotAssetsRequest: RequestValidator =
-//   mkRequestValidator([validateNetwork, validateAssetSymbol]);
-//
-// export const validatePolkadotOptInRequest: RequestValidator =
-//   mkRequestValidator([
-//     validatePolkadotAddress,
-//     validateAssetSymbol,
-//     validateNetwork,
-//   ]);

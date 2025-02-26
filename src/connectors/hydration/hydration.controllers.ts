@@ -34,7 +34,7 @@ export async function price(
   hydration: Hydration,
   req: PriceRequest,
 ): Promise<PriceResponse> {
-  const startTimestamp: number = Date.now();
+  const startTimestamp = Date.now();
   let trade: any;
   let tradeHuman: any;
   try {
@@ -78,13 +78,12 @@ export async function trade(
   hydration: Hydration,
   req: TradeRequest,
 ): Promise<TradeResponse> {
-  const startTimestamp: number = Date.now();
-
+  const startTimestamp = Date.now();
   const limitPrice = req.limitPrice;
   let trade: any;
   let tradeHuman: any;
   try {
-    trade = await hydration.estimateTrade(<PriceRequest>req);
+    trade = await hydration.estimateTrade(req as PriceRequest);
     tradeHuman = trade.toHuman();
   } catch (e) {
     throw new HttpException(
@@ -96,8 +95,7 @@ export async function trade(
 
   const estimatedPrice = trade.expectedPrice;
   logger.info(
-    `Expected execution price is ${estimatedPrice}, ` +
-      `limit price is ${limitPrice}.`,
+    `Expected execution price is ${estimatedPrice}, limit price is ${limitPrice}.`,
   );
 
   if (req.side === 'BUY') {
@@ -125,8 +123,8 @@ export async function trade(
       );
     }
   }
-  const txHash = await hydration.executeTrade(req.address, trade);
 
+  const txHash = (await hydration.executeTrade(req.address, trade)).txHash;
   logger.info(`${req.side} swap has been executed.`);
 
   return {
@@ -143,7 +141,7 @@ export async function trade(
     gasPriceToken: polkadot.nativeTokenSymbol,
     gasLimit: polkadot.gasLimit,
     gasCost: tradeHuman.tradeFee,
-    txHash: txHash,
+    txHash,
   };
 }
 

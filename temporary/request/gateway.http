@@ -87,6 +87,22 @@ Content-Type: application/json
 }
 
 ###
+
+POST https://{{host}}:{{port}}/amm/price
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "connector": "{{connector}}",
+  "base": "HDX",
+  "quote": "USDT",
+  "amount": "1",
+  "side": "SELL"
+}
+
+###
+
 POST https://{{host}}:{{port}}/chain/poll
 Content-Type: application/json
 
@@ -110,6 +126,28 @@ Content-Type: application/json
   "quote": "USDT",
   "amount":"1",
   "address":"{{walletPublicKey}}",
+  "side": "BUY",
+  "limitPrice": null,
+  "nonce": null,
+  "maxFeePerGas": null,
+  "maxPriorityFeePerGas": null,
+  "allowedSlippage": null,
+  "poolId": null
+}
+
+###
+
+POST https://{{host}}:{{port}}/amm/trade
+Content-Type: application/json
+
+{
+  "chain":"{{chain}}",
+  "network":"{{network}}",
+  "connector":"{{connector}}",
+  "base": "HDX",
+  "quote": "USDT",
+  "amount":"1",
+  "address":"{{walletPublicKey}}",
   "side": "SELL",
   "limitPrice": null,
   "nonce": null,
@@ -118,4 +156,5 @@ Content-Type: application/json
   "allowedSlippage": null,
   "poolId": null
 }
+
 ###

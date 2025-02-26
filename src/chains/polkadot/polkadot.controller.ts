@@ -35,10 +35,7 @@ export class PolkadotController {
           tokenSymbol,
         );
       } catch (error) {
-        console.error(
-          `Failure while retrieving ${tokenSymbol} token balance:`,
-          error,
-        );
+        console.error(`Error retrieving balance for ${tokenSymbol}:`, error);
         balances[tokenSymbol] = '0';
       }
     }
@@ -52,8 +49,8 @@ export class PolkadotController {
     request: TokensRequest,
   ): Promise<TokensResponse> {
     const tokens: TokenInfo[] = [];
-
     let assetSymbols: string[];
+
     if (!request.tokenSymbols) {
       assetSymbols = polkadot.storedAssetList.map((a) => a.symbol);
     } else if (typeof request.tokenSymbols === 'string') {
@@ -62,24 +59,20 @@ export class PolkadotController {
       assetSymbols = request.tokenSymbols;
     }
 
-    for (const a of assetSymbols as []) {
-      const rawToken = polkadot.getAssetForSymbol(a);
+    for (const symbol of assetSymbols) {
+      const rawToken = polkadot.getAssetForSymbol(symbol);
       if (!rawToken) {
-        throw new Error(`Unsupported symbol: ${a}`);
+        throw new Error(`Unsupported symbol: ${symbol}`);
       }
-      const token = {
+      tokens.push({
         chainId: null,
         address: rawToken.id,
         name: rawToken.name,
         symbol: rawToken.symbol,
         decimals: rawToken.decimals,
-      } as TokenInfo;
-
-      tokens.push(token);
+      } as TokenInfo);
     }
 
-    return {
-      tokens: tokens,
-    };
+    return { tokens };
   }
 }

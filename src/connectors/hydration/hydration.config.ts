@@ -6,7 +6,7 @@ import { ConfigManagerV2 } from '../../services/config-manager-v2';
 export namespace HydrationConfig {
   export interface NetworkConfig {
     allowedSlippage: string;
-    tradingTypes: Array<string>;
+    tradingTypes: string[];
     chainType: string;
     availableNetworks: Array<AvailableNetworks>;
   }

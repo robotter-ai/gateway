@@ -30,7 +30,7 @@ export class Polkadot {
   private _ready: boolean = false;
   public gasPrice: number;
   public gasLimit: number;
-  public gasCost: number;
+  public gasCost: string;
   public nodeUrl: string;
   public controller: typeof PolkadotController;
   public nativeTokenSymbol: string;
@@ -44,14 +44,14 @@ export class Polkadot {
     const config = getPolkadotConfiguration(network);
     this._network = network;
     this.nativeTokenSymbol = config.nativeCurrencySymbol;
-    this.gasPrice = 0;
+    this.gasPrice = null;
     this.nodeUrl = nodeUrl;
     this.polkadotApi = new ApiPromise({ provider: new WsProvider(nodeUrl) });
     this._keyring = new Keyring({ type: 'sr25519' });
     this._assetListType = assetListType;
     this._assetListSource = assetListSource;
-    this.gasLimit = 0;
-    this.gasCost = 0;
+    this.gasLimit = null;
+    this.gasCost = '';
     this.controller = PolkadotController;
   }
   public get polkadot(): ApiPromise {

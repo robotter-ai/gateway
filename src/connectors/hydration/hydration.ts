@@ -232,4 +232,84 @@ export class Hydration {
       };
     }
   }
+    // async getTransactionStatus(txHash: string, network: string): Promise<PollResponse> {
+    //     let api: ApiPromise | undefined;
+    //
+    //     try {
+    //         api = await ApiPromise.create({ provider: this.wsProvider });
+    //
+    //         // Get finalized block info
+    //         const finalizedHead = await api.rpc.chain.getFinalizedHead();
+    //         const finalizedHeader = await api.rpc.chain.getHeader(finalizedHead);
+    //         const finalizedBlockNumber = finalizedHeader.number.toNumber();
+    //
+    //         // Get current block info
+    //         const currentHeader = await api.rpc.chain.getHeader();
+    //         const currentBlockNumber = currentHeader.number.toNumber();
+    //
+    //         const searchDepth = 200;
+    //         let foundExtrinsic = null;
+    //         let foundBlockNumber: number | undefined;
+    //         let foundBlockHash: string | undefined;
+    //
+    //         // Search backwards through recent blocks
+    //         for (let i = currentBlockNumber; i > currentBlockNumber - searchDepth; i--) {
+    //             const blockHash = await api.rpc.chain.getBlockHash(i);
+    //             const block = await api.rpc.chain.getBlock(blockHash);
+    //
+    //             for (const extrinsic of block.block.extrinsics) {
+    //                 if (extrinsic.hash.toHex() === txHash) {
+    //                     foundExtrinsic = extrinsic;
+    //                     foundBlockNumber = i;
+    //                     foundBlockHash = blockHash.toHex();
+    //                     break;
+    //                 }
+    //             }
+    //             if (foundExtrinsic) break;
+    //         }
+    //
+    //         // Determine status
+    //         let txStatus = 0; // PENDING
+    //         if (foundExtrinsic && foundBlockNumber) {
+    //             txStatus = (finalizedBlockNumber - foundBlockNumber) >= 12 ? 2 : 1;
+    //         }
+    //
+    //         const response: PollResponse = {
+    //             network,
+    //             timestamp: Date.now(),
+    //             currentBlock: currentBlockNumber,
+    //             txHash,
+    //             txStatus,
+    //             txBlock: foundBlockNumber || 0,
+    //             //@ts-ignore
+    //             txData: foundExtrinsic ? {
+    //                 hash: txHash,
+    //                 blockHash: foundBlockHash || null,
+    //                 blockNumber: foundBlockNumber || null,
+    //                 from: foundExtrinsic.signer?.toString() || '',
+    //                 to: foundExtrinsic.method?.section || '',
+    //                 gasPrice: null,
+    //                 gasLimit: '0',
+    //                 value: '0',
+    //                 nonce: 0,
+    //                 data: foundExtrinsic.method?.toHex() || '',
+    //                 r: null,
+    //                 s: null,
+    //                 v: null,
+    //                 chainId: typeof network === 'string' ? network : '0',
+    //                 wait: async () => Promise.resolve({} as CustomTransactionReceipt)
+    //             } : null,
+    //             txReceipt: null
+    //         };
+    //
+    //         return response;
+    //     } catch (error) {
+    //         console.error('Error getting transaction status:', error);
+    //         throw error;
+    //     } finally {
+    //         if (api) {
+    //             await api.disconnect();
+    //         }
+    //     }
+    // }
 }

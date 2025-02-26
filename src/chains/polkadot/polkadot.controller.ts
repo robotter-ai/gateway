@@ -1,16 +1,14 @@
 import {
   validatePolkadotPollRequest,
-  // validatePolkadotAssetsRequest,
 } from './polkadot.validators';
 import {
-  AssetsRequest,
-  AssetsResponse,
   BalanceRequest,
   PollRequest,
   PollResponse,
-} from './polkadot.requests';
+} from '../../network/network.requests';
 import { Polkadot } from './polkadot';
 import { Asset } from '@galacticcouncil/sdk';
+import { AssetsRequest, AssetsResponse } from "./polkadot.requests";
 
 export class PolkadotController {
   static async poll(
@@ -22,8 +20,6 @@ export class PolkadotController {
   }
 
   static async balances(chain: Polkadot, request: BalanceRequest) {
-    // validatePolkadotBalanceRequest(request);
-
     const balances: Record<string, string> = {};
 
     if (request.tokenSymbols.includes('HDX')) {
@@ -50,7 +46,6 @@ export class PolkadotController {
     polkadot: Polkadot,
     request: AssetsRequest,
   ): Promise<AssetsResponse> {
-    // validateAssetsRequest(request);
 
     let assets: Asset[] = [];
 

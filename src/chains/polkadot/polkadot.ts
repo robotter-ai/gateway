@@ -3,7 +3,6 @@ import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { getPolkadotConfig } from './polkadot.config';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 import { TokenListType, walletPath } from '../../services/base';
-import { PollResponse } from './polkadot.requests';
 import axios from 'axios';
 import { Asset } from '@galacticcouncil/sdk';
 import { promises as fs } from 'fs';
@@ -11,6 +10,7 @@ import { PolkadotController } from './polkadot.controller';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import fse from 'fs-extra';
 import { BigNumber } from 'bignumber.js';
+import { PollResponse } from "../../network/network.requests";
 
 type AssetListType = TokenListType;
 export class Polkadot {
@@ -189,10 +189,15 @@ export class Polkadot {
     if (!tx) throw new Error('Transaction not found.');
 
     return {
+      network: "",
+      timestamp: 0,
+      tokenId: 0,
+      txData: undefined,
+      txReceipt: undefined,
+      txStatus: 0,
       currentBlock: block.block.header.number.toNumber(),
       txBlock: block.block.header.number.toNumber(),
-      txHash: txHash,
-      fee: 0, // Fee can be computed based on transaction details if required
+      txHash: txHash
     };
   }
 

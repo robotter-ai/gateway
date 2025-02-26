@@ -1,10 +1,9 @@
-import { Asset } from "@galacticcouncil/sdk";
+import { Asset } from '@galacticcouncil/sdk';
 
 export interface AssetsRequest {
   network?: string; // the target network of the chain (e.g. mainnet)
   assetSymbols?: string[];
 }
-
 
 export type AssetsResponse = {
   assets: Asset[]; // using galacticcouncil sdk type

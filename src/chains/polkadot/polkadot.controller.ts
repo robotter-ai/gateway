@@ -2,6 +2,7 @@ import { validatePolkadotPollRequest } from './polkadot.validators';
 import { Polkadot } from './polkadot';
 import { Asset } from '@galacticcouncil/sdk';
 import { AssetsRequest, AssetsResponse } from './polkadot.requests';
+// noinspection ES6PreferShortImport
 import {
   BalanceRequest,
   PollRequest,
@@ -32,7 +33,10 @@ export class PolkadotController {
           tokenSymbol,
         );
       } catch (error) {
-        console.error(`Erro ao buscar balanço do token ${tokenSymbol}:`, error);
+        console.error(
+          `Failure while retrieving ${tokenSymbol} token balance:`,
+          error,
+        );
         balances[tokenSymbol] = '0';
       }
     }
@@ -44,13 +48,12 @@ export class PolkadotController {
     polkadot: Polkadot,
     request: AssetsRequest,
   ): Promise<AssetsResponse> {
-
     let assets: Asset[] = [];
 
     if (!request.assetSymbols) {
       assets = polkadot.storedAssetList;
     } else {
-      let assetSymbols;
+      let assetSymbols: string[];
       if (typeof request.assetSymbols === 'string') {
         assetSymbols = [request.assetSymbols];
       } else {

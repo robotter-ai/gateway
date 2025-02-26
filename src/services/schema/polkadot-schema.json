@@ -34,14 +34,10 @@
     },
     "nativeCurrencySymbol": {
       "type": "string"
-    },
-    "gasLimitEstimate": {
-      "type": "integer"
     }
   },
   "additionalProperties": false,
   "required": [
-    "nativeCurrencySymbol",
-    "gasLimitEstimate"
+    "nativeCurrencySymbol"
   ]
 }

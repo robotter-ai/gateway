@@ -2,15 +2,19 @@ import LRUCache from 'lru-cache';
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { getPolkadotConfig } from './polkadot.config';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+// noinspection ES6PreferShortImport
 import { TokenListType, walletPath } from '../../services/base';
 import axios from 'axios';
 import { Asset } from '@galacticcouncil/sdk';
 import { promises as fs } from 'fs';
 import { PolkadotController } from './polkadot.controller';
+// noinspection ES6PreferShortImport
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import fse from 'fs-extra';
 import { BigNumber } from 'bignumber.js';
+// noinspection ES6PreferShortImport
 import { HydrationTransaction } from '../../chains/polkadot/polkadot.requests';
+// noinspection ES6PreferShortImport
 import { PollResponse } from '../../network/network.requests';
 
 type AssetListType = TokenListType;
@@ -18,11 +22,11 @@ export class Polkadot {
   private _assetMap: Record<string, Asset> = {};
   private static _instances: LRUCache<string, Polkadot>;
   private _chain: string = 'polkadot';
-  private _network: string;
+  private readonly _network: string;
   private polkadotApi: ApiPromise;
-  private _keyring: Keyring;
-  private _assetListType: AssetListType;
-  private _assetListSource: string;
+  private readonly _keyring: Keyring;
+  private readonly _assetListType: AssetListType;
+  private readonly _assetListSource: string;
   private _ready: boolean = false;
   public gasPrice: number;
   public gasLimit: number;
@@ -130,20 +134,8 @@ export class Polkadot {
     return this._assetMap[symbol] ? this._assetMap[symbol] : null;
   }
 
-  public async getAccountInfo(accountAddress: string): Promise<any> {
-    const accountInfo =
-      await this.polkadotApi.query.system.account(accountAddress);
-    const accountData = accountInfo.toJSON() as any;
-    return {
-      free: accountData.data?.free || '0',
-      reserved: accountData.data?.reserved || '0',
-      miscFrozen: accountData.data?.miscFrozen || '0',
-      nonce: accountData.nonce || 0,
-    };
-  }
-
   public async getNativeBalance(accountAddress: string): Promise<string> {
-    const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+    const wsProvider = new WsProvider('wss://rpc.hydradx.cloud'); // TODO remove and use hydration!!!
     const api = await ApiPromise.create({ provider: wsProvider });
 
     const { data: balance } = (await api.query.system.account(
@@ -163,9 +155,9 @@ export class Polkadot {
   ): Promise<string> {
     const token = this._assetMap[tokenSymbol];
     if (!token) {
-      throw new Error(`Token ${tokenSymbol} não encontrado`);
+      throw new Error(`Token ${tokenSymbol} not found`);
     }
-    const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+    const wsProvider = new WsProvider('wss://rpc.hydradx.cloud'); // TODO remove and use hydration!!!
     const api = await ApiPromise.create({ provider: wsProvider });
 
     const assetBalance = (await api.query.tokens.accounts(
@@ -173,6 +165,7 @@ export class Polkadot {
       token.id,
     )) as any;
 
+    // noinspection UnnecessaryLocalVariableJS
     const freeBalance = new BigNumber(String(assetBalance?.free || 0))
       .div(new BigNumber(Math.pow(10, token.decimals)))
       .toFixed(token.decimals);
@@ -237,12 +230,12 @@ export class Polkadot {
       Buffer.from(iv, 'hex'),
     );
 
-    const decrpyted = Buffer.concat([
+    const decrypted = Buffer.concat([
       decipher.update(Buffer.from(encryptedKey, 'hex')),
       decipher.final(),
     ]);
 
-    return decrpyted.toString();
+    return decrypted.toString();
   }
 
   public async getAccountFromPrivateKey(
@@ -292,7 +285,7 @@ export class Polkadot {
   }
 
   private async getAssetData(): Promise<any> {
-    let assetData;
+    let assetData: any;
     if (this._assetListType === 'URL') {
       const response = await axios.get(this._assetListSource);
       assetData = response.data.results;

@@ -2,12 +2,12 @@ import LRUCache from 'lru-cache';
 import { Polkadot } from '../../chains/polkadot/polkadot';
 import { HydrationConfig } from './hydration.config';
 import { getPolkadotConfig } from '../../chains/polkadot/polkadot.config';
-import { percentRegexp } from '../../services/config-manager-v2';
 import {
-  TradeRouter,
+  BigNumber,
   PoolService,
   Trade,
-  BigNumber,
+  TradeRouter,
+  TradeType,
 } from '@galacticcouncil/sdk';
 import { PriceRequest } from '../../amm/amm.requests';
 import {
@@ -16,13 +16,15 @@ import {
   TOKEN_NOT_SUPPORTED_ERROR_MESSAGE,
 } from '../../services/error-handler';
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 export class Hydration {
   private static _instances: LRUCache<string, Hydration>;
   private chain: Polkadot;
   private _config: HydrationConfig.NetworkConfig;
   private _ready: boolean = false;
-  private wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+  private api: ApiPromise;
+  private tradeRouter: TradeRouter;
 
   constructor(network: string) {
     this._config = HydrationConfig.config;
@@ -54,6 +56,17 @@ export class Hydration {
     if (!this.chain.ready()) {
       await this.chain.init();
     }
+
+    await cryptoWaitReady();
+
+    const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
+
+    this.api = await ApiPromise.create({ provider: wsProvider });
+
+    const poolService = new PoolService(this.api);
+    await poolService.syncRegistry();
+    this.tradeRouter = new TradeRouter(poolService);
+
     this._ready = true;
   }
 
@@ -61,28 +74,63 @@ export class Hydration {
     return this._ready;
   }
 
-  getSlippage(): BigNumber {
-    const allowedSlippage = this._config.allowedSlippage;
-    const nd = allowedSlippage.match(percentRegexp);
-    let slippage = 0.0;
-    if (nd) slippage = Number(nd[1]) / Number(nd[2]);
-    return BigNumber(slippage * 10 ** 12);
+  public calculateTradeLimit(
+    trade: Trade,
+    slippagePercentage: BigNumber,
+    side: TradeType,
+  ): BigNumber {
+    const ONE_HUNDRED = BigNumber('100');
+
+    let amount: BigNumber;
+    let slippage: BigNumber;
+    let tradeLimit: BigNumber;
+    if (side === TradeType.Buy) {
+      // maxAmountIn
+
+      amount = trade.amountIn;
+
+      slippage = amount
+        .div(ONE_HUNDRED)
+        .multipliedBy(slippagePercentage)
+        .decimalPlaces(0, 1);
+
+      tradeLimit = amount.plus(slippage);
+    } else if (side === TradeType.Sell) {
+      // minAmountOut
+
+      amount = trade.amountOut;
+
+      slippage = amount
+        .div(ONE_HUNDRED)
+        .multipliedBy(slippagePercentage)
+        .decimalPlaces(0, 1);
+
+      tradeLimit = amount.minus(slippage);
+    } else {
+      throw new Error('Invalid side');
+    }
+
+    // console.log(`Trade: ${JSON.stringify(trade, null, 2)}`);
+    console.log(`trade -> amountOut: ${trade.amountOut}`);
+    console.log(`trade -> amountIn: ${trade.amountIn}`);
+    console.log(`trade -> spotPrice: ${trade.spotPrice}`);
+    console.log(`Side: ${side}`);
+    console.log(`Amount: ${amount.toString()}`);
+    console.log(`Slippage percentage: ${slippagePercentage.toString()}%`);
+    console.log(`Slippage: ${slippage.toString()}`);
+    console.log(
+      `Trade limit (${side === TradeType.Buy ? 'maxAmountIn' : 'minAmountOut'}): ${tradeLimit.toString()}`,
+    );
+
+    return tradeLimit;
   }
 
   public async getAllTokens() {
-    const api = await ApiPromise.create({ provider: this.wsProvider });
-    const poolService = new PoolService(api);
-    await poolService.syncRegistry();
-    const tradeRouter = new TradeRouter(poolService);
-    return await tradeRouter.getAllAssets();
+    return await this.tradeRouter.getAllAssets();
   }
 
   async estimateTrade(req: PriceRequest): Promise<Trade> {
-    const api = await ApiPromise.create({ provider: this.wsProvider });
-    const poolService = new PoolService(api);
-    await poolService.syncRegistry();
-    const tradeRouter = new TradeRouter(poolService);
-    const asset = await tradeRouter.getAllAssets();
+    const asset = await this.tradeRouter.getAllAssets();
     const tokenIdBase = asset.find((a) => a.symbol === req.base).id;
     const tokenIdQuote = asset.find((a) => a.symbol === req.quote).id;
 
@@ -95,16 +143,18 @@ export class Hydration {
 
     let trade: Trade;
     if (req.side === 'BUY') {
-      trade = await tradeRouter.getBestBuy(
+      // buy 1 HDX (base, assetOut) with USDT (quote, assetIn)
+      trade = await this.tradeRouter.getBestBuy(
         tokenIdQuote,
         tokenIdBase,
-        req.amount,
+        BigNumber(req.amount),
       );
     } else if (req.side === 'SELL') {
-      trade = await tradeRouter.getBestSell(
+      // sell 1 HDX (base, assetIn) for USDT (quote, assetOut)
+      trade = await this.tradeRouter.getBestSell(
         tokenIdBase,
         tokenIdQuote,
-        req.amount,
+        BigNumber(req.amount),
       );
     } else {
       throw new HttpException(
@@ -118,48 +168,68 @@ export class Hydration {
   }
 
   async executeTrade(address: string, trade: Trade) {
-    const api = await ApiPromise.create({ provider: this.wsProvider });
-    const poolService = new PoolService(api);
-    await poolService.syncRegistry();
+    if (trade) {
+      console.log(
+        `Route found: ${trade.swaps
+          .map((pool) => pool.poolAddress)
+          .join(' -> ')}`,
+      );
+      console.log(
+        `Estimated ${trade.type === TradeType.Buy ? 'output' : 'input'} amount: ${trade.type === TradeType.Buy ? trade.amountOut : trade.amountIn}`,
+      );
 
-    const slippage = new BigNumber('10');
-    const transaction = trade.toTx(slippage).get() as any;
+      const tradeLimit = this.calculateTradeLimit(
+        trade,
+        BigNumber(this._config.allowedSlippage),
+        trade.type,
+      );
 
-    const keyringPair = await this.chain.getAccountFromAddress(address);
+      const transaction = trade.toTx(tradeLimit).get<any>();
 
-    return new Promise((resolve, reject) => {
+      const keyPair = await this.chain.getAccountFromAddress(address);
+
       try {
-        transaction.signAndSend(keyringPair, (result) => {
-          if (result.dispatchError) {
-            if (result.dispatchError.isModule) {
-              // Decodifica o erro utilizando o registry da API
-              const decoded = api.registry.findMetaError(
-                result.dispatchError.asModule,
-              );
-              const { name } = decoded;
-              reject(
-                new Error(
-                  `Hydration.executeTrade received an unexpected error: ${name}.`,
-                ),
-              );
-            } else {
-              reject(
-                new Error(
-                  `Hydration.executeTrade received an unexpected error: ${result.dispatchError.toString()}.`,
-                ),
-              );
+        const txHash = await new Promise<string>((resolve, reject) => {
+          transaction.signAndSend(keyPair, (result) => {
+            if (result.dispatchError) {
+              if (result.dispatchError.isModule) {
+                const decoded = this.api.registry.findMetaError(
+                  result.dispatchError.asModule,
+                );
+                const { name } = decoded;
+                console.error(`Error: ${name}`);
+                reject(name);
+              } else {
+                console.error(
+                  'Unknown error:',
+                  result.dispatchError.toString(),
+                );
+                reject(result.dispatchError.toString());
+              }
+            } else if (result.status.isInBlock) {
+              const hash = result.status.asInBlock.toString();
+              console.log('Swap done! TX HASH:', hash);
+              resolve(hash);
             }
-          } else {
-            if (result.status.type === 'InBlock') {
-              const txHash = JSON.parse(result.status.toString()).inBlock;
-              console.log('Swap done! TX HASH:', txHash);
-              resolve(txHash);
-            }
-          }
+          });
         });
-      } catch (error: any) {
-        reject(error.message);
+
+        return {
+          txHash,
+          error: '',
+        };
+      } catch (err) {
+        return {
+          txHash: '',
+          error: err as string,
+        };
       }
-    });
+    } else {
+      console.log('No route found for the swap.');
+      return {
+        txHash: '',
+        error: 'No route found',
+      };
+    }
   }
 }

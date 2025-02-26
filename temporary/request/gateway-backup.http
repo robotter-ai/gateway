@@ -1,0 +1,123 @@
+# OK
+GET https://{{host}}:{{port}}
+Content-Type: application/json
+
+{
+}
+
+###
+# OK
+POST https://{{host}}:{{port}}/wallet/add
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "privateKey": "{{walletMnemonic}}",
+  "address": null,
+  "accountId": null
+}
+
+###
+ # It is missing rpcUrl and chainId
+GET https://{{host}}:{{port}}/chain/status?chain={{chain}}&network={{network}}
+Content-Type: application/json
+
+{
+}
+
+###
+# OK
+GET https://{{host}}:{{port}}/chain/config?chain={{chain}}&network={{network}}
+Content-Type: application/json
+
+{
+}
+
+###
+# OK
+GET https://{{host}}:{{port}}/chain/tokens?chain={{chain}}&network={{network}}
+Content-Type: application/json
+
+{
+}
+
+###
+# OK
+POST https://{{host}}:{{port}}/chain/balances
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "connector": "{{connector}}",
+  "address": "{{walletPublicKey}}",
+  "tokenSymbols": [
+    "USDT",
+    "HDX",
+    "DOT"
+  ]
+}
+
+###
+
+# OK gasPrice, gasPriceToken, gasLimit and gasCost return 0
+POST https://{{host}}:{{port}}/amm/estimateGas
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "connector": "{{connector}}"
+}
+
+###
+# It is missing gasWanted?
+POST https://{{host}}:{{port}}/amm/price
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "connector": "{{connector}}",
+  "base": "HDX",
+  "quote": "USDT",
+  "amount": "1",
+  "side": "BUY"
+}
+
+###
+ # ERROR
+POST https://{{host}}:{{port}}/chain/poll
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "connector": "{{connector}}",
+  "txHash":"{{txHash}}"
+}
+
+###
+
+# It is missing finalAmountReceived?, finalAmountReceived_basetoken?, expectedOut?, expectedPrice?, gasWanted? and nonce?
+POST https://{{host}}:{{port}}/amm/trade
+Content-Type: application/json
+
+{
+  "chain":"{{chain}}",
+  "network":"{{network}}",
+  "connector":"{{connector}}",
+  "base": "HDX",
+  "quote": "USDT",
+  "amount":"1",
+  "address":"{{walletPublicKey}}",
+  "side": "SELL",
+  "limitPrice": null,
+  "nonce": null,
+  "maxFeePerGas": null,
+  "maxPriorityFeePerGas": null,
+  "allowedSlippage": null,
+  "poolId": null
+}
+###

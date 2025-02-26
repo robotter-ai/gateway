@@ -1,3 +1,4 @@
+
 GET https://{{host}}:{{port}}
 Content-Type: application/json
 
@@ -60,17 +61,6 @@ Content-Type: application/json
 
 ###
 
-POST https://{{host}}:{{port}}/chain/poll
-Content-Type: application/json
-
-{
-  "chain": "{{chain}}",
-  "network": "{{network}}",
-  "connector": "{{connector}}",
-  "txHash":"{{txHash}}"
-}
-
-###
 
 POST https://{{host}}:{{port}}/amm/estimateGas
 Content-Type: application/json
@@ -97,6 +87,17 @@ Content-Type: application/json
 }
 
 ###
+POST https://{{host}}:{{port}}/chain/poll
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "connector": "{{connector}}",
+  "txHash":"{{txHash}}"
+}
+
+###
 
 POST https://{{host}}:{{port}}/amm/trade
 Content-Type: application/json
@@ -117,5 +118,4 @@ Content-Type: application/json
   "allowedSlippage": null,
   "poolId": null
 }
-
 ###

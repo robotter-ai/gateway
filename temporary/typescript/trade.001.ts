@@ -53,16 +53,66 @@ const tokens = {
   },
 };
 
-const buyHDXWithUSDTAmount = BigNumber('1');
-const sellHDXForUSDTAmount = BigNumber('1');
-const buyUSDTWithHDXAmount = BigNumber('0.1');
-const sellUSDTForHDXAmount = BigNumber('0.1');
-const ONE = BigNumber('1');
-const maxSlippage = BigNumber('0.01'); // 1%
+const USDTAmountToReceive = BigNumber('0.02');
+const USDTAmountToTrade = BigNumber('0.02');
+const HDXAmountToReceive = BigNumber('3');
+const HDXAmountToTrade = BigNumber('3');
+const maxSlippage = BigNumber('1'); // 1%
 
 let api: ApiPromise;
 let keyPair: any;
 let tradeRouter: TradeRouter;
+
+function calculateTradeLimit(
+  trade: Trade,
+  slippagePercentage: BigNumber,
+  side: 'buy' | 'sell',
+): BigNumber {
+  const ONE_HUNDRED = BigNumber('100');
+
+  let amount: BigNumber;
+  let slippage: BigNumber;
+  let tradeLimit: BigNumber;
+  if (side === 'buy') {
+    // maxAmountIn
+
+    amount = trade.amountIn;
+
+    slippage = amount
+      .div(ONE_HUNDRED)
+      .multipliedBy(slippagePercentage)
+      .decimalPlaces(0, 1);
+
+    tradeLimit = amount.plus(slippage);
+  } else if (side === 'sell') {
+    // minAmountOut
+
+    amount = trade.amountOut;
+
+    slippage = amount
+      .div(ONE_HUNDRED)
+      .multipliedBy(slippagePercentage)
+      .decimalPlaces(0, 1);
+
+    tradeLimit = amount.minus(slippage);
+  } else {
+    throw new Error('Invalid side');
+  }
+
+  // console.log(`Trade: ${JSON.stringify(trade, null, 2)}`);
+  console.log(`trade -> amountOut: ${trade.amountOut}`);
+  console.log(`trade -> amountIn: ${trade.amountIn}`);
+  console.log(`trade -> spotPrice: ${trade.spotPrice}`);
+  console.log(`Side: ${side}`);
+  console.log(`Amount: ${amount.toString()}`);
+  console.log(`Slippage percentage: ${slippagePercentage.toString()}%`);
+  console.log(`Slippage: ${slippage.toString()}`);
+  console.log(
+    `Trade limit (${side === 'buy' ? 'maxAmountIn' : 'minAmountOut'}): ${tradeLimit.toString()}`,
+  );
+
+  return tradeLimit;
+}
 
 async function initializeAPI() {
   await cryptoWaitReady();
@@ -135,18 +185,7 @@ async function executeTrade(
       `Estimated ${side === 'buy' ? 'output' : 'input'} amount: ${side === 'buy' ? trade.amountOut : trade.amountIn}`,
     );
 
-    let tradeLimit: BigNumber;
-    if (side === 'buy') {
-      tradeLimit = new BigNumber(trade.amountIn)
-        .times(ONE.plus(maxSlippage))
-        .integerValue(BigNumber.ROUND_CEIL); // maxAmountIn
-    } else if (side === 'sell') {
-      tradeLimit = new BigNumber(trade.amountOut)
-        .times(ONE.minus(maxSlippage))
-        .integerValue(BigNumber.ROUND_CEIL); // maxAmountIn
-    } else {
-      throw new Error('Invalid side');
-    }
+    const tradeLimit = calculateTradeLimit(trade, maxSlippage, side);
 
     const transaction = trade.toTx(tradeLimit).get<any>();
 
@@ -195,76 +234,114 @@ async function executeTrade(
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function test01() {
   try {
-    const tokenIn = tokens.hdx.id;
-    const tokenOut = tokens.usdt.id;
-    const amount = buyHDXWithUSDTAmount; // Low amount
-    return await executeTrade(tokenIn, tokenOut, amount, 'buy'); // Buy HDX with USDT
+    console.log('\n\nStarting test01...');
+    console.log(
+      'Balances before: ',
+      await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']),
+    );
+
+    const tokenIn = tokens.usdt.id;
+    const tokenOut = tokens.hdx.id;
+    const amount = HDXAmountToReceive;
+    console.log(`Buying ${amount} HDX with USDT`);
+    return await executeTrade(tokenIn, tokenOut, amount, 'buy');
   } catch (error) {
     console.error('Error in test01:', error);
     throw error;
   } finally {
-    console.log('Finished test01.');
+    console.log(
+      'Balances after: ',
+      await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']),
+    );
+    console.log('Finished test01.\n\n');
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function test02() {
   try {
-    const tokenIn = tokens.usdt.id;
-    const tokenOut = tokens.hdx.id;
-    const amount = buyUSDTWithHDXAmount; // Low amount
-    return await executeTrade(tokenIn, tokenOut, amount, 'buy'); // Buy USDT with HDX
+    console.log('\n\nStarting test02...');
+    console.log(
+      'Balances before: ',
+      await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']),
+    );
+
+    const tokenIn = tokens.hdx.id;
+    const tokenOut = tokens.usdt.id;
+    const amount = USDTAmountToReceive;
+    console.log(`Buying ${amount} USDT with HDX`);
+    return await executeTrade(tokenIn, tokenOut, amount, 'buy');
   } catch (error) {
     console.error('Error in test02:', error);
     throw error;
   } finally {
-    console.log('Finished test02.');
+    console.log(
+      'Balances after: ',
+      await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']),
+    );
+    console.log('Finished test02.\n\n');
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function test03() {
   try {
+    console.log('\n\nStarting test03...');
+    console.log(
+      'Balances before: ',
+      await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']),
+    );
+
     const tokenIn = tokens.hdx.id;
     const tokenOut = tokens.usdt.id;
-    const amount = sellHDXForUSDTAmount; // Low amount
-    return await executeTrade(tokenIn, tokenOut, amount, 'sell'); // Sell HDX for USDT
+    const amount = HDXAmountToTrade;
+    console.log(`Selling ${amount} HDX for USDT`);
+    return await executeTrade(tokenIn, tokenOut, amount, 'sell');
   } catch (error) {
     console.error('Error in test03:', error);
     throw error;
   } finally {
-    console.log('Finished test03.');
+    console.log(
+      'Balances after: ',
+      await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']),
+    );
+    console.log('Finished test03.\n\n');
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function test04() {
   try {
+    console.log('\n\nStarting test04...');
+    console.log(
+      'Balances before: ',
+      await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']),
+    );
+
     const tokenIn = tokens.usdt.id;
     const tokenOut = tokens.hdx.id;
-    const amount = sellUSDTForHDXAmount; // Low amount
-    return await executeTrade(tokenIn, tokenOut, amount, 'sell'); // Sell USDT for HDX
+    const amount = USDTAmountToTrade;
+    console.log(`Selling ${amount} USDT for HDX`);
+    return await executeTrade(tokenIn, tokenOut, amount, 'sell');
   } catch (error) {
     console.error('Error in test04:', error);
     throw error;
   } finally {
-    console.log('Finished test04.');
+    console.log(
+      'Balances after: ',
+      await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']),
+    );
+    console.log('Finished test04.\n\n');
   }
 }
 
 (async () => {
-  try {
-    await initializeAPI();
+  await initializeAPI();
 
-    console.log(await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']));
+  // console.log(await getBalances(keyPair.address, ['HDX', 'DOT', 'USDT']));
 
-    // console.log(await test01());
-    // console.log(await test02());
-    // console.log(await test03());
-    // console.log(await test04());
-  } catch (error) {
-    console.error('Error in the main process:', error);
-  } finally {
-    console.log('Finished swap operations.');
-  }
+  console.log(await test01());
+  console.log(await test02());
+  console.log(await test03());
+  console.log(await test04());
 })();

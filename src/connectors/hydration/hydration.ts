@@ -3,7 +3,7 @@ import LRUCache from 'lru-cache';
 import { Polkadot } from '../../chains/polkadot/polkadot';
 import { HydrationConfig } from './hydration.config';
 // noinspection ES6PreferShortImport
-import { getPolkadotConfig } from '../../chains/polkadot/polkadot.config';
+import { getPolkadotConfiguration } from '../../chains/polkadot/polkadot.config';
 import {
   BigNumber,
   PoolService,
@@ -36,10 +36,10 @@ export class Hydration {
   }
 
   public static getInstance(network: string): Hydration {
-    const config = getPolkadotConfig(network);
+    const config = getPolkadotConfiguration(network);
     if (Hydration._instances === undefined) {
       Hydration._instances = new LRUCache<string, Hydration>({
-        max: config.network.maxLRUCacheInstances,
+        max: config.network.maximumLRUCacheInstances,
       });
     }
 

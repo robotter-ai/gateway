@@ -70,6 +70,7 @@ export async function price(
     gasPriceToken: polkadot.nativeTokenSymbol,
     gasLimit: polkadot.gasLimit,
     gasCost: tradeHuman.tradeFee,
+    gasWanted: null,
   } as PriceResponse;
 }
 
@@ -134,13 +135,19 @@ export async function trade(
     base: req.base,
     quote: req.quote,
     amount: req.amount,
+    finalAmountReceived: null,
     rawAmount: req.amount,
+    finalAmountReceived_basetoken: null,
     price: tradeHuman.spotPrice,
     expectedIn: tradeHuman.amountOut,
+    expectedOut: null,
+    expectedPrice: null,
     gasPrice: polkadot.gasPrice,
     gasPriceToken: polkadot.nativeTokenSymbol,
     gasLimit: polkadot.gasLimit,
+    gasWanted: null,
     gasCost: tradeHuman.tradeFee,
+    nonce: null,
     txHash,
   };
 }

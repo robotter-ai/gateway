@@ -38,6 +38,8 @@ export async function price(
   let trade: any;
   let tradeHuman: any;
   try {
+    req.base = req.base.replace(/[_-]+$/, '');
+    req.quote = req.base.replace(/[_-]+$/, '');
     trade = await hydration.estimateTrade(req);
     tradeHuman = trade.toHuman();
   } catch (e) {
@@ -84,6 +86,8 @@ export async function trade(
   let trade: any;
   let tradeHuman: any;
   try {
+    req.base = req.base.replace(/[_-]+$/, '');
+    req.quote = req.base.replace(/[_-]+$/, '');
     trade = await hydration.estimateTrade(req as PriceRequest);
     tradeHuman = trade.toHuman();
   } catch (e) {

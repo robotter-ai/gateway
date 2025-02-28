@@ -209,17 +209,31 @@ export class Polkadot {
         { headers },
       );
       const transaction: HydrationTransaction = response.data;
-      return {
+
+      const transactionStatusMessage = transaction?.message?.toLowerCase();
+      let transactionStatus: number;
+      if (transactionStatusMessage == 'success') {
+        transactionStatus = 1;
+      } else if (transactionStatusMessage == 'failed') {
+        transactionStatus = -1;
+      } else {
+        transactionStatus = 0;
+      }
+
+      // noinspection UnnecessaryLocalVariableJS
+      const result = {
         network: null,
-        timestamp: transaction.generated_at,
+        timestamp: transaction?.generated_at,
         currentBlock: null,
-        txHash: transaction.data.extrinsic_hash,
-        txStatus: transaction.data.success ? 'success' : 'failed',
-        txBlock: transaction.data.block_hash,
-        txData: transaction.data,
+        txHash: txHash,
+        txStatus: transactionStatus,
+        txBlock: transaction?.data?.block_hash,
+        txData: transaction?.data, // TODO if the transaction is too recent, the data is not coming.
         txReceipt: null,
         tokenId: null,
       } as unknown as PollResponse;
+
+      return result;
     } catch (error) {
       console.error('Error fetching transaction:', error);
       throw error;

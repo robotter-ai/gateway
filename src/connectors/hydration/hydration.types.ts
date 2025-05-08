@@ -294,7 +294,11 @@ export interface OmniPool {
  * Hydration add liquidity request schema
  */
 export const HydrationAddLiquidityRequestSchema = Type.Composite([
-  AddLiquidityRequest
+  AddLiquidityRequest,
+  Type.Object({
+    baseToken: Type.Optional(Type.String({ examples: ['ASTR'] })),
+    quoteToken: Type.Optional(Type.String({ examples: ['BNC'] })),
+  })
 ], { $id: 'HydrationAddLiquidityRequest' });
 export type HydrationAddLiquidityRequest = Static<typeof HydrationAddLiquidityRequestSchema>;
 

@@ -636,20 +636,20 @@ Content-Type: application/json
 
 
 
-# # POST /{{connector}}/amm/add-liquidity - HYDRATION Omnipool
-# POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/add-liquidity
-# Content-Type: application/json
+# POST /{{connector}}/amm/add-liquidity - HYDRATION Omnipool
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/add-liquidity
+Content-Type: application/json
 
-# {
-#   "network": "{{network}}",
-#   "walletAddress": "{{walletPublicKey}}",
-#   "poolAddress": "{{poolAddressOmnipool}}",
-#   "baseTokenAmount": "{{baseTokenAmount}}",
-#   "quoteTokenAmount": "{{quoteTokenAmount}}",
-#   "slippagePct": "{{slippagePercentage}}"
-# }
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "poolAddress": "{{poolAddressOmnipool}}",
+  "baseTokenAmount": "{{smallBaseTokenAmount}}",
+  "quoteTokenAmount": "{{smallQuoteTokenAmount}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
 
-# ###
+###
 
 # POST /{{connector}}/amm/remove-liquidity - HYDRATION XYK SMALL %
 POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/remove-liquidity
@@ -703,15 +703,15 @@ Content-Type: application/json
 
 ###
 
-# # POST /{{connector}}/amm/remove-liquidity - HYDRATION Omnipool
-# POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/remove-liquidity
-# Content-Type: application/json
+# POST /{{connector}}/amm/remove-liquidity - HYDRATION Omnipool
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/remove-liquidity
+Content-Type: application/json
 
-# {
-#   "network": "{{network}}",
-#   "walletAddress": "{{walletPublicKey}}",
-#   "poolAddress": "{{poolAddressOmnipool}}",
-#   "percentageToRemove": "{{percentageToRemove}}"
-# }
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "poolAddress": "{{poolAddressOmnipool}}",
+  "percentageToRemove": "{{smallPercentageToRemove}}"
+}
 
-# ###
+###

@@ -1,0 +1,717 @@
+# ===================== ROOT ROUTE =====================
+
+# GET /
+GET {{httpProtocol}}://{{host}}:{{port}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# ===================== CONFIG ROUTES =====================
+
+# GET /config
+GET {{httpProtocol}}://{{host}}:{{port}}/config
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /config?chainOrConnector={{chain}}
+GET {{httpProtocol}}://{{host}}:{{port}}/config?chainOrConnector={{chain}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /config?chainOrConnector={{connector}}
+GET {{httpProtocol}}://{{host}}:{{port}}/config?chainOrConnector={{connector}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# POST /config/update
+POST {{httpProtocol}}://{{host}}:{{port}}/config/update
+Content-Type: application/json
+
+{
+  "configPath": "{{configPath}}",
+  "configValue": "{{configValue}}"
+}
+
+###
+
+# GET /config?chainOrConnector={{connector}}
+GET {{httpProtocol}}://{{host}}:{{port}}/config?chainOrConnector={{connector}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# ===================== CONNECTOR ROUTES =====================
+
+# GET /connectors
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors
+Content-Type: application/json
+
+{
+}
+
+###
+
+# ===================== WALLET ROUTES =====================
+
+# GET /wallet
+GET {{httpProtocol}}://{{host}}:{{port}}/wallet
+Content-Type: application/json
+
+{
+}
+
+
+###
+
+# DELETE /wallet/remove
+DELETE {{httpProtocol}}://{{host}}:{{port}}/wallet/remove
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "address": "{{walletPublicKey}}"
+}
+
+###
+
+# GET /wallet
+GET {{httpProtocol}}://{{host}}:{{port}}/wallet
+Content-Type: application/json
+
+{
+}
+
+###
+
+# POST /wallet/add
+POST {{httpProtocol}}://{{host}}:{{port}}/wallet/add
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "privateKey": "{{walletMnemonic}}"
+}
+
+###
+
+# GET /wallet
+GET {{httpProtocol}}://{{host}}:{{port}}/wallet
+Content-Type: application/json
+
+{
+}
+
+###
+
+# ===================== CHAIN ROUTES =====================
+
+# GET /<chain>/status
+GET {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/status?network={{network}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# POST /<chain>/estimate-gas
+POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/estimate-gas
+Content-Type: application/json
+
+{
+  "chain": "{{chain}}",
+  "network": "{{network}}",
+  "gasLimit": "{{gasLimit}}"
+}
+
+###
+
+# ===================== TRANSACTION ROUTES =====================
+
+# POST /{{chain}}/poll - Poll for transaction status
+POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/poll
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "txHash": "{{txHash}}"
+}
+
+###
+
+# ===================== TOKEN ROUTES =====================
+
+# GET /<chain>/tokens - Just network
+GET {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/tokens?network={{network}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /<chain>/tokens - Single token
+GET {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/tokens?network={{network}}&tokenSymbols={{nativeTokenSymbol}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /<chain>/tokens - Multiple tokens
+GET {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/tokens?network={{network}}&tokenSymbols={{nativeTokenSymbol}},{{baseTokenSymbol}},{{quoteTokenSymbol}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# ===================== BALANCE ROUTES =====================
+
+# POST /{{chain}}/balances - All balances
+POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/balances
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "address": "{{walletPublicKey}}"
+}
+
+###
+
+# POST /{{chain}}/balances - Single token (string format)
+POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/balances
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "address": "{{walletPublicKey}}",
+  "tokens": "{{nativeTokenSymbol}}"
+}
+
+###
+
+# POST /{{chain}}/balances - Single token (array format)
+POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/balances
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "address": "{{walletPublicKey}}",
+  "tokens": ["{{quoteTokenSymbol}}"]
+}
+
+###
+# POST /{{chain}}/balances - Multiple tokens
+POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/balances
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "address": "{{walletPublicKey}}",
+  "tokens": ["{{nativeTokenSymbol}}", "{{baseTokenSymbol}}", "{{quoteTokenSymbol}}"]
+}
+
+###
+
+# ===================== AMM CONNECTOR ROUTES =====================
+
+# ===================== LIST POOLS =====================
+
+# GET /hydration/amm/list-pools - List all pools
+GET {{httpProtocol}}://{{host}}:{{port}}/hydration/amm/list-pools?network={{network}}
+Content-Type: application/json
+
+###
+
+# GET /hydration/amm/list-pools - Filter by tokenSymbols
+GET {{httpProtocol}}://{{host}}:{{port}}/hydration/amm/list-pools?network={{network}}&tokenSymbols=WUD&tokenSymbols=DOT
+Content-Type: application/json
+
+###
+
+# GET /hydration/amm/list-pools - Filter by tokenAddresses (using Polkadot asset IDs)
+GET {{httpProtocol}}://{{host}}:{{port}}/hydration/amm/list-pools?network={{network}}&tokenAddresses=10&tokenAddresses=22
+Content-Type: application/json
+
+###
+
+# GET /hydration/amm/list-pools - Filter by both tokenSymbols and tokenAddresses
+GET {{httpProtocol}}://{{host}}:{{port}}/hydration/amm/list-pools?network={{network}}&tokenSymbols=WUD&tokenAddresses=5
+Content-Type: application/json
+
+###
+
+# GET /hydration/amm/list-pools - Filter stableswap pools
+GET {{httpProtocol}}://{{host}}:{{port}}/hydration/amm/list-pools?network={{network}}&types=stableswap
+Content-Type: application/json
+
+###
+
+# GET /hydration/amm/list-pools - Filter xyk pools
+GET {{httpProtocol}}://{{host}}:{{port}}/hydration/amm/list-pools?network={{network}}&types=xyk
+Content-Type: application/json
+
+###
+
+# =======================================================
+
+# GET /{{connector}}/amm/pool-info - HYDRATION XYK
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/pool-info?network={{network}}&poolAddress={{poolAddressXyk}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/pool-info - HYDRATION Stableswap
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/pool-info?network={{network}}&poolAddress={{poolAddressStableswap}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/pool-info - HYDRATION Omnipool
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/pool-info?network={{network}}&poolAddress={{poolAddressOmnipool}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-swap - HYDRATION XYK BUYING MEDIUM AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}&amount={{mediumAmount}}&side={{sideBuy}}&poolAddress={{poolAddressXyk}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-swap - HYDRATION XYK SELLING MEDIUM AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}&amount={{mediumAmount}}&side={{sideSell}}&poolAddress={{poolAddressXyk}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-swap - HYDRATION Stableswap BUYING SMALL AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}&amount={{smallAmount}}&side={{sideBuy}}&poolAddress={{poolAddressStableswap}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-swap - HYDRATION Stableswap SELLING SMALL AMOUNT 
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}&amount={{smallAmount}}&side={{sideSell}}&poolAddress={{poolAddressStableswap}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-swap - HYDRATION XYK BUYING BIGGER AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}&amount={{biggerAmount}}&side={{sideBuy}}&poolAddress={{poolAddressXyk}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-swap - HYDRATION XYK SELLING BIGGER AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}&amount={{biggerAmount}}&side={{sideSell}}&poolAddress={{poolAddressXyk}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-swap - HYDRATION Stableswap BUYING BIGGER AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}&amount={{biggerAmount}}&side={{sideBuy}}&poolAddress={{poolAddressStableswap}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-swap - HYDRATION Stableswap SELLING BIGGER AMOUNT 
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}&amount={{biggerAmount}}&side={{sideSell}}&poolAddress={{poolAddressStableswap}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-swap - HYDRATION Omnipool BUYING SMALL AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{baseTokenSymbol}}&quoteToken={{quoteTokenSymbol}}&amount={{smallAmount}}&side={{sideBuy}}&poolAddress={{poolAddressOmnipool}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-liquidity -  HYDRATION XYK SMALL AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddressXyk}}&baseTokenAmount={{smallBaseTokenAmount}}&quoteTokenAmount={{smallQuoteTokenAmount}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-liquidity - HYDRATION Stableswap SMALL AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddressStableswap}}&baseTokenAmount={{smallBaseTokenAmount}}&quoteTokenAmount={{smallQuoteTokenAmount}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-liquidity -  HYDRATION XYK BIGGER AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddressXyk}}&baseTokenAmount={{biggerBaseTokenAmount}}&quoteTokenAmount={{biggerQuoteTokenAmount}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/quote-liquidity - HYDRATION Stableswap BIGGER AMOUNT
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddressStableswap}}&baseTokenAmount={{biggerBaseTokenAmount}}&quoteTokenAmount={{biggerQuoteTokenAmount}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# POST /{{connector}}/amm/execute-swap - HYDRATION XYK BUYING MEDIUM AMOUNT
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "baseToken": "{{xykBaseTokenSymbol}}",
+  "quoteToken": "{{xykQuoteTokenSymbol}}",
+  "amount": "{{mediumAmount}}",
+  "side": "{{sideBuy}}",
+  "poolAddress": "{{poolAddressXyk}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# POST /{{connector}}/amm/execute-swap - HYDRATION XYK SELLING MEDIUM AMOUNT
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "baseToken": "{{xykBaseTokenSymbol}}",
+  "quoteToken": "{{xykQuoteTokenSymbol}}",
+  "amount": "{{mediumAmount}}",
+  "side": "{{sideSell}}",
+  "poolAddress": "{{poolAddressXyk}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# POST /{{connector}}/amm/execute-swap - HYDRATION Stableswap BUYING SMALL AMOUNT
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "baseToken": "{{stableBaseTokenSymbol}}",
+  "quoteToken": "{{stableQuoteTokenSymbol}}",
+  "amount": "{{smallAmount}}",
+  "side": "{{sideBuy}}",
+  "poolAddress": "{{poolAddressStableswap}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# POST /{{connector}}/amm/execute-swap - HYDRATION Stableswap SELLING SMALL AMOUNT
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "baseToken": "{{stableBaseTokenSymbol}}",
+  "quoteToken": "{{stableQuoteTokenSymbol}}",
+  "amount": "{{smallAmount}}",
+  "side": "{{sideSell}}",
+  "poolAddress": "{{poolAddressStableswap}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# POST /{{connector}}/amm/execute-swap - HYDRATION XYK BUYING BIGGER AMOUNT
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "baseToken": "{{xykBaseTokenSymbol}}",
+  "quoteToken": "{{xykQuoteTokenSymbol}}",
+  "amount": "{{biggerAmount}}",
+  "side": "{{sideBuy}}",
+  "poolAddress": "{{poolAddressXyk}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# POST /{{connector}}/amm/execute-swap - HYDRATION XYK SELLING BIGGER AMOUNT
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "baseToken": "{{xykBaseTokenSymbol}}",
+  "quoteToken": "{{xykQuoteTokenSymbol}}",
+  "amount": "{{biggerAmount}}",
+  "side": "{{sideSell}}",
+  "poolAddress": "{{poolAddressXyk}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# POST /{{connector}}/amm/execute-swap - HYDRATION Stableswap BUYING MEDIUM AMOUNT
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "baseToken": "{{stableBaseTokenSymbol}}",
+  "quoteToken": "{{stableQuoteTokenSymbol}}",
+  "amount": "{{mediumAmount}}",
+  "side": "{{sideBuy}}",
+  "poolAddress": "{{poolAddressStableswap}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# POST /{{connector}}/amm/execute-swap - HYDRATION Stableswap SELLING MEDIUM AMOUNT
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "baseToken": "{{stableBaseTokenSymbol}}",
+  "quoteToken": "{{stableQuoteTokenSymbol}}",
+  "amount": "{{mediumAmount}}",
+  "side": "{{sideSell}}",
+  "poolAddress": "{{poolAddressStableswap}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# # POST /{{connector}}/amm/execute-swap - HYDRATION Omnipool
+# POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
+# Content-Type: application/json
+
+# {
+#   "network": "{{network}}",
+#   "walletAddress": "{{walletPublicKey}}",
+#   "baseToken": "{{baseTokenSymbol}}",
+#   "quoteToken": "{{quoteTokenSymbol}}",
+#   "amount": "{{amount}}",
+#   "side": "{{side}}",
+#   "poolAddress": "{{poolAddressOmnipool}}",
+#   "slippagePct": "{{slippagePercentage}}"
+# }
+
+# ###
+
+# POST /{{connector}}/amm/add-liquidity - HYDRATION XYK SMALL AMOUNT
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/add-liquidity
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "poolAddress": "{{poolAddressXyk}}",
+  "baseTokenAmount": "{{smallBaseTokenAmount}}",
+  "quoteTokenAmount": "{{smallQuoteTokenAmount}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# POST /{{connector}}/amm/add-liquidity - HYDRATION Stableswap SMALL AMOUNT 
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/add-liquidity
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "poolAddress": "{{poolAddressStableswap}}",
+  "baseTokenAmount": "{{smallBaseTokenAmount}}",
+  "quoteTokenAmount": "{{smallQuoteTokenAmount}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# POST /{{connector}}/amm/add-liquidity - HYDRATION XYK BIGGER AMOUNT
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/add-liquidity
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "poolAddress": "{{poolAddressXyk}}",
+  "baseTokenAmount": "{{biggerBaseTokenAmount}}",
+  "quoteTokenAmount": "{{biggerQuoteTokenAmount}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+# POST /{{connector}}/amm/add-liquidity - HYDRATION Stableswap BIGGER AMOUNT 
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/add-liquidity
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "poolAddress": "{{poolAddressStableswap}}",
+  "baseTokenAmount": "{{biggerBaseTokenAmount}}",
+  "quoteTokenAmount": "{{biggerQuoteTokenAmount}}",
+  "slippagePct": "{{slippagePercentage}}"
+}
+
+###
+
+
+
+# # POST /{{connector}}/amm/add-liquidity - HYDRATION Omnipool
+# POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/add-liquidity
+# Content-Type: application/json
+
+# {
+#   "network": "{{network}}",
+#   "walletAddress": "{{walletPublicKey}}",
+#   "poolAddress": "{{poolAddressOmnipool}}",
+#   "baseTokenAmount": "{{baseTokenAmount}}",
+#   "quoteTokenAmount": "{{quoteTokenAmount}}",
+#   "slippagePct": "{{slippagePercentage}}"
+# }
+
+# ###
+
+# POST /{{connector}}/amm/remove-liquidity - HYDRATION XYK SMALL %
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/remove-liquidity
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "poolAddress": "{{poolAddressXyk}}", 
+  "percentageToRemove": "{{smallPercentageToRemove}}"
+}
+
+###
+
+# POST /{{connector}}/amm/remove-liquidity - HYDRATION Stableswap SMALL %
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/remove-liquidity
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "poolAddress": "{{poolAddressStableswap}}",
+  "percentageToRemove": "{{smallPercentageToRemove}}"
+}
+
+###
+
+# POST /{{connector}}/amm/remove-liquidity - HYDRATION XYK BIGGER %
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/remove-liquidity
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "poolAddress": "{{poolAddressXyk}}",
+  "percentageToRemove": "{{biggerPercentageToRemove}}"
+}
+
+###
+
+# POST /{{connector}}/amm/remove-liquidity - HYDRATION Stableswap BIGGER %
+POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/remove-liquidity
+Content-Type: application/json
+
+{
+  "network": "{{network}}",
+  "walletAddress": "{{walletPublicKey}}",
+  "poolAddress": "{{poolAddressStableswap}}",
+  "percentageToRemove": "{{biggerPercentageToRemove}}"
+}
+
+###
+
+# # POST /{{connector}}/amm/remove-liquidity - HYDRATION Omnipool
+# POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/remove-liquidity
+# Content-Type: application/json
+
+# {
+#   "network": "{{network}}",
+#   "walletAddress": "{{walletPublicKey}}",
+#   "poolAddress": "{{poolAddressOmnipool}}",
+#   "percentageToRemove": "{{percentageToRemove}}"
+# }
+
+# ###

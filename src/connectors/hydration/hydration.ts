@@ -1080,7 +1080,7 @@ export class Hydration {
       };
       
       try {
-        logger.info(`Submitting transaction with id ${txId} ...`);
+        logger.info(`Submitting transaction...`);
         unsub = await tx.signAndSend(wallet, statusHandler);
       } catch (error) {
         const fallbackHash = tx.hash.toString();

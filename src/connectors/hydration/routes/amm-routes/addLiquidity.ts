@@ -28,7 +28,9 @@ export async function addLiquidityToHydration(
   poolId: string,
   baseTokenAmount: number,
   quoteTokenAmount: number,
-  slippagePct?: number
+  slippagePct?: number,
+  baseToken?: string,
+  quoteToken?: string
 ): Promise<HydrationAddLiquidityResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
@@ -47,7 +49,9 @@ export async function addLiquidityToHydration(
     poolId,
     baseTokenAmount,
     quoteTokenAmount,
-    slippagePct
+    slippagePct,
+    baseToken,
+    quoteToken
   );
 }
 
@@ -81,6 +85,8 @@ export const addLiquidityRoute: FastifyPluginAsync = async (fastify) => {
         const {
           walletAddress,
           poolAddress,
+          baseToken,
+          quoteToken,
           baseTokenAmount,
           quoteTokenAmount,
           slippagePct
@@ -94,7 +100,9 @@ export const addLiquidityRoute: FastifyPluginAsync = async (fastify) => {
           poolAddress,
           baseTokenAmount,
           quoteTokenAmount,
-          slippagePct
+          slippagePct,
+          baseToken,
+          quoteToken
         );
 
         return result;

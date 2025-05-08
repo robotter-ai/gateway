@@ -153,23 +153,19 @@ export class Hydration {
       if (isOmnipool) {
         // For omnipool, return all available tokens
         const tokens = poolData.tokens
-          .filter(token => !token.symbol.includes('-Pool'))
           .map(token => token.symbol);
-
-        // Get hub asset (H2O)
-        const hubAsset = poolData.tokens.find(token => token.symbol === 'H2O');
         
         return {
           address: poolData.address,
-          baseTokenAddress: hubAsset?.id || '',
-          quoteTokenAddress: poolData.tokens[0]?.id || '',
+          baseTokenAddress: null,
+          quoteTokenAddress: null,
           feePct: 500/10000, // Default fee for omnipool
           price: 1, // Default price for omnipool
           baseTokenAmount: 0,
           quoteTokenAmount: 0,
           poolType: POOL_TYPE.OMNIPOOL,
           id: poolData.id,
-          tokens: tokens // Include all available tokens
+          tokens: tokens
         };
       }
 
@@ -831,7 +827,9 @@ export class Hydration {
     poolId: string,
     baseTokenAmount: number,
     quoteTokenAmount: number,
-    slippagePct?: number
+    slippagePct?: number,
+    baseTokenSymbol?: string,
+    quoteTokenSymbol?: string
   ): Promise<HydrationAddLiquidityResponse> {
     // Get wallet
     const wallet = await this.polkadot.getWallet(walletAddress);
@@ -843,8 +841,12 @@ export class Hydration {
     }
 
     // Get token symbols from addresses
-    const baseTokenSymbol = await this.getTokenSymbol(pool.baseTokenAddress);
-    const quoteTokenSymbol = await this.getTokenSymbol(pool.quoteTokenAddress);
+    if (!baseTokenSymbol) {
+      baseTokenSymbol = await this.getTokenSymbol(pool.baseTokenAddress);
+    }
+    if (!quoteTokenSymbol) {
+      quoteTokenSymbol = await this.getTokenSymbol(pool.quoteTokenAddress);
+    }
 
     // Validate amounts
     if (baseTokenAmount <= 0 && quoteTokenAmount <= 0) {
@@ -880,10 +882,8 @@ export class Hydration {
 
     logger.info(`Adding liquidity to pool ${poolId}: ${baseTokenAmount.toFixed(4)} ${baseTokenSymbol}, ${quoteTokenAmount.toFixed(4)} ${quoteTokenSymbol}`);
 
-    // Use assets from Hydration to get asset IDs
-    const assets = this.getAllTokens();
-    const baseToken = assets.find(a => a.symbol === baseTokenSymbol);
-    const quoteToken = assets.find(a => a.symbol === quoteTokenSymbol);
+    const baseToken = this.polkadot.getToken(baseTokenSymbol);
+    const quoteToken = this.polkadot.getToken(quoteTokenSymbol);
 
     if (!baseToken || !quoteToken) {
       throw new Error(`Asset not found: ${!baseToken ? baseTokenSymbol : quoteTokenSymbol}`);

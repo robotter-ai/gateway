@@ -644,6 +644,8 @@ Content-Type: application/json
   "network": "{{network}}",
   "walletAddress": "{{walletPublicKey}}",
   "poolAddress": "{{poolAddressOmnipool}}",
+  "baseToken": "{{omnipoolBaseTokenSymbol}}",
+  "quoteToken": "{{omnipoolQuoteTokenSymbol}}",
   "baseTokenAmount": "{{smallBaseTokenAmount}}",
   "quoteTokenAmount": "{{smallQuoteTokenAmount}}",
   "slippagePct": "{{slippagePercentage}}"

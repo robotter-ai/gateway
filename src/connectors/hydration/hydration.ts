@@ -22,9 +22,6 @@ import {BigNumber, PoolService, PoolType, TradeRouter, TradeType} from "@galacti
 import {PoolItem} from '../../schemas/trading-types/amm-schema';
 import { percentRegexp } from '../../services/config-manager-v2';
 
-// Buffer for transaction costs (in HDX)
-const HDX_TRANSACTION_BUFFER = 0.1;
-
 // Pool types
 const POOL_TYPE = {
   XYK: 'xyk',
@@ -820,6 +817,8 @@ export class Hydration {
    * @param baseTokenAmount Amount of base token to add
    * @param quoteTokenAmount Amount of quote token to add
    * @param slippagePct Optional slippage percentage (1 means 1%) (default from config)
+   * @param baseTokenSymbol Optional base token symbol (only used for omnipool)
+   * @param quoteTokenSymbol Optional quote token symbol (only used for omnipool)
    * @returns Details of the liquidity addition
    */
   async addLiquidity(
@@ -854,10 +853,9 @@ export class Hydration {
     }
 
     // Check balances with transaction buffer
-    const balances = await this.polkadot.getBalance(wallet, [baseTokenSymbol, quoteTokenSymbol, "HDX"]);
+    const balances = await this.polkadot.getBalance(wallet, [baseTokenSymbol, quoteTokenSymbol]);
     const requiredBase = baseTokenAmount;
     const requiredQuote = quoteTokenAmount;
-    const requiredHDX = HDX_TRANSACTION_BUFFER;
 
     // Check base token balance
     if (balances[baseTokenSymbol] < requiredBase) {
@@ -870,13 +868,6 @@ export class Hydration {
     if (balances[quoteTokenSymbol] < requiredQuote) {
       throw new Error(
         `Insufficient ${quoteTokenSymbol} balance. Required: ${requiredQuote}, Available: ${balances[quoteTokenSymbol]}`
-      );
-    }
-
-    // Check HDX balance for gas
-    if (balances['HDX'] < requiredHDX) {
-      throw new Error(
-        `Insufficient HDX balance for transaction fees. Required: ${requiredHDX}, Available: ${balances['HDX']}`
       );
     }
 
@@ -919,10 +910,20 @@ export class Hydration {
         );
         break;
 
-      case POOL_TYPE.LBP:
-        addLiquidityTx = apiPromise.tx.lbp.addLiquidity(
-          [baseToken.address, baseAmountBN.toString()],
-          [quoteToken.address, quoteAmountBN.toString()]
+      case POOL_TYPE.STABLESWAP:
+        const assets = [
+          { assetId: baseToken.address, amount: baseAmountBN.toString() },
+          { assetId: quoteToken.address, amount: quoteAmountBN.toString() }
+        ].filter(asset => new BigNumber(asset.amount).gt(0));
+
+        const numericPoolId = parseInt(pool.id);
+        if (isNaN(numericPoolId)) {
+          throw new Error(`Invalid pool ID for stableswap: ${pool.id}`);
+        }
+
+        addLiquidityTx = apiPromise.tx.stableswap.addLiquidity(
+            numericPoolId,
+            assets
         );
         break;
 
@@ -934,38 +935,27 @@ export class Hydration {
             baseAmountBN.toString(),
             minSharesLimit.toString()
           );
-        } else {
+          quoteTokenAmount = 0;
+          quoteTokenSymbol = null;
+        } else if (quoteTokenAmount > 0) {
           const minSharesLimit = this.calculateMinSharesLimit(quoteAmountBN, effectiveSlippage);
           addLiquidityTx = apiPromise.tx.omnipool.addLiquidityWithLimit(
             quoteToken.address,
             quoteAmountBN.toString(),
             minSharesLimit.toString()
           );
+          baseTokenAmount = 0;
+          baseTokenSymbol = null;
+        } else {
+          throw new Error('You must provide at least one non-zero amount');
         }
-        break;
 
-      case POOL_TYPE.STABLESWAP:
-        const assets = [
-          { assetId: baseToken.address, amount: baseAmountBN.toString() },
-          { assetId: quoteToken.address, amount: quoteAmountBN.toString() }
-        ].filter(asset => new BigNumber(asset.amount).gt(0));
-        
-        const numericPoolId = parseInt(pool.id);
-        if (isNaN(numericPoolId)) {
-          throw new Error(`Invalid pool ID for stableswap: ${pool.id}`);
-        }
-        
-        addLiquidityTx = apiPromise.tx.stableswap.addLiquidity(
-          numericPoolId,
-          assets
-        );
         break;
 
       default:
         throw new Error(`Unsupported pool type: ${poolType}`);
     }
 
-    // Sign and send the transaction
     const {txHash, transaction} = await this.submitTransaction(apiPromise, addLiquidityTx, wallet, poolType);
 
     const feePaymentToken = this.polkadot.getFeePaymentToken();

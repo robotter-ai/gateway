@@ -19,6 +19,8 @@ import {
  * @param baseTokenAmount - Amount of base token to add
  * @param quoteTokenAmount - Amount of quote token to add
  * @param slippagePct - Optional slippage percentage (default from config)
+ * @param baseToken - Optional base token symbol (only used for omnipool)
+ * @param quoteToken - Optional quote token symbol (only used for omnipool)
  * @returns Details of the liquidity addition operation
  */
 export async function addLiquidityToHydration(
@@ -85,11 +87,11 @@ export const addLiquidityRoute: FastifyPluginAsync = async (fastify) => {
         const {
           walletAddress,
           poolAddress,
-          baseToken,
-          quoteToken,
           baseTokenAmount,
           quoteTokenAmount,
-          slippagePct
+          slippagePct,
+          baseToken,
+          quoteToken
         } = request.body;
         const network = request.body.network || 'mainnet';
 

@@ -646,8 +646,8 @@ Content-Type: application/json
   "poolAddress": "{{poolAddressOmnipool}}",
   "baseToken": "{{omnipoolBaseTokenSymbol}}",
   "quoteToken": "{{omnipoolQuoteTokenSymbol}}",
-  "baseTokenAmount": "{{smallBaseTokenAmount}}",
-  "quoteTokenAmount": "{{smallQuoteTokenAmount}}",
+  "baseTokenAmount": "{{mediumBaseTokenAmount}}",
+  "quoteTokenAmount": "{{mediumQuoteTokenAmount}}",
   "slippagePct": "{{slippagePercentage}}"
 }
 

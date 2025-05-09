@@ -44,7 +44,7 @@ Content-Type: application/json
 
 {
   "configPath": "{{configPath}}",
-  "configValue": "{{configValue}}"
+  "configValue": "{{$randomInt 2 5}}/100"
 }
 
 ###
@@ -87,7 +87,7 @@ Content-Type: application/json
 
 {
   "chain": "{{chain}}",
-  "address": "{{walletPublicKey}}"
+  "address": "{{$processEnv %walletPublicKey}}"
 }
 
 ###
@@ -108,7 +108,7 @@ Content-Type: application/json
 {
   "chain": "{{chain}}",
   "network": "{{network}}",
-  "privateKey": "{{walletMnemonic}}"
+  "privateKey": "{{$processEnv %walletMnemonic}}"
 }
 
 ###
@@ -195,7 +195,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "address": "{{walletPublicKey}}"
+  "address": "{{$processEnv %walletPublicKey}}"
 }
 
 ###
@@ -206,7 +206,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "address": "{{walletPublicKey}}",
+  "address": "{{$processEnv %walletPublicKey}}",
   "tokens": "{{nativeTokenSymbol}}"
 }
 
@@ -218,7 +218,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "address": "{{walletPublicKey}}",
+  "address": "{{$processEnv %walletPublicKey}}",
   "tokens": ["{{quoteTokenSymbol}}"]
 }
 
@@ -229,7 +229,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "address": "{{walletPublicKey}}",
+  "address": "{{$processEnv %walletPublicKey}}",
   "tokens": ["{{nativeTokenSymbol}}", "{{baseTokenSymbol}}", "{{quoteTokenSymbol}}"]
 }
 
@@ -427,7 +427,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "baseToken": "{{xykBaseTokenSymbol}}",
   "quoteToken": "{{xykQuoteTokenSymbol}}",
   "amount": "{{mediumAmount}}",
@@ -444,7 +444,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "baseToken": "{{xykBaseTokenSymbol}}",
   "quoteToken": "{{xykQuoteTokenSymbol}}",
   "amount": "{{mediumAmount}}",
@@ -461,7 +461,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "baseToken": "{{stableBaseTokenSymbol}}",
   "quoteToken": "{{stableQuoteTokenSymbol}}",
   "amount": "{{smallAmount}}",
@@ -478,7 +478,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "baseToken": "{{stableBaseTokenSymbol}}",
   "quoteToken": "{{stableQuoteTokenSymbol}}",
   "amount": "{{smallAmount}}",
@@ -495,7 +495,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "baseToken": "{{xykBaseTokenSymbol}}",
   "quoteToken": "{{xykQuoteTokenSymbol}}",
   "amount": "{{biggerAmount}}",
@@ -512,7 +512,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "baseToken": "{{xykBaseTokenSymbol}}",
   "quoteToken": "{{xykQuoteTokenSymbol}}",
   "amount": "{{biggerAmount}}",
@@ -529,7 +529,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "baseToken": "{{stableBaseTokenSymbol}}",
   "quoteToken": "{{stableQuoteTokenSymbol}}",
   "amount": "{{mediumAmount}}",
@@ -546,7 +546,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "baseToken": "{{stableBaseTokenSymbol}}",
   "quoteToken": "{{stableQuoteTokenSymbol}}",
   "amount": "{{mediumAmount}}",
@@ -563,7 +563,7 @@ Content-Type: application/json
 
 # {
 #   "network": "{{network}}",
-#   "walletAddress": "{{walletPublicKey}}",
+#   "walletAddress": "{{$processEnv %walletPublicKey}}",
 #   "baseToken": "{{baseTokenSymbol}}",
 #   "quoteToken": "{{quoteTokenSymbol}}",
 #   "amount": "{{amount}}",
@@ -580,7 +580,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressXyk}}",
   "baseTokenAmount": "{{smallBaseTokenAmount}}",
   "quoteTokenAmount": "{{smallQuoteTokenAmount}}",
@@ -595,7 +595,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressStableswap}}",
   "baseTokenAmount": "{{smallBaseTokenAmount}}",
   "quoteTokenAmount": "{{smallQuoteTokenAmount}}",
@@ -610,7 +610,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressXyk}}",
   "baseTokenAmount": "{{biggerBaseTokenAmount}}",
   "quoteTokenAmount": "{{biggerQuoteTokenAmount}}",
@@ -625,7 +625,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressStableswap}}",
   "baseTokenAmount": "{{biggerBaseTokenAmount}}",
   "quoteTokenAmount": "{{biggerQuoteTokenAmount}}",
@@ -642,7 +642,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressOmnipool}}",
   "baseToken": "{{omnipoolBaseTokenSymbol}}",
   "quoteToken": "{{omnipoolQuoteTokenSymbol}}",
@@ -659,7 +659,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressXyk}}", 
   "percentageToRemove": "{{smallPercentageToRemove}}"
 }
@@ -672,7 +672,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressStableswap}}",
   "percentageToRemove": "{{smallPercentageToRemove}}"
 }
@@ -685,7 +685,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressXyk}}",
   "percentageToRemove": "{{biggerPercentageToRemove}}"
 }
@@ -698,7 +698,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressStableswap}}",
   "percentageToRemove": "{{biggerPercentageToRemove}}"
 }
@@ -711,7 +711,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressOmnipool}}",
   "percentageToRemove": "{{smallPercentageToRemove}}"
 }

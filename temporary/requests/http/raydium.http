@@ -78,7 +78,7 @@ Content-Type: application/json
 {
   "chain": "{{chain}}",
   "network": "{{network}}",
-  "privateKey": "{{walletMnemonic}}"
+  "privateKey": "{{$processEnv %walletMnemonic}}"
 }
 
 ###
@@ -89,7 +89,7 @@ Content-Type: application/json
 
 {
   "chain": "{{chain}}",
-  "address": "{{walletPublicKey}}"
+  "address": "{{$processEnv %walletPublicKey}}"
 }
 
 ###
@@ -167,7 +167,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "address": "{{walletPublicKey}}"
+  "address": "{{$processEnv %walletPublicKey}}"
 }
 
 ###
@@ -178,7 +178,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "address": "{{walletPublicKey}}",
+  "address": "{{$processEnv %walletPublicKey}}",
   "tokenSymbols": "{{nativeTokenSymbol}}"
 }
 
@@ -190,7 +190,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "address": "{{walletPublicKey}}",
+  "address": "{{$processEnv %walletPublicKey}}",
   "tokenSymbols": ["{{quoteTokenSymbol}}"]
 }
 
@@ -201,7 +201,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "address": "{{walletPublicKey}}",
+  "address": "{{$processEnv %walletPublicKey}}",
   "tokenSymbols": ["{{nativeTokenSymbol}}", "{{baseTokenSymbol}}", "{{quoteTokenSymbol}}"]
 }
 
@@ -276,7 +276,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "baseToken": "{{baseTokenSymbol}}",
   "quoteToken": "{{quoteTokenSymbol}}",
   "amount": "{{amount}}",
@@ -294,7 +294,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddress}}",
   "baseTokenAmount": "{{baseTokenAmount}}",
   "quoteTokenAmount": "{{quoteTokenAmount}}",
@@ -309,7 +309,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddress}}",
   "percentageToRemove": "{{percentageToRemove}}"
 }

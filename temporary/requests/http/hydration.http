@@ -421,6 +421,15 @@ Content-Type: application/json
 
 ###
 
+# GET /{{connector}}/amm/quote-liquidity - HYDRATION Omnipool
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddressOmnipool}}&baseTokenAmount={{mediumBaseTokenAmount}}&quoteTokenAmount={{mediumQuoteTokenAmount}}&slippagePct={{slippagePercentage}}
+Content-Type: application/json
+
+{
+}
+
+###
+
 # POST /{{connector}}/amm/execute-swap - HYDRATION XYK BUYING MEDIUM AMOUNT
 POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
 Content-Type: application/json

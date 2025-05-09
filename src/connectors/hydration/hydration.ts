@@ -144,25 +144,28 @@ export class Hydration {
         return null;
       }
 
-      // Check if it's an omnipool
-      const isOmnipool = poolData.type?.toLowerCase() === POOL_TYPE.OMNIPOOL;
+      // Check if it's an omnipool - add null check for type
+      const poolType = poolData.type || 'xyk'; // Default to xyk if type is null
+      const isOmnipool = poolType.toLowerCase() === POOL_TYPE.OMNIPOOL;
 
       if (isOmnipool) {
-        // For omnipool, return all available tokens
-        const tokens = poolData.tokens
-          .map(token => token.symbol);
-        
+        // For omnipool, use hub asset (H2O) as both base and quote token
+        const hubAsset = this.polkadot.getToken('H2O');
+        if (!hubAsset) {
+          throw new Error('Hub asset (H2O) not found');
+        }
+
         return {
           address: poolData.address,
-          baseTokenAddress: null,
-          quoteTokenAddress: null,
+          baseTokenAddress: hubAsset.address,
+          quoteTokenAddress: hubAsset.address,
           feePct: 500/10000, // Default fee for omnipool
           price: 1, // Default price for omnipool
           baseTokenAmount: 0,
           quoteTokenAmount: 0,
           poolType: POOL_TYPE.OMNIPOOL,
           id: poolData.id,
-          tokens: tokens
+          tokens: poolData.tokens.map(token => token.symbol)
         };
       }
 
@@ -516,7 +519,7 @@ export class Hydration {
       }
 
       const currentPrice = poolInfo.price || 10;
-      const poolType = poolInfo.poolType;
+      const poolType = poolInfo.poolType?.toLowerCase() || 'xyk'; // Default to xyk if type is null
 
       if (!amount || amount <= 0) {
         logger.warn(`Invalid amount provided: ${amount}, using default value 1`);
@@ -528,7 +531,7 @@ export class Hydration {
       let baseTokenAmount = 0;
       let quoteTokenAmount = 0;
 
-      if (poolType.toLowerCase().includes('stable')) {
+      if (poolType.includes('stable')) {
         if (amountType === 'base') {
           baseTokenAmount = amount;
           quoteTokenAmount = amount * currentPrice;
@@ -536,7 +539,7 @@ export class Hydration {
           quoteTokenAmount = amount;
           baseTokenAmount = amount / currentPrice;
         }
-      } else if (poolType.toLowerCase().includes('xyk') || poolType.toLowerCase().includes('constantproduct')) {
+      } else if (poolType.includes('xyk') || poolType.includes('constantproduct')) {
         if (amountType === 'base') {
           baseTokenAmount = amount;
           switch (strategyType) {
@@ -578,7 +581,7 @@ export class Hydration {
               baseTokenAmount = quoteTokenAmount / currentPrice;
           }
         }
-      } else if (poolType.toLowerCase().includes('omni')) {
+      } else if (poolType.includes('omni')) {
         if (amountType === 'base') {
           baseTokenAmount = amount;
           const pricePosition = (currentPrice - lowerPrice) / (upperPrice - lowerPrice);
@@ -638,11 +641,11 @@ export class Hydration {
       quoteTokenAmount = Number(quoteTokenAmount) || 0;
 
       let liquidity = 0;
-      if (poolType.toLowerCase().includes('stable')) {
+      if (poolType.includes('stable')) {
         liquidity = Math.sqrt(baseTokenAmount * quoteTokenAmount * currentPrice);
-      } else if (poolType.toLowerCase().includes('xyk') || poolType.toLowerCase().includes('constantproduct')) {
+      } else if (poolType.includes('xyk') || poolType.includes('constantproduct')) {
         liquidity = Math.sqrt(baseTokenAmount * quoteTokenAmount);
-      } else if (poolType.toLowerCase().includes('omni')) {
+      } else if (poolType.includes('omni')) {
         liquidity = Math.sqrt(baseTokenAmount * quoteTokenAmount) *
           (1 + Math.min(0.2, Math.abs(currentPrice - (lowerPrice + upperPrice) / 2) / ((upperPrice - lowerPrice) / 2)));
       } else {
@@ -1241,9 +1244,18 @@ export class Hydration {
       throw new Error(`Pool not found: ${poolAddress}`);
     }
 
+    // Validate pool info
+    if (!poolInfo.baseTokenAddress || !poolInfo.quoteTokenAddress) {
+      throw new Error('Invalid pool info: missing token addresses');
+    }
+
     // Get token symbols
     const baseTokenSymbol = await this.getTokenSymbol(poolInfo.baseTokenAddress);
     const quoteTokenSymbol = await this.getTokenSymbol(poolInfo.quoteTokenAddress);
+
+    if (!baseTokenSymbol || !quoteTokenSymbol) {
+      throw new Error('Failed to get token symbols');
+    }
 
     logger.info(`Preparing liquidity quote for ${baseTokenSymbol}/${quoteTokenSymbol} pool`);
     
@@ -1251,13 +1263,15 @@ export class Hydration {
     const currentPrice = poolInfo.price || 10;
     let priceRange = 0.05; // Default 5%
     
+    // Safely get pool type with fallback
+    const poolType = (poolInfo.poolType || '').toLowerCase();
+    
     // Adjust price range based on pool type
-    if (poolInfo.poolType?.toLowerCase().includes('stable')) {
+    if (poolType.includes('stable')) {
       priceRange = 0.005; // 0.5% for stable pools
-    } else if (poolInfo.poolType?.toLowerCase().includes('xyk') || 
-              poolInfo.poolType?.toLowerCase().includes('constantproduct')) {
+    } else if (poolType.includes('xyk') || poolType.includes('constantproduct')) {
       priceRange = 0.05; // 5% for XYK pools
-    } else if (poolInfo.poolType?.toLowerCase().includes('omni')) {
+    } else if (poolType.includes('omni')) {
       priceRange = 0.15; // 15% for Omnipool (wider range)
     }
     

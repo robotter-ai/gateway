@@ -408,3 +408,70 @@ export const HydrationGetSwapQuoteResponseSchema = Type.Composite([
   GetSwapQuoteResponse
 ], { $id: 'HydrationGetSwapQuoteResponse' });
 export type HydrationGetSwapQuoteResponse = Static<typeof HydrationGetSwapQuoteResponseSchema>;
+
+/**
+ * Request schema for getting position information
+ */
+export interface HydrationGetPositionInfoRequest {
+  network?: string;
+  poolAddress?: string;
+  baseToken?: string;
+  quoteToken?: string;
+  walletAddress: string;
+}
+
+/**
+ * Schema for position information response
+ */
+export interface HydrationPositionInfo {
+  poolAddress: string;
+  walletAddress: string;
+  baseTokenAddress: string;
+  quoteTokenAddress: string;
+  lpTokenAmount: number;
+  baseTokenAmount: number;
+  quoteTokenAmount: number;
+  price: number;
+}
+
+/**
+ * Schema for position information request
+ */
+export const HydrationGetPositionInfoRequestSchema = {
+  type: 'object',
+  required: ['walletAddress'],
+  properties: {
+    network: { type: 'string', default: 'mainnet' },
+    poolAddress: { type: 'string' },
+    baseToken: { type: 'string' },
+    quoteToken: { type: 'string' },
+    walletAddress: { type: 'string' },
+  },
+};
+
+/**
+ * Schema for position information response
+ */
+export const HydrationPositionInfoSchema = {
+  type: 'object',
+  required: [
+    'poolAddress',
+    'walletAddress',
+    'baseTokenAddress',
+    'quoteTokenAddress',
+    'lpTokenAmount',
+    'baseTokenAmount',
+    'quoteTokenAmount',
+    'price',
+  ],
+  properties: {
+    poolAddress: { type: 'string' },
+    walletAddress: { type: 'string' },
+    baseTokenAddress: { type: 'string' },
+    quoteTokenAddress: { type: 'string' },
+    lpTokenAmount: { type: 'number' },
+    baseTokenAmount: { type: 'number' },
+    quoteTokenAmount: { type: 'number' },
+    price: { type: 'number' },
+  },
+};

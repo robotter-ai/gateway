@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {Polkadot} from '../../chains/polkadot/polkadot';
 import {logger} from '../../services/logger';
 import {HydrationConfig} from './hydration.config';
@@ -1566,7 +1567,7 @@ export class Hydration {
 
       case POOL_TYPE.LBP:
         removeLiquidityTx = apiPromise.tx.lbp.removeLiquidity(
-          poolAddress
+         poolAddress
         );
         break;
 
@@ -1627,5 +1628,54 @@ export class Hydration {
       baseTokenAmountRemoved: baseTokenAmountRemoved.toNumber(),
       quoteTokenAmountRemoved: quoteTokenAmountRemoved.toNumber()
     };
+  }
+
+  /**
+   * Gets information about a user's position in a pool
+   * @param walletAddress - The user's wallet address
+   * @param poolAddress - The pool address
+   * @returns Position information including LP token amount and token amounts
+   */
+  public async getPositionInfo(
+    walletAddress: string,
+    poolAddress: string
+  ): Promise<{
+    lpTokenAmount: number;
+    baseTokenAmount: number;
+    quoteTokenAmount: number;
+  }> {
+    try {
+      // Get pool info
+      const poolInfo = await this.getPoolDetails(poolAddress);
+      if (!poolInfo) {
+        throw new Error(`Pool not found: ${poolAddress}`);
+      }
+
+      // Get user's LP token balance
+      const wallet = await this.polkadot.getWallet(walletAddress);
+      const balances = await this.polkadot.getBalance(wallet, [poolInfo.lpMint.address]);
+      const lpBalance = balances[poolInfo.lpMint.address] || 0;
+
+      if (lpBalance === 0) {
+        return {
+          lpTokenAmount: 0,
+          baseTokenAmount: 0,
+          quoteTokenAmount: 0,
+        };
+      }
+
+      // Calculate token amounts based on LP share
+      const baseTokenAmount = (lpBalance * poolInfo.baseTokenAmount) / (10 ** poolInfo.lpMint.decimals);
+      const quoteTokenAmount = (lpBalance * poolInfo.quoteTokenAmount) / (10 ** poolInfo.lpMint.decimals);
+
+      return {
+        lpTokenAmount: lpBalance,
+        baseTokenAmount,
+        quoteTokenAmount,
+      };
+    } catch (error) {
+      logger.error(`Error getting position info: ${error.message}`);
+      throw error;
+    }
   }
 }

@@ -475,3 +475,15 @@ export const HydrationPositionInfoSchema = {
     price: { type: 'number' },
   },
 };
+
+/**
+ * Schema for CLMM position information response
+ */
+export interface HydrationCLMMPositionInfo extends HydrationPositionInfo {
+  lowerPrice: number;
+  upperPrice: number;
+  fee: number;
+  liquidity: number;
+  tickLower: number;
+  tickUpper: number;
+}

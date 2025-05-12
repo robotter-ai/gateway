@@ -10,6 +10,7 @@ import { removeLiquidityRoute } from './routes/amm-routes/removeLiquidity';
 import { quoteLiquidityRoute } from './routes/amm-routes/quoteLiquidity';
 import { listPoolsRoute } from './routes/amm-routes/listPools';
 import { positionInfoRoute } from './routes/amm-routes/positionInfo';
+import { positionsOwnedRoute as clmmPositionsOwnedRoute } from './routes/clmm-routes/positionsOwned';
 
 /**
  * Registers all Hydration AMM routes to the Fastify instance.
@@ -29,6 +30,7 @@ export const hydrationAMMRoutes: FastifyPluginAsync = async (fastify) => {
   await fastify.register(addLiquidityRoute);
   await fastify.register(removeLiquidityRoute);
   await fastify.register(positionInfoRoute);
+  await fastify.register(clmmPositionsOwnedRoute);
 };
 
 /**

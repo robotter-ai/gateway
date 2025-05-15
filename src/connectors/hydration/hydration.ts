@@ -17,7 +17,7 @@ import {
 } from './hydration.types';
 import {KeyringPair} from '@polkadot/keyring/types';
 import {ApiPromise, HttpProvider, WsProvider} from '@polkadot/api';
-import {cryptoWaitReady} from '@polkadot/util-crypto';
+import {cryptoWaitReady, encodeAddress, decodeAddress} from '@polkadot/util-crypto';
 import {runWithRetryAndTimeout} from "../../chains/polkadot/polkadot.utils";
 import {PoolBase, Trade} from '@galacticcouncil/sdk/build/types/types';
 import {BigNumber, PoolService, PoolType, TradeRouter, TradeType} from "@galacticcouncil/sdk";
@@ -33,6 +33,9 @@ const POOL_TYPE = {
   STABLESWAP: 'stableswap',
   AAVE: 'aave'
 };
+
+// Hydration-specific constants
+const HYDRA_ADDRESS_PREFIX = 63;
 
 /**
  * Main class for interacting with the Hydration protocol on Polkadot
@@ -58,6 +61,8 @@ export class Hydration {
   private constructor() {
     this.config = HydrationConfig.config;
   }
+
+  lpDecimals = 18;
 
   /**
    * Get or create an instance of the Hydration class
@@ -1531,6 +1536,7 @@ export class Hydration {
     }
 
     // Calculate shares to remove
+    // eslint-disable-next-line prefer-const
     let percentageToRemoveBN = BigNumber(percentageToRemove.toString());
     let totalUserSharesInThePool: BigNumber;
     let userSharesToRemove: BigNumber;
@@ -1649,15 +1655,21 @@ export class Hydration {
     if (!walletAddress) {
       throw new Error('Wallet address parameter is required');
     }
-
     validatePolkadotAddress(walletAddress);
-
+  
+    // Convert wallet address to Hydration format
+    const hydraWalletAddress = encodeAddress(
+      decodeAddress(walletAddress),
+      HYDRA_ADDRESS_PREFIX
+    );
+  
     if (!poolAddress && (!baseToken || !quoteToken)) {
       throw new Error(
         'Either poolAddress or both baseToken and quoteToken must be provided',
       );
     }
-
+  
+    // Resolve pool address
     let poolAddressToUse = poolAddress;
     if (!poolAddressToUse) {
       const pools = await this.listPools([], [baseToken, quoteToken]);
@@ -1666,136 +1678,88 @@ export class Hydration {
       }
       poolAddressToUse = pools[0].address;
     }
-
-    // Get pool info directly from pool service first
+  
+    // Fetch pool data
     const poolService = await this.getPoolService();
-    const pools = await this.poolServiceGetPools(poolService, []);
-    const poolData = pools.find(pool => pool.address === poolAddressToUse);
-
+    const allPools = await this.poolServiceGetPools(poolService, []);
+    const poolData = allPools.find(p => p.address === poolAddressToUse);
     if (!poolData) {
       throw new Error(`Pool not found: ${poolAddressToUse}`);
     }
-
-    // Get pool details
+  
     const poolInfo = await this.getPoolDetails(poolAddressToUse);
     if (!poolInfo) {
       throw new Error(`Pool not found: ${poolAddressToUse}`);
     }
-
-    // Ensure we have valid token addresses
-    if (!poolInfo.quoteTokenAddress || poolInfo.quoteTokenAddress === '0') {
+  
+    // Ensure valid quote token
+    if (
+      !poolInfo.quoteTokenAddress ||
+      poolInfo.quoteTokenAddress === this.polkadot.getNativeToken().address
+    ) {
       if (poolData.tokens.length > 1) {
         poolInfo.quoteTokenAddress = poolData.tokens[1].id.toString();
-        logger.info(`Updated quote token address to: ${poolInfo.quoteTokenAddress}`);
       } else {
         throw new Error('Invalid pool configuration: missing quote token');
       }
     }
-
-    logger.info(`Getting position info for pool ${poolAddressToUse}:`, {
-      poolType: poolInfo.poolType,
-      baseTokenAddress: poolInfo.baseTokenAddress,
-      quoteTokenAddress: poolInfo.quoteTokenAddress,
-      baseTokenAmount: poolInfo.baseTokenAmount,
-      quoteTokenAmount: poolInfo.quoteTokenAmount
-    });
-
-    const apiPromise = await this.getApiPromise();
-    const lpTokenBalance = await apiPromise.query.tokens.accounts(
-      walletAddress,
-      poolInfo.lpMint.address,
-    );
-
-    const totalSupply = await apiPromise.query.tokens.totalIssuance(
-      poolInfo.lpMint.address,
-    );
-
-    logger.info(`LP token balances:`, {
-      userBalance: lpTokenBalance.free.toString(),
-      totalSupply: totalSupply.toString(),
-      lpMintAddress: poolInfo.lpMint.address
-    });
-
-    const userLpBalance = new BigNumber(lpTokenBalance.free.toString());
-    const totalLpSupply = new BigNumber(totalSupply.toString());
-
+  
+    const api = await this.getApiPromise();
     let lpTokenAmount = new BigNumber(0);
     let baseTokenAmount = new BigNumber(0);
     let quoteTokenAmount = new BigNumber(0);
+  
+    // Get LP token balance
+    const lpBalanceRaw = await api.query.tokens.accounts(
+      hydraWalletAddress,
+      poolInfo.lpMint.address
+    );
+    const userLpBalance = new BigNumber(lpBalanceRaw.free.toString());
+    const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolInfo.lpMint.address)).toString());
 
     if (userLpBalance.gt(0) && totalLpSupply.gt(0)) {
-      const userShare = userLpBalance.dividedBy(totalLpSupply);
-      
-      logger.info(`Calculated user share:`, {
-        userShare: userShare.toString(),
-        userLpBalance: userLpBalance.toString(),
-        totalLpSupply: totalLpSupply.toString()
-      });
+      // Normalize LP balances to human units
+      const lpDecimals = poolInfo.lpMint.decimals || this.lpDecimals;
+      const userLpHuman = userLpBalance.dividedBy(
+        new BigNumber(10).pow(lpDecimals)
+      );
+      const totalLpHuman = totalLpSupply.dividedBy(
+        new BigNumber(10).pow(lpDecimals)
+      );
+      const userShareHuman = userLpHuman.dividedBy(totalLpHuman);
 
-      lpTokenAmount = userLpBalance;
-      
-      // Get token amounts from pool data
-      const poolBaseAmount = new BigNumber(poolData.tokens[0].balance.toString());
-      const poolQuoteAmount = new BigNumber(poolData.tokens[1].balance.toString());
-      
-      logger.info(`Pool token amounts from pool data:`, {
-        poolBaseAmount: poolBaseAmount.toString(),
-        poolQuoteAmount: poolQuoteAmount.toString(),
-        userShare: userShare.toString()
-      });
+      lpTokenAmount = userLpHuman;
 
-      baseTokenAmount = poolBaseAmount.multipliedBy(userShare);
-      quoteTokenAmount = poolQuoteAmount.multipliedBy(userShare);
+      // Pool reserves in human units from poolInfo
+      const poolBaseHuman = new BigNumber(poolInfo.baseTokenAmount);
+      const poolQuoteHuman = new BigNumber(poolInfo.quoteTokenAmount);
 
-      logger.info(`Calculated token amounts before decimal conversion:`, {
-        baseTokenAmount: baseTokenAmount.toString(),
-        quoteTokenAmount: quoteTokenAmount.toString()
-      });
-    } else {
-      logger.warn(`User has no LP tokens or total supply is zero:`, {
-        userLpBalance: userLpBalance.toString(),
-        totalLpSupply: totalLpSupply.toString()
-      });
+      // Calculate user's share of pool reserves
+      const rawBaseHuman = poolBaseHuman.multipliedBy(userShareHuman);
+      const rawQuoteHuman = poolQuoteHuman.multipliedBy(userShareHuman);
+
+      // Round according to token decimals
+      baseTokenAmount = rawBaseHuman.decimalPlaces(
+        poolData.tokens[0].decimals,
+        BigNumber.ROUND_DOWN
+      );
+      quoteTokenAmount = rawQuoteHuman.decimalPlaces(
+        poolData.tokens[1].decimals,
+        BigNumber.ROUND_DOWN
+      );
     }
 
-    // Get token decimals from pool data
-    const lpDecimals = poolInfo.lpMint.decimals || 18;
-    const baseTokenDecimals = poolData.tokens[0].decimals;
-    const quoteTokenDecimals = poolData.tokens[1].decimals;
-
-    logger.info(`Token decimals:`, {
-      lpDecimals,
-      baseTokenDecimals,
-      quoteTokenDecimals
-    });
-
-    const formattedLpAmount = lpTokenAmount.dividedBy(new BigNumber(10).pow(lpDecimals)).toNumber();
-    const formattedBaseAmount = baseTokenAmount.dividedBy(new BigNumber(10).pow(baseTokenDecimals)).toNumber();
-    
-    // Handle small numbers better by using a minimum precision
-    const quoteTokenAmountBN = quoteTokenAmount.dividedBy(new BigNumber(10).pow(quoteTokenDecimals));
-    const formattedQuoteAmount = quoteTokenAmountBN.isLessThan(0.000001) 
-      ? Number(quoteTokenAmountBN.toFixed(6)) 
-      : quoteTokenAmountBN.toNumber();
-
-    logger.info(`Final formatted amounts:`, {
-      lpAmount: formattedLpAmount,
-      baseAmount: formattedBaseAmount,
-      quoteAmount: formattedQuoteAmount,
-      rawQuoteAmount: quoteTokenAmount.toString(),
-      quoteDecimals: quoteTokenDecimals,
-      quoteTokenAmountBN: quoteTokenAmountBN.toString()
-    });
-
+    await api.disconnect();
+  
     return {
       poolAddress: poolAddressToUse,
-      walletAddress,
+      walletAddress: hydraWalletAddress,
       baseTokenAddress: poolInfo.baseTokenAddress,
       quoteTokenAddress: poolInfo.quoteTokenAddress,
-      lpTokenAmount: formattedLpAmount,
-      baseTokenAmount: formattedBaseAmount,
-      quoteTokenAmount: formattedQuoteAmount,
-      price: Number(new BigNumber(poolInfo.price).toFixed(6)),
+      lpTokenAmount: lpTokenAmount.toNumber(),
+      baseTokenAmount: baseTokenAmount.toNumber(),
+      quoteTokenAmount: quoteTokenAmount.toNumber(),
+      price: new BigNumber(poolInfo.price).toNumber(),
     };
   }
 }

@@ -51,7 +51,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{{{$processEnv %walletPublicKey}}}}",
   "baseToken": "{{baseTokenSymbol}}",
   "quoteToken": "{{quoteTokenSymbol}}",
   "amount": "{{amount}}",
@@ -68,7 +68,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{{{$processEnv %walletPublicKey}}}}",
   "lowerPrice": "{{lowerPrice}}",
   "upperPrice": "{{upperPrice}}",
   "poolAddress": "{{poolAddress}}",
@@ -85,7 +85,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{{{$processEnv %walletPublicKey}}}}",
   "positionAddress": "{{positionAddress}}",
   "baseTokenAmount": "{{baseTokenAmount}}",
   "quoteTokenAmount": "{{quoteTokenAmount}}",
@@ -100,7 +100,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{{{$processEnv %walletPublicKey}}}}",
   "positionAddress": "{{positionAddress}}",
   "percentageToRemove": "{{percentageToRemove}}"
 }
@@ -113,7 +113,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{{{$processEnv %walletPublicKey}}}}",
   "positionAddress": "{{positionAddress}}"
 }
 
@@ -125,7 +125,7 @@ Content-Type: application/json
 
 {
   "network": "{{network}}",
-  "walletAddress": "{{walletPublicKey}}",
+  "walletAddress": "{{{{$processEnv %walletPublicKey}}}}",
   "positionAddress": "{{positionAddress}}"
 }
 

@@ -24,6 +24,7 @@ interface ErrorResponse {
  * @param walletAddress - The user's wallet address
  * @param poolAddress - The pool address to remove liquidity from
  * @param percentageToRemove - Percentage to remove (1-100)
+ * @param tokenId - The token ID to remove liquidity from
  * @returns Details of the liquidity removal operation
  */
 export async function removeLiquidity(
@@ -31,7 +32,8 @@ export async function removeLiquidity(
   network: string,
   walletAddress: string,
   poolAddress: string,
-  percentageToRemove: number
+  percentageToRemove: number,
+  tokenId?: string | number
 ): Promise<HydrationRemoveLiquidityResponse> {
   // Validate inputs
   if (percentageToRemove <= 0 || percentageToRemove > 100) {
@@ -47,10 +49,18 @@ export async function removeLiquidity(
     const result = await hydration.removeLiquidity(
       walletAddress,
       poolAddress,
-      percentageToRemove
+      percentageToRemove,
+      tokenId
     );
     
-    return result;
+    return {
+      signature: result.signature,
+      fee: result.fee,
+      baseTokenAmountRemoved: result.baseTokenAmountRemoved,
+      quoteTokenAmountRemoved: result.quoteTokenAmountRemoved,
+      sharesPercentageRemoved: result.sharesPercentageRemoved,
+      sharesAmountRemoved: result.sharesAmountRemoved
+    };
   } catch (error) {
     if (error.message?.includes('not found')) {
       throw new Error(error.message);
@@ -104,7 +114,8 @@ export const removeLiquidityRoute: FastifyPluginAsync = async (fastify) => {
             ...HydrationRemoveLiquidityRequestSchema.properties,
             network: { type: 'string', default: 'mainnet' },
             poolAddress: { type: 'string', examples: ['hydration-pool-0'] },
-            percentageToRemove: { type: 'number', examples: [50] }
+            percentageToRemove: { type: 'number', examples: [50] },
+            tokenId: { type: ['string', 'number'], examples: ['31'] }
           }
         },
         response: {
@@ -117,7 +128,7 @@ export const removeLiquidityRoute: FastifyPluginAsync = async (fastify) => {
     },
     async (request, reply) => {
       try {
-        const { network, walletAddress, poolAddress, percentageToRemove } = request.body as HydrationRemoveLiquidityRequest;
+        const { network, walletAddress, poolAddress, percentageToRemove, tokenId } = request.body as HydrationRemoveLiquidityRequest;
         const networkToUse = network || 'mainnet';
         
         const result = await removeLiquidity(
@@ -125,7 +136,8 @@ export const removeLiquidityRoute: FastifyPluginAsync = async (fastify) => {
           networkToUse,
           walletAddress,
           poolAddress,
-          percentageToRemove
+          percentageToRemove,
+          tokenId
         );
         
         return reply.send(result);

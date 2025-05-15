@@ -364,16 +364,27 @@ export type HydrationQuoteLiquidityResponse = Static<typeof HydrationQuoteLiquid
 /**
  * Hydration remove liquidity request schema
  */
-export const HydrationRemoveLiquidityRequestSchema = Type.Composite([
-  RemoveLiquidityRequest
-], { $id: 'HydrationRemoveLiquidityRequest' });
+export const HydrationRemoveLiquidityRequestSchema = Type.Object({
+  network: Type.Optional(Type.String()),
+  poolAddress: Type.String(),
+  baseToken: Type.Optional(Type.String()),
+  quoteToken: Type.Optional(Type.String()),
+  walletAddress: Type.String(),
+  percentageToRemove: Type.Number(),
+  tokenId: Type.Optional(Type.Union([Type.String(), Type.Number()]))
+}, { $id: 'HydrationRemoveLiquidityRequest' });
+
 export type HydrationRemoveLiquidityRequest = Static<typeof HydrationRemoveLiquidityRequestSchema>;
 
 /**
  * Hydration remove liquidity response schema
  */
 export const HydrationRemoveLiquidityResponseSchema = Type.Composite([
-  RemoveLiquidityResponse
+  RemoveLiquidityResponse,
+  Type.Object({
+    sharesPercentageRemoved: Type.Number(),
+    sharesAmountRemoved: Type.Number()
+  })
 ], { $id: 'HydrationRemoveLiquidityResponse' });
 export type HydrationRemoveLiquidityResponse = Static<typeof HydrationRemoveLiquidityResponseSchema>;
 
@@ -408,3 +419,15 @@ export const HydrationGetSwapQuoteResponseSchema = Type.Composite([
   GetSwapQuoteResponse
 ], { $id: 'HydrationGetSwapQuoteResponse' });
 export type HydrationGetSwapQuoteResponse = Static<typeof HydrationGetSwapQuoteResponseSchema>;
+
+/**
+ * Represents a position in the Hydration protocol
+ */
+export interface HydrationPosition {
+  positionId: string;
+  assetId: string;
+  owner: string;
+  shares: string;
+  amount: string;
+  price?: number;
+}

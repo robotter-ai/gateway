@@ -1,0 +1,13 @@
+{
+  "network": "polkadot",
+  "connector": "hydration",
+  "poolAddress": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+  "token0": "DOT",
+  "token1": "USDT",
+  "reserve0": "10000000000000000000",
+  "reserve1": "10000000000",
+  "totalSupply": "1000000000000000000",
+  "fee": "0.003",
+  "volume24h": "1000000000000",
+  "tvl": "20000000000000000000"
+} 

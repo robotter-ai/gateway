@@ -1,0 +1,9 @@
+{
+  "hash": "0x123abc...",
+  "tokenIn": "DOT",
+  "tokenOut": "USDT",
+  "amountIn": "1000000000000",
+  "amountOut": "990000000",
+  "from": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+  "to": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
+}

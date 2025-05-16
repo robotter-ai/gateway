@@ -1503,7 +1503,6 @@ export class Hydration {
       case POOL_TYPE.XYK: {
         // Handle XYK liquidity removal
         const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
-        const shareTokenRaw = shareTokenId.toString();
         const baseToken = this.polkadot.getToken(pool.baseTokenAddress);
         
         if (!baseToken) {
@@ -1540,86 +1539,63 @@ export class Hydration {
 
       case POOL_TYPE.OMNIPOOL: {
         try {
-          // Get pool data
-          const poolService = await this.getPoolService();
-          const allPools = await this.poolServiceGetPools(poolService, []);
-          const poolData = allPools.find(p => p.address === poolAddress || p.id === poolAddress);
-          
-          if (!poolData) {
-            throw new Error(`Could not find pool data for ${poolAddress}`);
-          }
-          
           // Require tokenId to be specified
           if (!tokenId) {
             throw new Error('Token ID must be specified for omnipool liquidity removal');
           }
 
-          // Convert tokenId to string for comparison
-          const tokenIdStr = tokenId.toString();
+          // Get user positions in parallel with pool data
+          const [userPositions, poolData] = await Promise.all([
+            this.getPositionsOwned(walletAddress, tokenId.toString()),
+            this.getPoolService().then(service => 
+              this.poolServiceGetPools(service, [])
+                .then(pools => pools.find(p => p.address === poolAddress || p.id === poolAddress))
+            )
+          ]);
           
-          // Find the target token
-          const targetToken = poolData.tokens.find(t => t.id === tokenIdStr);
-          if (!targetToken) {
-            throw new Error(`Token with ID ${tokenIdStr} not found in pool`);
+          if (!poolData) {
+            throw new Error(`Could not find pool data for ${poolAddress}`);
           }
-          
-          const userPositions = await this.getPositionsOwned(walletAddress, tokenIdStr);
           
           if (userPositions.length === 0) {
-            throw new Error(`No positions found for ${targetToken.symbol} owned by ${walletAddress}`);
+            throw new Error(`No positions found for token ${tokenId} owned by ${walletAddress}`);
           }
           
-          // Calculate total shares across all positions
-          const totalShares = userPositions.reduce(
-            (sum, pos) => sum.plus(new BigNumber(pos.shares)),
-            new BigNumber(0)
+          // Calculate total shares and shares to remove in one pass
+          const { totalShares, totalSharesToRemove } = userPositions.reduce(
+            (acc, pos) => {
+              const shares = new BigNumber(pos.shares);
+              return {
+                totalShares: acc.totalShares.plus(shares),
+                totalSharesToRemove: acc.totalSharesToRemove.plus(
+                  shares.multipliedBy(percentageToRemove).dividedBy(100)
+                )
+              };
+            },
+            { totalShares: new BigNumber(0), totalSharesToRemove: new BigNumber(0) }
           );
           
-          // Calculate total shares to remove
-          const totalSharesToRemove = totalShares
-            .multipliedBy(percentageToRemove)
-            .dividedBy(100)
-            .integerValue(BigNumber.ROUND_DOWN);
-          
           // Store the total shares to remove for the response
-          userSharesToRemove = totalSharesToRemove;
+          userSharesToRemove = totalSharesToRemove.integerValue(BigNumber.ROUND_DOWN);
           
-          let remainingSharesToRemove = totalSharesToRemove;
-          let currentPositionIndex = 0;
+          // Create transaction for the first position that has enough shares
+          const position = userPositions.find(pos => 
+            new BigNumber(pos.shares).gte(userSharesToRemove)
+          ) || userPositions[0];
           
-          // Remove liquidity from positions until we've removed the requested amount
-          while (remainingSharesToRemove.gt(0) && currentPositionIndex < userPositions.length) {
-            const position = userPositions[currentPositionIndex];
-            const positionId = BigInt(position.positionId);
-            const positionShares = new BigNumber(position.shares);
-            
-            // Calculate how many shares to remove from this position
-            const sharesToRemoveFromPosition = BigNumber.min(
-              remainingSharesToRemove,
-              positionShares
+          const positionId = BigInt(position.positionId);
+          
+          // Create transaction
+          if (apiPromise.tx.omnipool.withdraw) {
+            removeLiquidityTx = apiPromise.tx.omnipool.withdraw(
+              positionId,
+              userSharesToRemove.toString()
             );
-            
-            // Create transaction for this position
-            if (apiPromise.tx.omnipool.withdraw) {
-              removeLiquidityTx = apiPromise.tx.omnipool.withdraw(
-                positionId,
-                sharesToRemoveFromPosition.toString()
-              );
-            } else {
-              removeLiquidityTx = apiPromise.tx.omnipool.removeLiquidity(
-                positionId,
-                sharesToRemoveFromPosition.toString()
-              );
-            }
-            
-            // Update remaining shares to remove
-            remainingSharesToRemove = remainingSharesToRemove.minus(sharesToRemoveFromPosition);
-            currentPositionIndex++;
-            
-            // If we've removed all requested shares, break
-            if (remainingSharesToRemove.lte(0)) {
-              break;
-            }
+          } else {
+            removeLiquidityTx = apiPromise.tx.omnipool.removeLiquidity(
+              positionId,
+              userSharesToRemove.toString()
+            );
           }
           
           break;
@@ -1786,12 +1762,9 @@ export class Hydration {
       decodeAddress(walletAddress),
       HYDRA_ADDRESS_PREFIX
     );
-    logger.info(`Original wallet address: ${walletAddress}`);
-    logger.info(`Converted to Hydration format: ${hydraWalletAddress}`);
     
     // Get the NFT collection ID for omnipool positions
     const collectionId = await apiPromise.consts.omnipool.nftCollectionId;
-    logger.info(`Omnipool NFT collection ID: ${collectionId.toString()}`);
     
     // Get all positions and their NFT ownership in parallel
     const [positions, uniques] = await Promise.all([
@@ -1799,75 +1772,40 @@ export class Hydration {
       apiPromise.query.uniques.asset.entries(collectionId.toString())
     ]);
     
-    logger.info(`Found ${positions.length} total positions and ${uniques.length} NFTs`);
-    logger.info(`Looking for positions with tokenId: ${tokenId} and owner: ${hydraWalletAddress}`);
+    // Create a map of position IDs to NFT owners
+    const nftOwners = new Map(
+      uniques.map(([key, value]) => {
+        const [, itemId] = key.args;
+        const owner = value.unwrap()?.owner.toString();
+        return [itemId.toString(), owner];
+      })
+    );
     
-    // Log a sample of NFT owners to check format
-    const sampleOwners = uniques.slice(0, 3).map(([key, value]) => {
-      const [, itemId] = key.args;
-      const owner = value.unwrap()?.owner.toString();
-      return { positionId: itemId.toString(), owner };
-    });
-    logger.info('Sample NFT owners:', sampleOwners);
-    
-    // Map positions to their owners using the NFT data
-    const userPositions = positions
+    // Filter positions
+    return positions
       .map(([idRaw, dataRaw]) => {
         const positionId = idRaw.args[0].toString();
         const positionData = dataRaw.toHuman() as Record<string, any>;
+        const nftOwner = nftOwners.get(positionId);
         
-        // Find the NFT owner for this position
-        const nftOwner = uniques
-          .find(([key]) => {
-            const [, itemId] = key.args;
-            return itemId.toString() === positionId;
-          })?.[1]
-          ?.unwrap()
-          ?.owner.toString();
-        
-        if (!nftOwner) {
-          logger.warn(`No NFT owner found for position ${positionId}`);
+        if (!nftOwner || positionData?.assetId !== tokenId || nftOwner !== hydraWalletAddress) {
           return null;
         }
         
-        // Log positions that match the token ID
-        if (positionData?.assetId === tokenId) {
-          logger.info(`Found position ${positionId} with token ${tokenId}:`, {
-            nftOwner,
-            hydraWalletAddress,
-            isOwnerMatch: nftOwner === hydraWalletAddress,
-            shares: positionData?.shares?.toString().replace(/,/g, '') || '0'
-          });
+        const shares = positionData?.shares?.toString().replace(/,/g, '') || '0';
+        if (new BigNumber(shares).lte(0)) {
+          return null;
         }
         
         return {
           positionId,
-          assetId: positionData?.assetId,
+          assetId: positionData.assetId,
           owner: nftOwner,
-          shares: positionData?.shares?.toString().replace(/,/g, '') || '0',
+          shares,
           amount: positionData?.amount?.toString().replace(/,/g, '') || '0',
           price: positionData?.price
         };
       })
-      .filter((pos): pos is NonNullable<typeof pos> => {
-        if (pos === null) return false;
-        
-        const matchesToken = pos.assetId === tokenId;
-        const matchesOwner = pos.owner === hydraWalletAddress;
-        const hasShares = new BigNumber(pos.shares).gt(0);
-        
-        if (matchesToken && !matchesOwner) {
-          logger.info(`Position ${pos.positionId} matches token but not owner:`, {
-            positionOwner: pos.owner,
-            hydraWalletAddress,
-            shares: pos.shares
-          });
-        }
-        
-        return matchesToken && matchesOwner && hasShares;
-      });
-
-    logger.info(`Found ${userPositions.length} positions for token ${tokenId} owned by ${walletAddress}:`, userPositions);
-    return userPositions;
+      .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
   }
 }

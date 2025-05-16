@@ -630,7 +630,7 @@ export class Polkadot {
     // Get the payment info for the transaction
     const paymentInfo = await transferTx.paymentInfo(feeAddress);
     
-    // Convert the fee to human readable format (HDX)
+    // Convert the fee to human readable format (feePaymentToken)
     const fee = new BigNumber(paymentInfo.partialFee.toString()).div(new BigNumber(10).pow(feePaymentToken.decimals));
     
     // Calculate gas price based on fee and gas limit

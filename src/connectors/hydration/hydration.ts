@@ -262,10 +262,8 @@ export class Hydration {
       throw new Error(`Token not found: ${!baseToken ? baseTokenSymbol : quoteTokenSymbol}`);
     }
 
-    // Find token IDs in the Hydration protocol
-    const assets = this.getAllTokens();
-    const baseTokenId = assets.find(a => a.symbol === baseToken.symbol)?.address;
-    const quoteTokenId = assets.find(a => a.symbol === quoteToken.symbol)?.address;
+    const baseTokenId = baseToken.address;
+    const quoteTokenId = quoteToken.address;
 
     if (!baseTokenId || !quoteTokenId) {
       throw new Error(`Token not supported in Hydration: ${!baseTokenId ? baseToken.symbol : quoteToken.symbol}`);
@@ -343,23 +341,10 @@ export class Hydration {
       percentage: swap.tradeFeePct || 100
     }));
 
-    let gasPrice = 0;
-    let gasLimit = 0;
-    let gasCost = 0;
-
-    try {
-      const tradeFee = Number(tradeHuman.tradeFee);
-      if (tradeFee > 0) {
-        gasPrice = tradeFee / 1000;
-        gasLimit = 200000;
-        gasCost = tradeFee;
-      }
-    } catch (error) {
-      logger.warn(`Failed to get gas information: ${error.message}, using defaults`);
-      gasPrice = 0.0001;
-      gasLimit = 200000;
-      gasCost = gasPrice * gasLimit;
-    }
+    const gasPrice = this.config.gasPrice;
+    const gasLimit = this.config.gasLimit;
+    const gasCost = this.config.gasCost;
+    const fee = gasCost;
 
     const baseTokenBalanceChange = side === 'BUY' ? estimatedAmountOut : estimatedAmountIn.multipliedBy(new BigNumber(-1));
     const quoteTokenBalanceChange = side === 'BUY' ? estimatedAmountIn.multipliedBy(new BigNumber(-1)) : estimatedAmountOut;
@@ -373,7 +358,7 @@ export class Hydration {
       quoteTokenBalanceChange: quoteTokenBalanceChange.toNumber(),
       price: price.toNumber(),
       route,
-      fee: Number(tradeHuman.tradeFee),
+      fee,
       gasPrice,
       gasLimit,
       gasCost

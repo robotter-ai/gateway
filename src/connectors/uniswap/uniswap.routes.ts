@@ -31,18 +31,18 @@ export const uniswapRoutes: FastifyPluginAsync = async (fastify) => {
 
   // Register CLMM routes (Uniswap V3)
   fastify.register(
-    async (clmmRouter) => {
-      await clmmRouter.register(require('./clmm-routes/poolInfo').default);
-      await clmmRouter.register(require('./clmm-routes/quoteSwap').default);
-      await clmmRouter.register(require('./clmm-routes/executeSwap').default);
-      await clmmRouter.register(require('./clmm-routes/positionInfo').default);
-      await clmmRouter.register(require('./clmm-routes/positionsOwned').default);
-      await clmmRouter.register(require('./clmm-routes/openPosition').default);
-      await clmmRouter.register(require('./clmm-routes/addLiquidity').default);
-      await clmmRouter.register(require('./clmm-routes/removeLiquidity').default);
-      await clmmRouter.register(require('./clmm-routes/collectFees').default);
-      await clmmRouter.register(require('./clmm-routes/closePosition').default);
-      await clmmRouter.register(require('./clmm-routes/quotePosition').default);
+    async (_clmmRouter) => {
+      // await clmmRouter.register(require('./clmm-routes/poolInfo').default);
+      // await clmmRouter.register(require('./clmm-routes/quoteSwap').default);
+      // await clmmRouter.register(require('./clmm-routes/executeSwap').default);
+      // await clmmRouter.register(require('./clmm-routes/positionInfo').default);
+      // await clmmRouter.register(require('./clmm-routes/positionsOwned').default);
+      // await clmmRouter.register(require('./clmm-routes/openPosition').default);
+      // await clmmRouter.register(require('./clmm-routes/addLiquidity').default);
+      // await clmmRouter.register(require('./clmm-routes/removeLiquidity').default);
+      // await clmmRouter.register(require('./clmm-routes/collectFees').default);
+      // await clmmRouter.register(require('./clmm-routes/closePosition').default);
+      // await clmmRouter.register(require('./clmm-routes/quotePosition').default);
     },
     { prefix: '/clmm' }
   );

@@ -1,0 +1,12 @@
+{
+  "address": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+  "poolType": "xyk",
+  "baseToken": "DOT",
+  "quoteToken": "USDT",
+  "baseTokenBalance": "10000000000000",
+  "quoteTokenBalance": "10000000000",
+  "baseTokenPrice": "1.0",
+  "quoteTokenPrice": "1000.0",
+  "totalSupply": "1000000000000",
+  "fee": 0.003
+}

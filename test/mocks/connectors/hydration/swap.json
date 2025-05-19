@@ -1,0 +1,13 @@
+{
+  "network": "polkadot",
+  "connector": "hydration",
+  "hash": "0x789...",
+  "from": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+  "tokenIn": "DOT",
+  "tokenOut": "USDT",
+  "amountIn": "1000000000000",
+  "amountOut": "1000000000",
+  "price": "1.0",
+  "fee": "3000000",
+  "status": "pending"
+} 

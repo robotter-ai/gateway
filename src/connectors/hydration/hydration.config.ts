@@ -26,6 +26,15 @@ export namespace HydrationConfig {
     
     /** Default allowed slippage percentage */
     allowedSlippage: string;
+
+    /** Gas price for the transaction */
+    gasPrice: number;
+
+    /** Gas limit for the transaction */
+    gasLimit: number;
+
+    /** Gas cost for the transaction */
+    gasCost: number;
   }
 
   const configManager = ConfigManagerV2.getInstance();
@@ -39,6 +48,9 @@ export namespace HydrationConfig {
     tradingTypes: ['AMM'],
     feePaymentCurrencySymbol: configManager.get('hydration.feePaymentCurrencySymbol'),
     allowedSlippage: configManager.get('hydration.allowedSlippage'),
+    gasPrice: 0.00000177,
+    gasLimit: 338667,
+    gasCost: 0.6, // in HDX
   };
 }
 

@@ -714,7 +714,7 @@ Content-Type: application/json
 
 ###
 
-# POST /{{connector}}/amm/remove-liquidity - HYDRATION Omnipool
+# POST /{{connector}}/amm/remove-liquidity - HYDRATION Omnipool with token ID
 POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/remove-liquidity
 Content-Type: application/json
 
@@ -722,7 +722,89 @@ Content-Type: application/json
   "network": "{{network}}",
   "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressOmnipool}}",
-  "percentageToRemove": "{{smallPercentageToRemove}}"
+  "percentageToRemove": "{{smallPercentageToRemove}}",
+  "tokenId": "31"
+}
+
+###
+
+# GET /{{connector}}/amm/position-info - XYK Pool
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressXyk}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/position-info - Stableswap Pool
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressStableswap}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/position-info - Omnipool
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressOmnipool}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/position-info - XYK with tokens
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/position-info - Stableswap with tokens
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/position-info - Omnipool with tokens
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{omnipoolBaseTokenSymbol}}&quoteToken={{omnipoolQuoteTokenSymbol}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/positions-owned - XYK Pool
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&tokenId={{poolAddressXyk}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/positions-owned - Stableswap Pool
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&tokenId={{poolAddressStableswap}}
+Content-Type: application/json
+
+{
+}
+
+###
+
+# GET /{{connector}}/amm/positions-owned - Omnipool
+GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&tokenId={{poolAddressOmnipool}}
+Content-Type: application/json
+
+{
 }
 
 ###

@@ -10,6 +10,7 @@ import {
   HydrationPositionInfo,
   HydrationQuoteLiquidityResponse,
   HydrationRemoveLiquidityResponse,
+  HydrationPosition,
   LiquidityQuote,
   PositionStrategyType,
   SwapQuote,
@@ -17,7 +18,8 @@ import {
 } from './hydration.types';
 import {KeyringPair} from '@polkadot/keyring/types';
 import {ApiPromise, HttpProvider, WsProvider} from '@polkadot/api';
-import {cryptoWaitReady, encodeAddress, decodeAddress} from '@polkadot/util-crypto';
+import {cryptoWaitReady} from '@polkadot/util-crypto';
+import {encodeAddress, decodeAddress} from '@polkadot/util-crypto';
 import {runWithRetryAndTimeout} from "../../chains/polkadot/polkadot.utils";
 import {PoolBase, Trade} from '@galacticcouncil/sdk/build/types/types';
 import {BigNumber, PoolService, PoolType, TradeRouter, TradeType} from "@galacticcouncil/sdk";
@@ -36,6 +38,8 @@ const POOL_TYPE = {
 
 // Hydration-specific constants
 const HYDRA_ADDRESS_PREFIX = 63;
+
+const LP_DECIMALS = 18;
 
 /**
  * Main class for interacting with the Hydration protocol on Polkadot
@@ -62,7 +66,6 @@ export class Hydration {
     this.config = HydrationConfig.config;
   }
 
-  lpDecimals = 18;
 
   /**
    * Get or create an instance of the Hydration class
@@ -273,10 +276,8 @@ export class Hydration {
       throw new Error(`Token not found: ${!baseToken ? baseTokenSymbol : quoteTokenSymbol}`);
     }
 
-    // Find token IDs in the Hydration protocol
-    const assets = this.getAllTokens();
-    const baseTokenId = assets.find(a => a.symbol === baseToken.symbol)?.address;
-    const quoteTokenId = assets.find(a => a.symbol === quoteToken.symbol)?.address;
+    const baseTokenId = baseToken.address;
+    const quoteTokenId = quoteToken.address;
 
     if (!baseTokenId || !quoteTokenId) {
       throw new Error(`Token not supported in Hydration: ${!baseTokenId ? baseToken.symbol : quoteToken.symbol}`);
@@ -354,23 +355,10 @@ export class Hydration {
       percentage: swap.tradeFeePct || 100
     }));
 
-    let gasPrice = 0;
-    let gasLimit = 0;
-    let gasCost = 0;
-
-    try {
-      const tradeFee = Number(tradeHuman.tradeFee);
-      if (tradeFee > 0) {
-        gasPrice = tradeFee / 1000;
-        gasLimit = 200000;
-        gasCost = tradeFee;
-      }
-    } catch (error) {
-      logger.warn(`Failed to get gas information: ${error.message}, using defaults`);
-      gasPrice = 0.0001;
-      gasLimit = 200000;
-      gasCost = gasPrice * gasLimit;
-    }
+    const gasPrice = this.config.gasPrice;
+    const gasLimit = this.config.gasLimit;
+    const gasCost = this.config.gasCost;
+    const fee = gasCost;
 
     const baseTokenBalanceChange = side === 'BUY' ? estimatedAmountOut : estimatedAmountIn.multipliedBy(new BigNumber(-1));
     const quoteTokenBalanceChange = side === 'BUY' ? estimatedAmountIn.multipliedBy(new BigNumber(-1)) : estimatedAmountOut;
@@ -384,7 +372,7 @@ export class Hydration {
       quoteTokenBalanceChange: quoteTokenBalanceChange.toNumber(),
       price: price.toNumber(),
       route,
-      fee: Number(tradeHuman.tradeFee),
+      fee,
       gasPrice,
       gasLimit,
       gasCost
@@ -1502,12 +1490,14 @@ export class Hydration {
    * @param walletAddress The user's wallet address
    * @param poolAddress The pool address to remove liquidity from
    * @param percentageToRemove Percentage to remove (1-100)
+   * @param tokenId Token ID to remove liquidity from (optional)
    * @returns Details of the liquidity removal operation
    */
   async removeLiquidity(
     walletAddress: string,
     poolAddress: string,
-    percentageToRemove: number
+    percentageToRemove: number,
+    tokenId?: string | number
   ): Promise<HydrationRemoveLiquidityResponse> {
     if (percentageToRemove <= 0 || percentageToRemove > 100) {
       throw new Error('Percentage to remove must be between 0 and 100');
@@ -1522,123 +1512,325 @@ export class Hydration {
       throw new Error(`Pool not found: ${poolAddress}`);
     }
 
-    // Get token symbols from addresses
-    const baseTokenSymbol = await this.getTokenSymbol(pool.baseTokenAddress);
-    const quoteTokenSymbol = await this.getTokenSymbol(pool.quoteTokenAddress);
-
-    // Use assets from Hydration to get asset IDs
-    const feePaymentToken = this.polkadot.getFeePaymentToken();
-    const baseToken = this.polkadot.getToken(baseTokenSymbol);
-    const quoteToken = this.polkadot.getToken(quoteTokenSymbol);
-
-    if (!baseToken || !quoteToken) {
-      throw new Error(`Asset not found: ${!baseToken ? baseTokenSymbol : quoteTokenSymbol}`);
-    }
-
-    // Calculate shares to remove
-    // eslint-disable-next-line prefer-const
-    let percentageToRemoveBN = BigNumber(percentageToRemove.toString());
-    let totalUserSharesInThePool: BigNumber;
-    let userSharesToRemove: BigNumber;
-    
     const apiPromise = await this.getApiPromise();
-
-    if (pool.id) {
-      totalUserSharesInThePool = new BigNumber((await apiPromise.query.tokens.accounts(walletAddress, pool.id)).free.toString()).dividedBy(Math.pow(10, 18));
-      userSharesToRemove = percentageToRemoveBN.multipliedBy(totalUserSharesInThePool).dividedBy(100);
-      logger.info(`Removing ${percentageToRemove}% or ${userSharesToRemove} shares of the user from the pool ${poolAddress}`);
-      userSharesToRemove = userSharesToRemove.multipliedBy(Math.pow(10, 18)).integerValue(BigNumber.ROUND_DOWN);
-    } else {
-      const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
-      totalUserSharesInThePool = new BigNumber((await apiPromise.query.tokens.accounts(walletAddress, shareTokenId)).free.toString()).dividedBy(Math.pow(10, baseToken.decimals));
-      userSharesToRemove = percentageToRemoveBN.multipliedBy(totalUserSharesInThePool).dividedBy(100);
-      logger.info(`Removing ${percentageToRemove}% or ${userSharesToRemove} shares of the user from the pool ${poolAddress}`);
-      userSharesToRemove = userSharesToRemove.multipliedBy(Math.pow(10, baseToken.decimals)).integerValue(BigNumber.ROUND_DOWN);
-    }
-
-    if (userSharesToRemove.lte(0)) {
-      throw new Error('Calculated liquidity to remove is zero or negative');
-    }
-
-    // Prepare transaction based on pool type
     const poolType = pool.poolType?.toLowerCase() || POOL_TYPE.XYK;
     let removeLiquidityTx: any;
+    let userSharesToRemove: BigNumber;
+    let totalUserSharesInThePool: BigNumber;
+    let shareTokenDecimals: number;
 
     switch (poolType) {
-      case POOL_TYPE.XYK:
+      case POOL_TYPE.XYK: {
+        // Handle XYK liquidity removal
+        const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
+        const baseToken = this.polkadot.getToken(pool.baseTokenAddress);
+        
+        if (!baseToken) {
+          throw new Error(`Base token not found: ${pool.baseTokenAddress}`);
+        }
+        
+        shareTokenDecimals = baseToken.decimals;
+        
+        // Get user balance
+        const rawBalance = await apiPromise.query.tokens.accounts(walletAddress, shareTokenId);
+        const freeBalance = rawBalance.free.toString();
+        
+        if (new BigNumber(freeBalance).lte(0)) {
+          throw new Error(`User has no liquidity in this pool.`);
+        }
+        
+        // Calculate shares to remove
+        totalUserSharesInThePool = new BigNumber(freeBalance);
+        const percentageToRemoveBN = BigNumber(percentageToRemove.toString());
+        userSharesToRemove = percentageToRemoveBN.multipliedBy(totalUserSharesInThePool).dividedBy(100).integerValue(BigNumber.ROUND_DOWN);
+        
+        if (userSharesToRemove.lte(0)) {
+          throw new Error(`Calculated liquidity to remove is zero.`);
+        }
+        
+        // Create transaction
         removeLiquidityTx = apiPromise.tx.xyk.removeLiquidity(
-          baseToken.address,
-          quoteToken.address,
+          pool.baseTokenAddress,
+          pool.quoteTokenAddress,
           userSharesToRemove.toString()
         );
         break;
+      }
 
-      case POOL_TYPE.LBP:
-        removeLiquidityTx = apiPromise.tx.lbp.removeLiquidity(
-         poolAddress
-        );
-        break;
+      case POOL_TYPE.OMNIPOOL: {
+        try {
+          // Require tokenId to be specified
+          if (!tokenId) {
+            throw new Error('Token ID must be specified for omnipool liquidity removal');
+          }
 
-      case POOL_TYPE.OMNIPOOL:
-        removeLiquidityTx = apiPromise.tx.omnipool.removeLiquidity(
-          baseToken.address,
-          userSharesToRemove.toString()
-        );
-        break;
+          // Get user positions in parallel with pool data
+          const [userPositions, poolData] = await Promise.all([
+            this.getPositionsOwned(walletAddress, tokenId.toString()),
+            this.getPoolService().then(service => 
+              this.poolServiceGetPools(service, [])
+                .then(pools => pools.find(p => p.address === poolAddress || p.id === poolAddress))
+            )
+          ]);
+          
+          if (!poolData) {
+            throw new Error(`Could not find pool data for ${poolAddress}`);
+          }
+          
+          if (userPositions.length === 0) {
+            throw new Error(`No positions found for token ${tokenId} owned by ${walletAddress}`);
+          }
+          
+          // Calculate total shares and shares to remove in one pass
+          const { totalShares, totalSharesToRemove } = userPositions.reduce(
+            (acc, pos) => {
+              const shares = new BigNumber(pos.shares);
+              return {
+                totalShares: acc.totalShares.plus(shares),
+                totalSharesToRemove: acc.totalSharesToRemove.plus(
+                  shares.multipliedBy(percentageToRemove).dividedBy(100)
+                )
+              };
+            },
+            { totalShares: new BigNumber(0), totalSharesToRemove: new BigNumber(0) }
+          );
+          
+          // Store the total shares to remove for the response
+          userSharesToRemove = totalSharesToRemove.integerValue(BigNumber.ROUND_DOWN);
+          
+          // Create transaction for the first position that has enough shares
+          const position = userPositions.find(pos => 
+            new BigNumber(pos.shares).gte(userSharesToRemove)
+          ) || userPositions[0];
+          
+          const positionId = BigInt(position.positionId);
+          
+          // Create transaction
+          if (apiPromise.tx.omnipool.withdraw) {
+            removeLiquidityTx = apiPromise.tx.omnipool.withdraw(
+              positionId,
+              userSharesToRemove.toString()
+            );
+          } else {
+            removeLiquidityTx = apiPromise.tx.omnipool.removeLiquidity(
+              positionId,
+              userSharesToRemove.toString()
+            );
+          }
+          
+          break;
+        } catch (error) {
+          throw new Error(`Failed to remove liquidity: ${error.message}`);
+        }
+      }
 
-      case POOL_TYPE.STABLESWAP:
+      case POOL_TYPE.STABLESWAP: {
+        // Handle standalone StableSwap pools
+        if (!pool.id) {
+          throw new Error('Invalid stableswap pool ID');
+        }
+        
+        shareTokenDecimals = 18; // Stableswap uses 18 decimals for LP tokens
+        const shareTokenId = pool.id;
+        
+        // Get user balance
+        const rawBalance = await apiPromise.query.tokens.accounts(walletAddress, shareTokenId);
+        const freeBalance = rawBalance.free.toString();
+        
+        if (new BigNumber(freeBalance).lte(0)) {
+          throw new Error(`User has no liquidity in this stableswap pool.`);
+        }
+        
+        // Calculate shares to remove
+        totalUserSharesInThePool = new BigNumber(freeBalance);
+        const percentageToRemoveBN = BigNumber(percentageToRemove.toString());
+        userSharesToRemove = percentageToRemoveBN.multipliedBy(totalUserSharesInThePool).dividedBy(100).integerValue(BigNumber.ROUND_DOWN);
+        
+        if (userSharesToRemove.lte(0)) {
+          throw new Error(`Calculated liquidity to remove is zero.`);
+        }
+        
+        // Create transaction with the pool's base and quote tokens
         removeLiquidityTx = apiPromise.tx.stableswap.removeLiquidity(
-          pool.id,
+          shareTokenId,
           userSharesToRemove.toString(),
           [
-            { assetId: baseToken.address, amount: 0 },
-            { assetId: quoteToken.address, amount: 0 }
+            { assetId: pool.baseTokenAddress, amount: "0" },
+            { assetId: pool.quoteTokenAddress, amount: "0" }
           ]
         );
         break;
+      }
 
       default:
         throw new Error(`Unsupported pool type: ${poolType}`);
     }
 
+    if (typeof removeLiquidityTx === 'undefined') {
+      throw new Error(`Failed to create transaction for pool ${poolAddress}, type ${poolType}`);
+    }
+
     // Sign and submit the transaction
     const {txHash, transaction} = await this.submitTransaction(apiPromise, removeLiquidityTx, wallet, poolType);
 
-    logger.info(`Liquidity removed from pool ${poolAddress} with tx hash: ${txHash}`);
-
+    // Extract fee information
+    const feePaymentToken = this.polkadot.getFeePaymentToken();
     let fee: BigNumber;
     try {
-      fee = new BigNumber(transaction.events.map((it) => it.toHuman()).filter((it) => it.event.method == 'TransactionFeePaid')[0].event.data.actualFee.toString().replaceAll(',', '')).dividedBy(Math.pow(10, feePaymentToken.decimals));
+      fee = new BigNumber(transaction.events
+        .map((it) => it.toHuman())
+        .filter((it) => it.event.method == 'TransactionFeePaid')[0]
+        .event.data.actualFee.toString()
+        .replaceAll(',', ''))
+        .dividedBy(Math.pow(10, feePaymentToken.decimals));
     } catch (error) {
-      logger.error(`It was not possible to extract the fee from the transaction:`, error);
       fee = new BigNumber(Number.NaN);
     }
 
-    let baseTokenAmountRemoved: BigNumber;
-    try {
-      baseTokenAmountRemoved = new BigNumber(transaction.events.map((it) => it.toHuman()).filter((it) => it.event.section == 'currencies' && it.event.method == 'Transferred' && it.event.data.currencyId.toString().replaceAll(',', '') == baseToken.address)[0].event.data.amount.toString().replaceAll(',', '')).dividedBy(Math.pow(10, baseToken.decimals));
-    } catch (error) {
-      logger.error(`It was not possible to extract the base token amount removed from the transaction:`, error);
-      baseTokenAmountRemoved = new BigNumber(Number.NaN);
+    // Extract token amounts
+    let baseTokenAmountRemoved: BigNumber | undefined;
+    let quoteTokenAmountRemoved: BigNumber | undefined;
+    if (poolType === POOL_TYPE.XYK || poolType === POOL_TYPE.STABLESWAP) {
+      try {
+        const events = transaction.events.map((it) => it.toHuman());
+        const liquidityRemovedEvent = events.find((it) => it.event.method === 'LiquidityRemoved');
+        
+        if (liquidityRemovedEvent) {
+          const { baseAmount, quoteAmount } = liquidityRemovedEvent.event.data;
+          const baseToken = this.polkadot.getToken(pool.baseTokenAddress);
+          const quoteToken = this.polkadot.getToken(pool.quoteTokenAddress);
+          
+          if (baseToken && quoteToken) {
+            baseTokenAmountRemoved = new BigNumber(baseAmount.toString()).dividedBy(Math.pow(10, baseToken.decimals));
+            quoteTokenAmountRemoved = new BigNumber(quoteAmount.toString()).dividedBy(Math.pow(10, quoteToken.decimals));
+          }
+        }
+      } catch (error) {
+        // Silent error handling
+      }
+    } else if (poolType === POOL_TYPE.OMNIPOOL) {
+      try {
+        const events = transaction.events.map((it) => it.toHuman());
+        const liquidityRemovedEvent = events.find((it) => 
+          it.event.method === 'LiquidityRemoved' || 
+          it.event.method === 'OmnipoolLiquidityRemoved'
+        );
+        
+        if (liquidityRemovedEvent) {
+          const eventData = liquidityRemovedEvent.event.data;
+          const baseToken = this.polkadot.getToken(pool.baseTokenAddress);
+          const quoteToken = this.polkadot.getToken(pool.quoteTokenAddress);
+          
+          if (baseToken && quoteToken) {
+            // Handle different event data structures
+            if (eventData.amount) {
+              // Single amount case
+              baseTokenAmountRemoved = new BigNumber(eventData.amount.toString())
+                .dividedBy(Math.pow(10, baseToken.decimals));
+              quoteTokenAmountRemoved = new BigNumber(0);
+            } else if (eventData.assetAmount) {
+              // Asset amount case
+              baseTokenAmountRemoved = new BigNumber(eventData.assetAmount.toString())
+                .dividedBy(Math.pow(10, baseToken.decimals));
+              quoteTokenAmountRemoved = new BigNumber(0);
+            } else if (eventData.baseAmount && eventData.quoteAmount) {
+              // Base/quote amounts case
+              baseTokenAmountRemoved = new BigNumber(eventData.baseAmount.toString())
+                .dividedBy(Math.pow(10, baseToken.decimals));
+              quoteTokenAmountRemoved = new BigNumber(eventData.quoteAmount.toString())
+                .dividedBy(Math.pow(10, quoteToken.decimals));
+            }
+          }
+        }
+      } catch (error) {
+        // Silent error handling
+      }
     }
 
-    let quoteTokenAmountRemoved: BigNumber;
-    try {
-      quoteTokenAmountRemoved = new BigNumber(transaction.events.map((it) => it.toHuman()).filter((it) => it.event.section == 'currencies' && it.event.method == 'Transferred' && it.event.data.currencyId.toString().replaceAll(',', '') == quoteToken.address)[0].event.data.amount.toString().replaceAll(',', '')).dividedBy(Math.pow(10, quoteToken.decimals));
-    } catch (error) {
-      logger.error(`It was not possible to extract the quote token amount removed from the transaction:`, error);
-      quoteTokenAmountRemoved = new BigNumber(Number.NaN);
+    // Ensure we have at least some values for the response
+    if (!baseTokenAmountRemoved) {
+      baseTokenAmountRemoved = new BigNumber(0);
+    }
+    if (!quoteTokenAmountRemoved) {
+      quoteTokenAmountRemoved = new BigNumber(0);
     }
 
+    logger.info(`Successfully removed ${percentageToRemove}% liquidity from ${poolType} pool ${poolAddress}. Removed ${baseTokenAmountRemoved.toNumber()} base tokens and ${quoteTokenAmountRemoved.toNumber()} quote tokens. Transaction hash: ${txHash}`);
+
+    // Return the result
     return {
       signature: txHash,
-      fee: fee.toNumber(),
+      fee: fee ? Number(fee.toString()) : 0,
       baseTokenAmountRemoved: baseTokenAmountRemoved.toNumber(),
-      quoteTokenAmountRemoved: quoteTokenAmountRemoved.toNumber()
+      quoteTokenAmountRemoved: quoteTokenAmountRemoved.toNumber(),
+      sharesPercentageRemoved: percentageToRemove,
+      sharesAmountRemoved: userSharesToRemove ? userSharesToRemove.toNumber() : 0
     };
   }
 
   /**
+   * Get all positions owned by a wallet address for a specific token
+   * @param walletAddress The wallet address to check
+   * @param tokenId The token ID to filter positions by
+   * @returns Array of positions owned by the wallet
+   */
+  async getPositionsOwned(walletAddress: string, tokenId: string): Promise<HydrationPosition[]> {
+    const apiPromise = await this.getApiPromise();
+    
+    // Convert wallet address to Hydration format
+    const hydraWalletAddress = encodeAddress(
+      decodeAddress(walletAddress),
+      HYDRA_ADDRESS_PREFIX
+    );
+    
+    // Get the NFT collection ID for omnipool positions
+    const collectionId = await apiPromise.consts.omnipool.nftCollectionId;
+    
+    // Get all positions and their NFT ownership in parallel
+    const [positions, uniques] = await Promise.all([
+      apiPromise.query.omnipool.positions.entries(),
+      apiPromise.query.uniques.asset.entries(collectionId.toString())
+    ]);
+    
+    // Create a map of position IDs to NFT owners
+    const nftOwners = new Map(
+      uniques.map(([key, value]) => {
+        const [, itemId] = key.args;
+        const owner = value.unwrap()?.owner.toString();
+        return [itemId.toString(), owner];
+      })
+    );
+    
+    // Filter positions
+    return positions
+      .map(([idRaw, dataRaw]) => {
+        const positionId = idRaw.args[0].toString();
+        const positionData = dataRaw.toHuman() as Record<string, any>;
+        const nftOwner = nftOwners.get(positionId);
+        
+        if (!nftOwner || positionData?.assetId !== tokenId || nftOwner !== hydraWalletAddress) {
+          return null;
+        }
+        
+        const shares = positionData?.shares?.toString().replace(/,/g, '') || '0';
+        if (new BigNumber(shares).lte(0)) {
+          return null;
+        }
+        
+        return {
+          positionId,
+          assetId: positionData.assetId,
+          owner: nftOwner,
+          shares,
+          amount: positionData?.amount?.toString().replace(/,/g, '') || '0',
+          price: positionData?.price
+        };
+      })
+      .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
+  }
+
+  
+/**
    * Get information about a user's position in a Hydration pool
    * @param walletAddress - The user's wallet address
    * @param poolAddress - Optional pool address for specific pool
@@ -1656,110 +1848,110 @@ export class Hydration {
       throw new Error('Wallet address parameter is required');
     }
     validatePolkadotAddress(walletAddress);
-  
+
     // Convert wallet address to Hydration format
     const hydraWalletAddress = encodeAddress(
       decodeAddress(walletAddress),
       HYDRA_ADDRESS_PREFIX
     );
-  
+
     if (!poolAddress && (!baseToken || !quoteToken)) {
-      throw new Error(
-        'Either poolAddress or both baseToken and quoteToken must be provided',
-      );
-    }
-  
-    // Resolve pool address
-    let poolAddressToUse = poolAddress;
-    if (!poolAddressToUse) {
-      const pools = await this.listPools([], [baseToken, quoteToken]);
-      if (pools.length === 0) {
-        throw new Error(`No AMM pool found for pair ${baseToken}-${quoteToken}`);
-      }
-      poolAddressToUse = pools[0].address;
-    }
-  
-    // Fetch pool data
-    const poolService = await this.getPoolService();
-    const allPools = await this.poolServiceGetPools(poolService, []);
-    const poolData = allPools.find(p => p.address === poolAddressToUse);
-    if (!poolData) {
-      throw new Error(`Pool not found: ${poolAddressToUse}`);
-    }
-  
-    const poolInfo = await this.getPoolDetails(poolAddressToUse);
-    if (!poolInfo) {
-      throw new Error(`Pool not found: ${poolAddressToUse}`);
-    }
-  
-    // Ensure valid quote token
-    if (
-      !poolInfo.quoteTokenAddress ||
-      poolInfo.quoteTokenAddress === this.polkadot.getNativeToken().address
-    ) {
-      if (poolData.tokens.length > 1) {
-        poolInfo.quoteTokenAddress = poolData.tokens[1].id.toString();
-      } else {
-        throw new Error('Invalid pool configuration: missing quote token');
-      }
-    }
-  
-    const api = await this.getApiPromise();
-    let lpTokenAmount = new BigNumber(0);
-    let baseTokenAmount = new BigNumber(0);
-    let quoteTokenAmount = new BigNumber(0);
-  
-    // Get LP token balance
-    const lpBalanceRaw = await api.query.tokens.accounts(
-      hydraWalletAddress,
-      poolInfo.lpMint.address
+    throw new Error(
+      'Either poolAddress or both baseToken and quoteToken must be provided',
     );
-    const userLpBalance = new BigNumber(lpBalanceRaw.free.toString());
-    const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolInfo.lpMint.address)).toString());
-
-    if (userLpBalance.gt(0) && totalLpSupply.gt(0)) {
-      // Normalize LP balances to human units
-      const lpDecimals = poolInfo.lpMint.decimals || this.lpDecimals;
-      const userLpHuman = userLpBalance.dividedBy(
-        new BigNumber(10).pow(lpDecimals)
-      );
-      const totalLpHuman = totalLpSupply.dividedBy(
-        new BigNumber(10).pow(lpDecimals)
-      );
-      const userShareHuman = userLpHuman.dividedBy(totalLpHuman);
-
-      lpTokenAmount = userLpHuman;
-
-      // Pool reserves in human units from poolInfo
-      const poolBaseHuman = new BigNumber(poolInfo.baseTokenAmount);
-      const poolQuoteHuman = new BigNumber(poolInfo.quoteTokenAmount);
-
-      // Calculate user's share of pool reserves
-      const rawBaseHuman = poolBaseHuman.multipliedBy(userShareHuman);
-      const rawQuoteHuman = poolQuoteHuman.multipliedBy(userShareHuman);
-
-      // Round according to token decimals
-      baseTokenAmount = rawBaseHuman.decimalPlaces(
-        poolData.tokens[0].decimals,
-        BigNumber.ROUND_DOWN
-      );
-      quoteTokenAmount = rawQuoteHuman.decimalPlaces(
-        poolData.tokens[1].decimals,
-        BigNumber.ROUND_DOWN
-      );
-    }
-
-    await api.disconnect();
-  
-    return {
-      poolAddress: poolAddressToUse,
-      walletAddress: hydraWalletAddress,
-      baseTokenAddress: poolInfo.baseTokenAddress,
-      quoteTokenAddress: poolInfo.quoteTokenAddress,
-      lpTokenAmount: lpTokenAmount.toNumber(),
-      baseTokenAmount: baseTokenAmount.toNumber(),
-      quoteTokenAmount: quoteTokenAmount.toNumber(),
-      price: new BigNumber(poolInfo.price).toNumber(),
-    };
   }
+
+  // Resolve pool address
+  let poolAddressToUse = poolAddress;
+  if (!poolAddressToUse) {
+    const pools = await this.listPools([], [baseToken, quoteToken]);
+    if (pools.length === 0) {
+      throw new Error(`No AMM pool found for pair ${baseToken}-${quoteToken}`);
+    }
+    poolAddressToUse = pools[0].address;
+  }
+
+  // Fetch pool data
+  const poolService = await this.getPoolService();
+  const allPools = await this.poolServiceGetPools(poolService, []);
+  const poolData = allPools.find(p => p.address === poolAddressToUse);
+  if (!poolData) {
+    throw new Error(`Pool not found: ${poolAddressToUse}`);
+  }
+
+  const poolInfo = await this.getPoolDetails(poolAddressToUse);
+  if (!poolInfo) {
+    throw new Error(`Pool not found: ${poolAddressToUse}`);
+  }
+
+  // Ensure valid quote token
+  if (
+    !poolInfo.quoteTokenAddress ||
+    poolInfo.quoteTokenAddress === this.polkadot.getNativeToken().address
+  ) {
+    if (poolData.tokens.length > 1) {
+      poolInfo.quoteTokenAddress = poolData.tokens[1].id.toString();
+    } else {
+      throw new Error('Invalid pool configuration: missing quote token');
+    }
+  }
+
+  const api = await this.getApiPromise();
+  let lpTokenAmount = new BigNumber(0);
+  let baseTokenAmount = new BigNumber(0);
+  let quoteTokenAmount = new BigNumber(0);
+
+  // Get LP token balance
+  const lpBalanceRaw = await api.query.tokens.accounts(
+    hydraWalletAddress,
+    poolInfo.lpMint.address
+  );
+  const userLpBalance = new BigNumber(lpBalanceRaw.free.toString());
+  const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolInfo.lpMint.address)).toString());
+
+  if (userLpBalance.gt(0) && totalLpSupply.gt(0)) {
+    // Normalize LP balances to human units
+    const lpDecimals = poolInfo.lpMint.decimals || LP_DECIMALS;
+    const userLpHuman = userLpBalance.dividedBy(
+      new BigNumber(10).pow(lpDecimals)
+    );
+    const totalLpHuman = totalLpSupply.dividedBy(
+      new BigNumber(10).pow(lpDecimals)
+    );
+    const userShareHuman = userLpHuman.dividedBy(totalLpHuman);
+
+    lpTokenAmount = userLpHuman;
+
+    // Pool reserves in human units from poolInfo
+    const poolBaseHuman = new BigNumber(poolInfo.baseTokenAmount);
+    const poolQuoteHuman = new BigNumber(poolInfo.quoteTokenAmount);
+
+    // Calculate user's share of pool reserves
+    const rawBaseHuman = poolBaseHuman.multipliedBy(userShareHuman);
+    const rawQuoteHuman = poolQuoteHuman.multipliedBy(userShareHuman);
+
+    // Round according to token decimals
+    baseTokenAmount = rawBaseHuman.decimalPlaces(
+      poolData.tokens[0].decimals,
+      BigNumber.ROUND_DOWN
+    );
+    quoteTokenAmount = rawQuoteHuman.decimalPlaces(
+      poolData.tokens[1].decimals,
+      BigNumber.ROUND_DOWN
+    );
+  }
+
+  await api.disconnect();
+
+  return {
+    poolAddress: poolAddressToUse,
+    walletAddress: hydraWalletAddress,
+    baseTokenAddress: poolInfo.baseTokenAddress,
+    quoteTokenAddress: poolInfo.quoteTokenAddress,
+    lpTokenAmount: lpTokenAmount.toNumber(),
+    baseTokenAmount: baseTokenAmount.toNumber(),
+    quoteTokenAmount: quoteTokenAmount.toNumber(),
+    price: new BigNumber(poolInfo.price).toNumber(),
+  };
+}
 }

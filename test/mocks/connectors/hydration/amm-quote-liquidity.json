@@ -1,0 +1,8 @@
+{
+  "baseTokenAmount": 1000000000000,
+  "quoteTokenAmount": 1000000000,
+  "baseTokenSymbol": "DOT",
+  "quoteTokenSymbol": "USDT",
+  "poolAddress": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+  "priceImpact": 0.05
+}

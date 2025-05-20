@@ -24,7 +24,7 @@ import {validatePolkadotAddress} from '../../../../chains/polkadot/polkadot.vali
  * @returns Details of the swap execution
  */
 export async function executeSwapOnHydration(
-  _fastify: FastifyInstance,
+  fastify: FastifyInstance,
   network: string,
   walletAddress: string,
   baseToken: string,
@@ -34,41 +34,71 @@ export async function executeSwapOnHydration(
   poolAddress?: string,
   slippagePct?: number
 ): Promise<HydrationExecuteSwapResponse> {
+  // Validate required parameters
   if (!baseToken) {
-    throw new Error('Base token parameter is required');
+    throw fastify.httpErrors.badRequest('Base token parameter is required');
   }
   
   if (!quoteToken) {
-    throw new Error('Quote token parameter is required');
+    throw fastify.httpErrors.badRequest('Quote token parameter is required');
   }
   
   if (!amount || amount <= 0) {
-    throw new Error('Amount must be a positive number');
+    throw fastify.httpErrors.badRequest('Amount must be a positive number');
   }
   
   if (side !== 'BUY' && side !== 'SELL') {
-    throw new Error('Side must be "BUY" or "SELL"');
+    throw fastify.httpErrors.badRequest('Side must be "BUY" or "SELL"');
   }
   
   // Validate wallet address
-  validatePolkadotAddress(walletAddress);
+  try {
+    validatePolkadotAddress(walletAddress);
+  } catch (error) {
+    throw fastify.httpErrors.badRequest('Invalid Polkadot address');
+  }
   
+  // Get Hydration instance
   const hydration = await Hydration.getInstance(network);
-  return await hydration.executeSwapWithWalletAddress(
-    network,
-    walletAddress,
-    baseToken,
-    quoteToken,
-    amount,
-    side,
-    poolAddress,
-    slippagePct
-  );
-}
+  if (!hydration) {
+    throw fastify.httpErrors.serviceUnavailable('Hydration service unavailable');
+  }
 
-// Define error response interface
-interface ErrorResponse {
-  error: string;
+  // Log request parameters
+  logger.info(`Executing swap for ${baseToken}-${quoteToken} on ${network}`);
+  logger.info(`Amount: ${amount}, Side: ${side}, Pool: ${poolAddress || 'default'}`);
+
+  try {
+    const result = await hydration.executeSwapWithWalletAddress(
+      network,
+      walletAddress,
+      baseToken,
+      quoteToken,
+      amount,
+      side,
+      poolAddress,
+      slippagePct
+    );
+
+    // Log successful execution
+    logger.info(`Successfully executed swap for ${baseToken}-${quoteToken}`);
+    logger.info(`Transaction signature: ${result.signature}`);
+
+    return result;
+  } catch (error) {
+    // Log error details
+    logger.error(`Error executing swap: ${error.message}`);
+    
+    if (error.message?.includes('not found') || error.message?.includes('Pool not found')) {
+      throw fastify.httpErrors.notFound(error.message);
+    }
+    
+    if (error.message?.includes('Insufficient')) {
+      throw fastify.httpErrors.badRequest(error.message);
+    }
+    
+    throw fastify.httpErrors.internalServerError('Failed to execute swap');
+  }
 }
 
 /**
@@ -78,16 +108,19 @@ interface ErrorResponse {
 export const executeSwapRoute: FastifyPluginAsync = async (fastify) => {
   fastify.post<{
     Body: HydrationExecuteSwapRequest;
-    Reply: HydrationExecuteSwapResponse | ErrorResponse;
+    Reply: HydrationExecuteSwapResponse;
   }>(
     '/execute-swap',
     {
       schema: {
-        description: 'Execute a token swap on Hydration',
-        tags: ['hydration'],
+        description: 'Execute a token swap in a Hydration pool',
+        tags: ['hydration/amm'],
         body: HydrationExecuteSwapRequestSchema,
         response: {
-          200: HydrationExecuteSwapResponseSchema
+          200: HydrationExecuteSwapResponseSchema,
+          400: { type: 'object', properties: { error: { type: 'string' } } },
+          404: { type: 'object', properties: { error: { type: 'string' } } },
+          500: { type: 'object', properties: { error: { type: 'string' } } }
         }
       }
     },
@@ -118,23 +151,8 @@ export const executeSwapRoute: FastifyPluginAsync = async (fastify) => {
 
         return result;
       } catch (error) {
-        logger.error('Error in execute-swap endpoint:', error);
-
-        if (error.statusCode) {
-          return reply.status(error.statusCode).send({ error: error.message });
-        }
-
-        if (error.message?.includes('not found') || error.message?.includes('Pool not found')) {
-          return reply.status(404).send({ error: error.message });
-        } else if (error.message?.includes('Invalid Polkadot address')) {
-          return reply.status(400).send({ error: error.message });
-        } else if (error.message?.includes('required') || 
-                   error.message?.includes('must be') ||
-                   error.message?.includes('Insufficient')) {
-          return reply.status(400).send({ error: error.message });
-        }
-
-        return reply.status(500).send({ error: 'Internal server error' });
+        // Error handling is done in executeSwapOnHydration
+        throw error;
       }
     }
   );

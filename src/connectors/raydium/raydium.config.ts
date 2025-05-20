@@ -6,47 +6,25 @@ interface AvailableNetworks {
 }
 
 export namespace RaydiumConfig {
-  export interface PoolsConfig {
-    [pairKey: string]: string;
-  }
+  // Supported networks for Raydium
+  export const chain = 'solana';
+  export const networks = ['mainnet-beta', 'devnet'];
 
   export interface NetworkConfig {
-    // Pool configurations
-    amm: PoolsConfig;
-    clmm: PoolsConfig;
-  }
-
-  export interface NetworkPoolsConfig {
-    // Dictionary of predefined pool addresses and settings by network
-    [network: string]: NetworkConfig;
-  }
-
-  export interface RootConfig {
-    // Global configuration
     allowedSlippage: string;
-    
-    // Network-specific configurations
-    networks: NetworkPoolsConfig;
-    
-    // Available networks
+    priorityLevel: string;
+    tradingTypes: Array<string>;
     availableNetworks: Array<AvailableNetworks>;
   }
 
-  export const config: RootConfig = {
-    // Global configuration
-    allowedSlippage: ConfigManagerV2.getInstance().get('raydium.allowedSlippage'),
-    
-    // Network-specific pools
-    networks: ConfigManagerV2.getInstance().get('raydium.networks'),
-    
-    availableNetworks: [{
-      chain: 'solana',
-      networks: ['mainnet-beta', 'devnet']
-    }]
-  };
-  
-  // Helper methods to get pools for a specific network
-  export const getNetworkPools = (network: string, poolType: 'amm' | 'clmm'): PoolsConfig => {
-    return config.networks[network]?.[poolType] || {};
+  export const config: NetworkConfig = {
+    allowedSlippage: ConfigManagerV2.getInstance().get(
+      'raydium.allowedSlippage',
+    ),
+    priorityLevel: ConfigManagerV2.getInstance().get('raydium.priorityLevel'),
+    tradingTypes: ['amm', 'clmm', 'swap'],
+    availableNetworks: [
+      { chain: 'solana', networks: ['mainnet-beta', 'devnet'] },
+    ],
   };
 }

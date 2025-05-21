@@ -85,7 +85,7 @@ export const poolInfoRoute: FastifyPluginAsync = async (fastify) => {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       try {
         const { poolAddress } = request.query;
         const network = request.query.network || 'mainnet';

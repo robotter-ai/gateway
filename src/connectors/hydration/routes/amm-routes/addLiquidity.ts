@@ -117,7 +117,7 @@ export const addLiquidityRoute: FastifyPluginAsync = async (fastify) => {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       try {
         const {
           walletAddress,

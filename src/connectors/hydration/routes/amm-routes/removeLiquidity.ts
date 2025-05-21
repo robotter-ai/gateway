@@ -131,7 +131,7 @@ export const removeLiquidityRoute: FastifyPluginAsync = async (fastify) => {
         },
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       try {
         const { network, walletAddress, poolAddress, percentageToRemove, tokenId } = request.body as HydrationRemoveLiquidityRequest;
         const networkToUse = network || 'mainnet';

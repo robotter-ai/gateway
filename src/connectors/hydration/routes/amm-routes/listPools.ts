@@ -109,7 +109,7 @@ export const listPoolsRoute: FastifyPluginAsync = async (fastify) => {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       // Extract parameters with defaults
       const {
         network = 'mainnet',

@@ -97,7 +97,7 @@ export const quoteLiquidityRoute: FastifyPluginAsync = async (fastify) => {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       try {
         const { 
           network = 'mainnet',

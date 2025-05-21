@@ -124,7 +124,7 @@ export const executeSwapRoute: FastifyPluginAsync = async (fastify) => {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       try {
         const { 
           walletAddress, 

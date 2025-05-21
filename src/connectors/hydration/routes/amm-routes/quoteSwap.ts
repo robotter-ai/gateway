@@ -123,7 +123,7 @@ export const quoteSwapRoute: FastifyPluginAsync = async (fastify) => {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       try {
         const { 
           network = 'mainnet', 

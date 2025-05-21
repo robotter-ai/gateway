@@ -10,21 +10,54 @@ export namespace RaydiumConfig {
   export const chain = 'solana';
   export const networks = ['mainnet-beta', 'devnet'];
 
+  export interface PoolsConfig {
+    [pairKey: string]: string;
+  }
+
   export interface NetworkConfig {
+    // Pool configurations
+    amm: PoolsConfig;
+    clmm: PoolsConfig;
+  }
+
+  export interface NetworkPoolsConfig {
+    // Dictionary of predefined pool addresses and settings by network
+    [network: string]: NetworkConfig;
+  }
+
+  export interface RootConfig {
+    // Global configuration
     allowedSlippage: string;
-    priorityLevel: string;
-    tradingTypes: Array<string>;
+
+    // Network-specific configurations
+    networks: NetworkPoolsConfig;
+
+    // Available networks
     availableNetworks: Array<AvailableNetworks>;
   }
 
-  export const config: NetworkConfig = {
+  export const config: RootConfig = {
+    // Global configuration
     allowedSlippage: ConfigManagerV2.getInstance().get(
       'raydium.allowedSlippage',
     ),
-    priorityLevel: ConfigManagerV2.getInstance().get('raydium.priorityLevel'),
-    tradingTypes: ['amm', 'clmm', 'swap'],
+
+    // Network-specific pools
+    networks: ConfigManagerV2.getInstance().get('raydium.networks'),
+
     availableNetworks: [
-      { chain: 'solana', networks: ['mainnet-beta', 'devnet'] },
+      {
+        chain: 'solana',
+        networks: ['mainnet-beta', 'devnet'],
+      },
     ],
+  };
+
+  // Helper methods to get pools for a specific network
+  export const getNetworkPools = (
+    network: string,
+    poolType: 'amm' | 'clmm',
+  ): PoolsConfig => {
+    return config.networks[network]?.[poolType] || {};
   };
 }

@@ -1771,55 +1771,70 @@ export class Hydration {
   async getPositionsOwned(walletAddress: string, tokenId: string): Promise<HydrationPosition[]> {
     const apiPromise = await this.getApiPromise();
     
-    // Convert wallet address to Hydration format
-    const hydraWalletAddress = encodeAddress(
-      decodeAddress(walletAddress),
-      HYDRA_ADDRESS_PREFIX
-    );
-    
-    // Get the NFT collection ID for omnipool positions
-    const collectionId = await apiPromise.consts.omnipool.nftCollectionId;
-    
-    // Get all positions and their NFT ownership in parallel
-    const [positions, uniques] = await Promise.all([
-      apiPromise.query.omnipool.positions.entries(),
-      apiPromise.query.uniques.asset.entries(collectionId.toString())
-    ]);
-    
-    // Create a map of position IDs to NFT owners
-    const nftOwners = new Map(
-      uniques.map(([key, value]) => {
-        const [, itemId] = key.args;
-        const owner = value.unwrap()?.owner.toString();
-        return [itemId.toString(), owner];
-      })
-    );
-    
-    // Filter positions
-    return positions
-      .map(([idRaw, dataRaw]) => {
-        const positionId = idRaw.args[0].toString();
-        const positionData = dataRaw.toHuman() as Record<string, any>;
-        const nftOwner = nftOwners.get(positionId);
-        
-        if (!nftOwner || positionData?.assetId !== tokenId || nftOwner !== hydraWalletAddress) {
-          return null;
-        }
-        
-        const shares = positionData?.shares?.toString().replace(/,/g, '') || '0';
-        if (new BigNumber(shares).lte(0)) {
-          return null;
-        }
-        
-        return {
-          positionId,
-          assetId: positionData.assetId,
-          owner: nftOwner,
-          shares,
-          amount: positionData?.amount?.toString().replace(/,/g, '') || '0',
-          price: positionData?.price
-        };
-      })
-      .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
+    try {
+      // Convert wallet address to Hydration format
+      const hydraWalletAddress = encodeAddress(
+        decodeAddress(walletAddress),
+        HYDRA_ADDRESS_PREFIX
+      );
+      
+      const collectionId = await apiPromise.consts.omnipool.nftCollectionId;
+      
+      const [positions, uniques] = await Promise.all([
+        apiPromise.query.omnipool.positions.entries(),
+        apiPromise.query.uniques.asset.entries(collectionId.toString())
+      ]);
+
+      const nftOwners = new Map(
+        uniques.map(([key, value]) => {
+          const [, itemId] = key.args;
+          const owner = value.unwrap()?.owner.toString();
+          return [itemId.toString(), owner];
+        })
+      );
+      
+      // Check alternate format - some Substrate chains have different address format encoding
+      const alternateHydraAddresses = [
+        hydraWalletAddress,
+        // Try with SS58 format 42 (generic Substrate)
+        encodeAddress(decodeAddress(walletAddress), 42),
+        // Try with SS58 format 0 (Polkadot)
+        encodeAddress(decodeAddress(walletAddress), 0)
+      ];
+      
+      const result = positions
+        .map(([idRaw, dataRaw]) => {
+          const positionId = idRaw.args[0].toString();
+          const positionData = dataRaw.toHuman() as Record<string, any>;
+          const nftOwner = nftOwners.get(positionId);
+          
+          const isMatchingToken = positionData?.assetId === tokenId;
+          const isMatchingOwner = alternateHydraAddresses.some(addr => nftOwner === addr);
+          
+          if (!nftOwner || !isMatchingToken || !isMatchingOwner) {
+            return null;
+          }
+          
+          const shares = positionData?.shares?.toString().replace(/,/g, '') || '0';
+          if (new BigNumber(shares).lte(0)) {
+            return null;
+          }
+                    
+          return {
+            positionId,
+            assetId: positionData.assetId,
+            owner: nftOwner,
+            shares,
+            amount: positionData?.amount?.toString().replace(/,/g, '') || '0',
+            price: positionData?.price
+          };
+        })
+        .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
+            
+      return result;
+    } catch (error) {
+      logger.error(`Error in getPositionsOwned: ${error.message}`);
+      return [];
+    }
   }
 }

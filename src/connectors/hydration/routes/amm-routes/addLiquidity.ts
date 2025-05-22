@@ -24,7 +24,7 @@ import {
  * @returns Details of the liquidity addition operation
  */
 export async function addLiquidityToHydration(
-  _fastify: FastifyInstance,
+  fastify: FastifyInstance,
   network: string,
   walletAddress: string,
   poolId: string,
@@ -34,32 +34,64 @@ export async function addLiquidityToHydration(
   baseToken?: string,
   quoteToken?: string
 ): Promise<HydrationAddLiquidityResponse> {
+  // Validate required parameters
   if (!network) {
-    throw new Error('Network parameter is required');
+    throw fastify.httpErrors.badRequest('Network parameter is required');
   }
   
   if (!poolId) {
-    throw new Error('Pool ID parameter is required');
+    throw fastify.httpErrors.badRequest('Pool ID parameter is required');
   }
   
   // Validate wallet address
-  validatePolkadotAddress(walletAddress);
+  try {
+    validatePolkadotAddress(walletAddress);
+  } catch (error) {
+    throw fastify.httpErrors.badRequest('Invalid Polkadot address');
+  }
   
+  // Get Hydration instance
   const hydration = await Hydration.getInstance(network);
-  return await hydration.addLiquidity(
-    walletAddress,
-    poolId,
-    baseTokenAmount,
-    quoteTokenAmount,
-    slippagePct,
-    baseToken,
-    quoteToken
-  );
-}
+  if (!hydration) {
+    throw fastify.httpErrors.serviceUnavailable('Hydration service unavailable');
+  }
 
-// Define error response interface
-interface ErrorResponse {
-  error: string;
+  // Log request parameters
+  logger.info(`Adding liquidity to pool ${poolId} on ${network}`);
+  logger.info(`Base amount: ${baseTokenAmount}, Quote amount: ${quoteTokenAmount}`);
+
+  try {
+    const result = await hydration.addLiquidity(
+      walletAddress,
+      poolId,
+      baseTokenAmount,
+      quoteTokenAmount,
+      slippagePct,
+      baseToken,
+      quoteToken
+    );
+
+    // Log successful execution
+    logger.info(`Successfully added liquidity to pool ${poolId}`);
+    logger.info(`Transaction signature: ${result.signature}`);
+
+    return result;
+  } catch (error) {
+    // Log error details
+    logger.error(`Error adding liquidity: ${error.message}`);
+    
+    if (error.message?.includes('not found') || error.message?.includes('Pool not found')) {
+      throw fastify.httpErrors.notFound(error.message);
+    }
+    
+    if (error.message?.includes('Insufficient') || 
+        error.message?.includes('Invalid') ||
+        error.message?.includes('You must provide')) {
+      throw fastify.httpErrors.badRequest(error.message);
+    }
+    
+    throw fastify.httpErrors.internalServerError('Failed to add liquidity');
+  }
 }
 
 /**
@@ -69,20 +101,23 @@ interface ErrorResponse {
 export const addLiquidityRoute: FastifyPluginAsync = async (fastify) => {
   fastify.post<{
     Body: HydrationAddLiquidityRequest;
-    Reply: HydrationAddLiquidityResponse | ErrorResponse;
+    Reply: HydrationAddLiquidityResponse;
   }>(
     '/add-liquidity',
     {
       schema: {
-        description: 'Add liquidity to a Hydration position',
-        tags: ['hydration'],
+        description: 'Add liquidity to a Hydration pool',
+        tags: ['hydration/amm'],
         body: HydrationAddLiquidityRequestSchema,
         response: {
-          200: HydrationAddLiquidityResponseSchema
+          200: HydrationAddLiquidityResponseSchema,
+          400: { type: 'object', properties: { error: { type: 'string' } } },
+          404: { type: 'object', properties: { error: { type: 'string' } } },
+          500: { type: 'object', properties: { error: { type: 'string' } } }
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       try {
         const {
           walletAddress,
@@ -109,23 +144,8 @@ export const addLiquidityRoute: FastifyPluginAsync = async (fastify) => {
 
         return result;
       } catch (error) {
-        logger.error('Error in add-liquidity endpoint:', error);
-
-        if (error.statusCode) {
-          return reply.status(error.statusCode).send({ error: error.message });
-        }
-
-        if (error.message?.includes('Pool not found')) {
-          return reply.status(404).send({ error: error.message });
-        } else if (error.message?.includes('Invalid Polkadot address')) {
-          return reply.status(400).send({ error: error.message });
-        } else if (error.message?.includes('Insufficient') || 
-                   error.message?.includes('Invalid') ||
-                   error.message?.includes('You must provide')) {
-          return reply.status(400).send({ error: error.message });
-        }
-
-        return reply.status(500).send({ error: 'Internal server error' });
+        // Error handling is done in addLiquidityToHydration
+        throw error;
       }
     }
   );

@@ -17,35 +17,49 @@ import {
  * @returns Detailed pool information
  */
 export async function getHydrationPoolInfo(
-  _fastify: FastifyInstance,
+  fastify: FastifyInstance,
   network: string,
   poolAddress: string
 ): Promise<HydrationPoolInfo> {
+  // Validate required parameters
   if (!network) {
-    throw new Error('Network parameter is required');
+    throw fastify.httpErrors.badRequest('Network parameter is required');
   }
   
   if (!poolAddress) {
-    throw new Error('Pool address parameter is required');
+    throw fastify.httpErrors.badRequest('Pool address parameter is required');
   }
 
+  // Get Hydration instance
   const hydration = await Hydration.getInstance(network);
   if (!hydration) {
-    throw new Error('Hydration service unavailable');
+    throw fastify.httpErrors.serviceUnavailable('Hydration service unavailable');
   }
 
-  // Get pool information with proper typing
-  const poolInfo = await hydration.getPoolDetails(poolAddress);
-  if (!poolInfo) {
-    throw new Error(`Pool not found: ${poolAddress}`);
+  // Log request parameters
+  logger.info(`Getting pool info for ${poolAddress} on ${network}`);
+
+  try {
+    // Get pool information with proper typing
+    const poolInfo = await hydration.getPoolDetails(poolAddress);
+    if (!poolInfo) {
+      throw fastify.httpErrors.notFound(`Pool not found: ${poolAddress}`);
+    }
+
+    // Log successful execution
+    logger.info(`Successfully retrieved pool info for ${poolAddress}`);
+
+    return poolInfo;
+  } catch (error) {
+    // Log error details
+    logger.error(`Error getting pool info: ${error.message}`);
+    
+    if (error.message?.includes('not found')) {
+      throw fastify.httpErrors.notFound(error.message);
+    }
+    
+    throw fastify.httpErrors.internalServerError('Failed to get pool info');
   }
-
-  return poolInfo;
-}
-
-// Define error response interface
-interface ErrorResponse {
-  error: string;
 }
 
 /**
@@ -55,20 +69,23 @@ interface ErrorResponse {
 export const poolInfoRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
     Querystring: HydrationGetPoolInfoRequest;
-    Reply: HydrationPoolInfo | ErrorResponse;
+    Reply: HydrationPoolInfo;
   }>(
     '/pool-info',
     {
       schema: {
         description: 'Get pool information for a Hydration pool',
-        tags: ['hydration'],
+        tags: ['hydration/amm'],
         querystring: HydrationGetPoolInfoRequestSchema,
         response: {
-          200: HydrationPoolInfoSchema
+          200: HydrationPoolInfoSchema,
+          400: { type: 'object', properties: { error: { type: 'string' } } },
+          404: { type: 'object', properties: { error: { type: 'string' } } },
+          500: { type: 'object', properties: { error: { type: 'string' } } }
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       try {
         const { poolAddress } = request.query;
         const network = request.query.network || 'mainnet';
@@ -81,17 +98,8 @@ export const poolInfoRoute: FastifyPluginAsync = async (fastify) => {
 
         return result;
       } catch (error) {
-        logger.error('Error in pool-info endpoint:', error);
-
-        if (error.statusCode) {
-          return reply.status(error.statusCode).send({ error: error.message });
-        }
-
-        if (error.message?.includes('not found')) {
-          return reply.status(404).send({ error: error.message });
-        }
-
-        return reply.status(500).send({ error: 'Internal server error' });
+        // Error handling is done in getHydrationPoolInfo
+        throw error;
       }
     }
   );

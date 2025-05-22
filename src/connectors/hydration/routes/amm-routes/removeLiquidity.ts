@@ -11,11 +11,6 @@ import {
 import { validatePolkadotAddress } from '../../../../chains/polkadot/polkadot.validators';
 import { RemoveLiquidityRequest } from '../../../../schemas/trading-types/amm-schema';
 
-// Define error response interface
-interface ErrorResponse {
-  error: string;
-}
-
 /**
  * Removes liquidity from a pool.
  * 
@@ -28,7 +23,7 @@ interface ErrorResponse {
  * @returns Details of the liquidity removal operation
  */
 export async function removeLiquidity(
-  _fastify: FastifyInstance,
+  fastify: FastifyInstance,
   network: string,
   walletAddress: string,
   poolAddress: string,
@@ -37,13 +32,25 @@ export async function removeLiquidity(
 ): Promise<HydrationRemoveLiquidityResponse> {
   // Validate inputs
   if (percentageToRemove <= 0 || percentageToRemove > 100) {
-    throw new Error('Percentage to remove must be between 0 and 100');
+    throw fastify.httpErrors.badRequest('Percentage to remove must be between 0 and 100');
   }
 
   // Validate address
-  validatePolkadotAddress(walletAddress);
+  try {
+    validatePolkadotAddress(walletAddress);
+  } catch (error) {
+    throw fastify.httpErrors.badRequest('Invalid Polkadot address');
+  }
 
+  // Get Hydration instance
   const hydration = await Hydration.getInstance(network);
+  if (!hydration) {
+    throw fastify.httpErrors.serviceUnavailable('Hydration service unavailable');
+  }
+
+  // Log request parameters
+  logger.info(`Removing liquidity from pool ${poolAddress} on ${network}`);
+  logger.info(`Percentage to remove: ${percentageToRemove}%, Token ID: ${tokenId || 'default'}`);
   
   try {
     const result = await hydration.removeLiquidity(
@@ -53,6 +60,10 @@ export async function removeLiquidity(
       tokenId
     );
     
+    // Log successful execution
+    logger.info(`Successfully removed liquidity from pool ${poolAddress}`);
+    logger.info(`Transaction signature: ${result.signature}`);
+
     return {
       signature: result.signature,
       fee: result.fee,
@@ -62,14 +73,16 @@ export async function removeLiquidity(
       sharesAmountRemoved: result.sharesAmountRemoved
     };
   } catch (error) {
+    // Log error details
+    logger.error(`Error removing liquidity: ${error.message}`);
+    
     if (error.message?.includes('not found')) {
-      throw new Error(error.message);
+      throw fastify.httpErrors.notFound(error.message);
     } else if (error.message?.includes('must be between')) {
-      throw new Error(error.message);
+      throw fastify.httpErrors.badRequest(error.message);
     }
     
-    logger.error(`Error removing liquidity: ${error.message}`);
-    throw error;
+    throw fastify.httpErrors.internalServerError('Failed to remove liquidity');
   }
 }
 
@@ -91,23 +104,15 @@ export const removeLiquidityRoute: FastifyPluginAsync = async (fastify) => {
   // Update schema example
   RemoveLiquidityRequest.properties.walletAddress.examples = [firstWalletAddress];
 
-  // Define error response schema
-  const ErrorResponseSchema = {
-    type: 'object',
-    properties: {
-      error: { type: 'string' }
-    }
-  };
-
   fastify.post<{
     Body: HydrationRemoveLiquidityRequest;
-    Reply: HydrationRemoveLiquidityResponse | ErrorResponse;
+    Reply: HydrationRemoveLiquidityResponse;
   }>(
     '/remove-liquidity',
     {
       schema: {
         description: 'Remove liquidity from a Hydration pool',
-        tags: ['hydration'],
+        tags: ['hydration/amm'],
         body: {
           ...HydrationRemoveLiquidityRequestSchema,
           properties: {
@@ -120,13 +125,13 @@ export const removeLiquidityRoute: FastifyPluginAsync = async (fastify) => {
         },
         response: {
           200: HydrationRemoveLiquidityResponseSchema,
-          400: ErrorResponseSchema,
-          404: ErrorResponseSchema,
-          500: ErrorResponseSchema
+          400: { type: 'object', properties: { error: { type: 'string' } } },
+          404: { type: 'object', properties: { error: { type: 'string' } } },
+          500: { type: 'object', properties: { error: { type: 'string' } } }
         },
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       try {
         const { network, walletAddress, poolAddress, percentageToRemove, tokenId } = request.body as HydrationRemoveLiquidityRequest;
         const networkToUse = network || 'mainnet';
@@ -140,13 +145,10 @@ export const removeLiquidityRoute: FastifyPluginAsync = async (fastify) => {
           tokenId
         );
         
-        return reply.send(result);
-      } catch (e) {
-        logger.error(e);
-        if (e.statusCode) {
-          return reply.status(e.statusCode).send({ error: e.message || 'Request failed' });
-        }
-        return reply.status(500).send({ error: 'Internal server error' });
+        return result;
+      } catch (error) {
+        // Error handling is done in removeLiquidity
+        throw error;
       }
     }
   );

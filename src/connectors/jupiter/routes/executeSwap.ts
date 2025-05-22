@@ -1,15 +1,16 @@
+import { Wallet } from '@coral-xyz/anchor';
+import Decimal from 'decimal.js-light';
 import { FastifyPluginAsync, FastifyInstance } from 'fastify';
+
 import { Solana } from '../../../chains/solana/solana';
-import { Jupiter } from '../jupiter';
-import { logger } from '../../../services/logger';
 import {
   ExecuteSwapRequest,
   ExecuteSwapResponse,
   ExecuteSwapRequestType,
-  ExecuteSwapResponseType
+  ExecuteSwapResponseType,
 } from '../../../schemas/trading-types/swap-schema';
-import { Wallet } from '@coral-xyz/anchor';
-import Decimal from 'decimal.js-light';
+import { logger } from '../../../services/logger';
+import { Jupiter } from '../jupiter';
 
 async function executeJupiterSwap(
   fastify: FastifyInstance,
@@ -20,7 +21,6 @@ async function executeJupiterSwap(
   amount: number,
   side: 'BUY' | 'SELL',
   slippagePct?: number,
-  poolAddress?: string
 ): Promise<ExecuteSwapResponseType> {
   const solana = await Solana.getInstance(network);
   const jupiter = await Jupiter.getInstance(network);
@@ -31,7 +31,9 @@ async function executeJupiterSwap(
   const quoteTokenInfo = await solana.getToken(quoteToken);
 
   if (!baseTokenInfo || !quoteTokenInfo) {
-    throw fastify.httpErrors.notFound(`Token not found: ${!baseTokenInfo ? baseToken : quoteToken}`);
+    throw fastify.httpErrors.notFound(
+      `Token not found: ${!baseTokenInfo ? baseToken : quoteToken}`,
+    );
   }
 
   const tradeSide = side === 'BUY' ? 'BUY' : 'SELL';
@@ -46,32 +48,37 @@ async function executeJupiterSwap(
       false,
       false,
       tradeSide === 'BUY' ? 'ExactOut' : 'ExactIn',
-      poolAddress // Pass the poolAddress parameter
     );
 
     const { signature, feeInLamports } = await jupiter.executeSwap(
       wallet,
-      quote
+      quote,
     );
-    const { baseTokenBalanceChange, quoteTokenBalanceChange } = 
+    const { baseTokenBalanceChange, quoteTokenBalanceChange } =
       await solana.extractPairBalanceChangesAndFee(
         signature,
         baseTokenInfo,
         quoteTokenInfo,
-        wallet.publicKey.toBase58()
+        wallet.publicKey.toBase58(),
       );
 
     return {
       signature,
-      totalInputSwapped: Math.abs(side === 'SELL' ? baseTokenBalanceChange : quoteTokenBalanceChange),
-      totalOutputSwapped: Math.abs(side === 'SELL' ? quoteTokenBalanceChange : baseTokenBalanceChange),
+      totalInputSwapped: Math.abs(
+        side === 'SELL' ? baseTokenBalanceChange : quoteTokenBalanceChange,
+      ),
+      totalOutputSwapped: Math.abs(
+        side === 'SELL' ? quoteTokenBalanceChange : baseTokenBalanceChange,
+      ),
       fee: feeInLamports / 1e9,
       baseTokenBalanceChange: baseTokenBalanceChange,
-      quoteTokenBalanceChange: quoteTokenBalanceChange
+      quoteTokenBalanceChange: quoteTokenBalanceChange,
     };
   } catch (error) {
     logger.error(`Jupiter swap error: ${error}`);
-    throw fastify.httpErrors.internalServerError('Failed to execute Jupiter swap');
+    throw fastify.httpErrors.internalServerError(
+      'Failed to execute Jupiter swap',
+    );
   }
 }
 
@@ -79,13 +86,14 @@ export const executeSwapRoute: FastifyPluginAsync = async (fastify) => {
   // Get first wallet address for example
   const solana = await Solana.getInstance('mainnet-beta');
   let firstWalletAddress = '<solana-wallet-address>';
-  
+
   try {
-    firstWalletAddress = await solana.getFirstWalletAddress() || firstWalletAddress;
+    firstWalletAddress =
+      (await solana.getFirstWalletAddress()) || firstWalletAddress;
   } catch (error) {
     logger.warn('No wallets found for examples in schema');
   }
-  
+
   // Update schema example
   ExecuteSwapRequest.properties.walletAddress.examples = [firstWalletAddress];
 
@@ -108,32 +116,40 @@ export const executeSwapRoute: FastifyPluginAsync = async (fastify) => {
             quoteToken: { type: 'string', examples: ['USDC'] },
             amount: { type: 'number', examples: [0.1] },
             side: { type: 'string', enum: ['BUY', 'SELL'], examples: ['SELL'] },
-            slippagePct: { type: 'number', examples: [0.5], description: 'Slippage tolerance in percentage (e.g., 0.5 for 0.5%)' },
-            poolAddress: { type: 'string', examples: ['jupiter-aggregator'], description: 'Optional pool address for routing' }
-          }
+            slippagePct: {
+              type: 'number',
+              examples: [0.5],
+              description:
+                'Slippage tolerance in percentage (e.g., 0.5 for 0.5%)',
+            },
+          },
         },
-        response: { 200: ExecuteSwapResponse }
-      }
+        response: { 200: ExecuteSwapResponse },
+      },
     },
     async (request) => {
-      const { network, walletAddress, baseToken, quoteToken, amount, side, slippagePct, poolAddress } = request.body;
-      
-      // For Jupiter, same token pair rules apply:
-      // 1. If poolAddress is provided, use it to identify the specific market
-      // 2. If only baseToken/quoteToken are provided, use default routing
-      
+      const {
+        network,
+        walletAddress,
+        baseToken,
+        quoteToken,
+        amount,
+        side,
+        slippagePct,
+      } = request.body;
+
       // Verify we have the needed parameters
       if (!baseToken || !quoteToken) {
-        throw fastify.httpErrors.badRequest('baseToken and quoteToken are required');
+        throw fastify.httpErrors.badRequest(
+          'baseToken and quoteToken are required',
+        );
       }
-      
+
       // Log the operation
-      if (poolAddress) {
-        logger.debug(`Executing Jupiter swap for ${baseToken}-${quoteToken} with pool: ${poolAddress}`);
-      } else {
-        logger.debug(`Executing Jupiter swap for ${baseToken}-${quoteToken} with default routing`);
-      }
-      
+      logger.debug(
+        `Executing Jupiter swap for ${baseToken}-${quoteToken} with default routing`,
+      );
+
       return await executeJupiterSwap(
         fastify,
         network || 'mainnet-beta',
@@ -143,10 +159,9 @@ export const executeSwapRoute: FastifyPluginAsync = async (fastify) => {
         amount,
         side as 'BUY' | 'SELL',
         slippagePct,
-        poolAddress
       );
-    }
+    },
   );
 };
 
-export default executeSwapRoute; 
+export default executeSwapRoute;

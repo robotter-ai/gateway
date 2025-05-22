@@ -1,9 +1,13 @@
 import { FastifyPluginAsync, FastifyInstance } from 'fastify';
-import { Solana } from '../../../chains/solana/solana';
-import { Jupiter } from '../jupiter';
-import { logger } from '../../../services/logger';
-import { GetSwapQuoteRequestType, GetSwapQuoteResponseType } from '../../../schemas/trading-types/swap-schema';
+
 import { estimateGasSolana } from '../../../chains/solana/routes/estimate-gas';
+import { Solana } from '../../../chains/solana/solana';
+import {
+  GetSwapQuoteRequestType,
+  GetSwapQuoteResponseType,
+} from '../../../schemas/trading-types/swap-schema';
+import { logger } from '../../../services/logger';
+import { Jupiter } from '../jupiter';
 
 export async function getJupiterQuote(
   fastify: FastifyInstance,
@@ -13,7 +17,6 @@ export async function getJupiterQuote(
   amount: number,
   side: 'BUY' | 'SELL',
   slippagePct?: number,
-  poolAddress?: string
 ) {
   const solana = await Solana.getInstance(network);
   const jupiter = await Jupiter.getInstance(network);
@@ -22,7 +25,9 @@ export async function getJupiterQuote(
   const quoteTokenInfo = await solana.getToken(quoteToken);
 
   if (!baseTokenInfo || !quoteTokenInfo) {
-    throw fastify.httpErrors.notFound(`Token not found: ${!baseTokenInfo ? baseToken : quoteToken}`);
+    throw fastify.httpErrors.notFound(
+      `Token not found: ${!baseTokenInfo ? baseToken : quoteToken}`,
+    );
   }
 
   const tradeSide = side === 'BUY' ? 'BUY' : 'SELL';
@@ -37,16 +42,17 @@ export async function getJupiterQuote(
       false, // onlyDirectRoutes
       false, // asLegacyTransaction
       tradeSide === 'BUY' ? 'ExactOut' : 'ExactIn',
-      poolAddress  // Pass the poolAddress parameter
     );
 
-    const baseAmount = tradeSide === 'BUY'
-      ? Number(quote.outAmount) / (10 ** baseTokenInfo.decimals)
-      : Number(quote.inAmount) / (10 ** baseTokenInfo.decimals);
-    const quoteAmount = tradeSide === 'BUY'
-      ? Number(quote.inAmount) / (10 ** quoteTokenInfo.decimals)
-      : Number(quote.outAmount) / (10 ** quoteTokenInfo.decimals);
-    
+    const baseAmount =
+      tradeSide === 'BUY'
+        ? Number(quote.outAmount) / 10 ** baseTokenInfo.decimals
+        : Number(quote.inAmount) / 10 ** baseTokenInfo.decimals;
+    const quoteAmount =
+      tradeSide === 'BUY'
+        ? Number(quote.inAmount) / 10 ** quoteTokenInfo.decimals
+        : Number(quote.outAmount) / 10 ** quoteTokenInfo.decimals;
+
     return {
       estimatedAmountIn: baseAmount,
       estimatedAmountOut: quoteAmount,
@@ -59,7 +65,9 @@ export async function getJupiterQuote(
   } catch (error) {
     logger.error(`Jupiter quote error: ${error}`);
     if (error.message.includes('NO_ROUTE_FOUND')) {
-      throw fastify.httpErrors.notFound(`No swap route found for ${baseToken}-${quoteToken}`);
+      throw fastify.httpErrors.notFound(
+        `No swap route found for ${baseToken}-${quoteToken}`,
+      );
     }
     throw fastify.httpErrors.internalServerError('Failed to get Jupiter quote');
   }
@@ -84,9 +92,8 @@ export const quoteSwapRoute: FastifyPluginAsync = async (fastify) => {
             amount: { type: 'number', examples: [0.01] },
             side: { type: 'string', enum: ['BUY', 'SELL'], examples: ['SELL'] },
             slippagePct: { type: 'number', examples: [1] },
-            poolAddress: { type: 'string', examples: ['jupiter-aggregator'] }
           },
-          required: ['baseToken', 'quoteToken', 'amount', 'side']
+          required: ['baseToken', 'quoteToken', 'amount', 'side'],
         },
         response: {
           200: {
@@ -102,32 +109,32 @@ export const quoteSwapRoute: FastifyPluginAsync = async (fastify) => {
               gasPrice: { type: 'number' },
               gasLimit: { type: 'number' },
               gasCost: { type: 'number' },
-              poolAddress: { type: 'string', description: 'Jupiter aggregator ID' }
-            }
-          }
-        }
-      }
+              poolAddress: {
+                type: 'string',
+                description: 'Jupiter aggregator ID',
+              },
+            },
+          },
+        },
+      },
     },
     async (request) => {
-      const { network, baseToken, quoteToken, amount, side, slippagePct, poolAddress } = request.query;
+      const { network, baseToken, quoteToken, amount, side, slippagePct } =
+        request.query;
       const networkToUse = network || 'mainnet-beta';
-      
-      // For Jupiter, same token pair rules apply:
-      // 1. If poolAddress is provided, use it to identify the specific market
-      // 2. If only baseToken/quoteToken are provided, use default routing
-      
+
       // Verify we have the needed parameters
       if (!baseToken || !quoteToken) {
-        throw fastify.httpErrors.badRequest('baseToken and quoteToken are required');
+        throw fastify.httpErrors.badRequest(
+          'baseToken and quoteToken are required',
+        );
       }
-      
+
       // Log the operation
-      if (poolAddress) {
-        logger.debug(`Getting Jupiter quote for ${baseToken}-${quoteToken} with pool: ${poolAddress}`);
-      } else {
-        logger.debug(`Getting Jupiter quote for ${baseToken}-${quoteToken} with default routing`);
-      }
-      
+      logger.debug(
+        `Getting Jupiter quote for ${baseToken}-${quoteToken} with default routing`,
+      );
+
       // Get the quote
       const quote = await getJupiterQuote(
         fastify,
@@ -137,7 +144,6 @@ export const quoteSwapRoute: FastifyPluginAsync = async (fastify) => {
         amount,
         side as 'BUY' | 'SELL',
         slippagePct,
-        poolAddress
       );
 
       // Get gas estimation
@@ -153,16 +159,20 @@ export const quoteSwapRoute: FastifyPluginAsync = async (fastify) => {
         estimatedAmountOut: quote.estimatedAmountOut,
         minAmountOut: quote.minAmountOut,
         maxAmountIn: quote.maxAmountIn,
-        baseTokenBalanceChange: side === 'SELL' ? -quote.estimatedAmountIn : quote.estimatedAmountIn,
-        quoteTokenBalanceChange: side === 'SELL' ? quote.estimatedAmountOut : -quote.estimatedAmountOut,
+        baseTokenBalanceChange:
+          side === 'SELL' ? -quote.estimatedAmountIn : quote.estimatedAmountIn,
+        quoteTokenBalanceChange:
+          side === 'SELL'
+            ? quote.estimatedAmountOut
+            : -quote.estimatedAmountOut,
         price: quote.expectedPrice,
         gasPrice: gasEstimation?.gasPrice,
         gasLimit: gasEstimation?.gasLimit,
         gasCost: gasEstimation?.gasCost,
-        poolAddress: 'jupiter-aggregator' // Jupiter doesn't expose specific pool addresses
+        poolAddress: 'jupiter-aggregator', // Jupiter doesn't expose specific pool addresses
       };
-    }
+    },
   );
 };
 
-export default quoteSwapRoute; 
+export default quoteSwapRoute;

@@ -308,7 +308,7 @@ export class Uniswap {
    * @returns The Universal Router address for the current network, or null if not available
    */
   public getUniversalRouterAddress(): string {
-    return this.config.getUniversalRouterAddress(this.networkName);
+    return this.config.uniswapV3SmartOrderRouterAddress(this.networkName);
   }
 
   /**

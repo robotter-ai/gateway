@@ -28,33 +28,43 @@ interface ExtendedListPoolsRequest extends HydrationListPoolsRequest {
  * @returns List of filtered pools
  */
 export async function listHydrationPools(
-  _fastify: FastifyInstance,
+  fastify: FastifyInstance,
   network: string,
   types: string[] = [],
   tokenSymbols: string[] = [],
   tokenAddresses: string[] = []
 ): Promise<HydrationListPoolsResponse> {
+  // Validate required parameters
   if (!network) {
-    throw new Error('Network parameter is required');
+    throw fastify.httpErrors.badRequest('Network parameter is required');
   }
 
+  // Get Hydration instance
   const hydration = await Hydration.getInstance(network);
   if (!hydration) {
-    throw new Error('Hydration service unavailable');
+    throw fastify.httpErrors.serviceUnavailable('Hydration service unavailable');
   }
+
+  // Log request parameters
+  logger.info(`Listing pools on ${network}`);
+  logger.info(`Filters: types=${types.join(',')}, symbols=${tokenSymbols.join(',')}, addresses=${tokenAddresses.join(',')}`);
   
-  const pools = await hydration.listPools(
-    types,
-    tokenSymbols,
-    tokenAddresses
-  );
+  try {
+    const pools = await hydration.listPools(
+      types,
+      tokenSymbols,
+      tokenAddresses
+    );
 
-  return { pools };
-}
+    // Log successful execution
+    logger.info(`Successfully listed ${pools.length} pools`);
 
-// Define error response interface
-interface ErrorResponse {
-  error: string;
+    return { pools };
+  } catch (error) {
+    // Log error details
+    logger.error(`Error listing pools: ${error.message}`);
+    throw fastify.httpErrors.internalServerError('Failed to list pools');
+  }
 }
 
 /**
@@ -64,13 +74,13 @@ interface ErrorResponse {
 export const listPoolsRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
     Querystring: ExtendedListPoolsRequest;
-    Reply: HydrationListPoolsResponse | ErrorResponse;
+    Reply: HydrationListPoolsResponse;
   }>(
     '/list-pools',
     {
       schema: {
-        description: 'List all available Hydration pools',
-        tags: ['hydration'],
+        description: 'List all Hydration pools',
+        tags: ['hydration/amm'],
         querystring: {
           ...HydrationListPoolsRequestSchema,
           properties: {
@@ -93,11 +103,13 @@ export const listPoolsRoute: FastifyPluginAsync = async (fastify) => {
           }
         },
         response: {
-          200: HydrationListPoolsResponseSchema
+          200: HydrationListPoolsResponseSchema,
+          400: { type: 'object', properties: { error: { type: 'string' } } },
+          500: { type: 'object', properties: { error: { type: 'string' } } }
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       // Extract parameters with defaults
       const {
         network = 'mainnet',
@@ -135,13 +147,8 @@ export const listPoolsRoute: FastifyPluginAsync = async (fastify) => {
 
         return result;
       } catch (error) {
-        logger.error('Error in list-pools endpoint:', error);
-
-        if (error.statusCode) {
-          return reply.status(error.statusCode).send({ error: error.message });
-        }
-
-        return reply.status(500).send({ error: 'Internal server error' });
+        // Error handling is done in listHydrationPools
+        throw error;
       }
     }
   );

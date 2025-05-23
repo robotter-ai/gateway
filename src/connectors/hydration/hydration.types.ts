@@ -445,6 +445,15 @@ export interface HydrationPositionInfo {
   price: number;
 }
 
+export interface HydrationPosition {
+  positionId: string;
+  assetId: string;
+  owner: string;
+  shares: string;
+  amount: string;
+  price?: number;
+}
+
 /**
  * Schema for position information request
  */

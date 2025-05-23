@@ -1654,50 +1654,39 @@ export class Hydration {
             throw new Error('Token ID must be specified for omnipool liquidity removal');
           }
 
-          // Get user positions and pool data
-          const [userPositions, poolData] = await Promise.all([
-            this.getPositionsOwned(walletAddress, tokenId.toString()),
-            this.getPoolService().then(service => 
-              this.poolServiceGetPools(service, [])
-                .then(pools => pools.find(p => p.address === poolAddress || p.id === poolAddress))
-            )
-          ]);
-          
-          if (!poolData) {
-            throw new Error(`Could not find pool data for ${poolAddress}`);
-          }
+          // Get user positions
+          const userPositions = await this.getPositionsOwned(walletAddress, tokenId.toString());
           
           if (userPositions.length === 0) {
             throw new Error(`No positions found for token ${tokenId} owned by ${walletAddress}`);
           }
           
-          const targetToken = poolData.tokens.find(t => t.id === tokenId.toString());
-          if (!targetToken) {
-            throw new Error(`Token with ID ${tokenId} not found in pool`);
-          }
-          
-          const { totalShares, totalSharesToRemove } = userPositions.reduce(
+          // Calculate total shares and amount to remove
+          const { totalShares, totalAmount, totalSharesToRemove } = userPositions.reduce(
             (acc, pos) => {
               const shares = new BigNumber(pos.shares);
+              const amount = new BigNumber(pos.amount);
               return {
                 totalShares: acc.totalShares.plus(shares),
+                totalAmount: acc.totalAmount.plus(amount),
                 totalSharesToRemove: acc.totalSharesToRemove.plus(
                   shares.multipliedBy(percentageToRemove).dividedBy(100)
                 )
               };
             },
-            { totalShares: new BigNumber(0), totalSharesToRemove: new BigNumber(0) }
+            { totalShares: new BigNumber(0), totalAmount: new BigNumber(0), totalSharesToRemove: new BigNumber(0) }
           );
           
           userSharesToRemove = totalSharesToRemove.integerValue(BigNumber.ROUND_DOWN);
           
-          const tokenDecimals = targetToken.decimals;
-          const amountToRemove = new BigNumber(targetToken.balance.toString())
+          // Calculate amount to remove based on user's total amount and shares
+          const amountToRemove = totalAmount
             .multipliedBy(userSharesToRemove)
             .dividedBy(totalShares)
             .integerValue(BigNumber.ROUND_DOWN);
           
-          baseTokenAmountRemoved = amountToRemove.dividedBy(Math.pow(10, tokenDecimals));
+          // Convert to human readable format (divide by 10^18)
+          baseTokenAmountRemoved = amountToRemove.dividedBy(Math.pow(10, 18));
           quoteTokenAmountRemoved = new BigNumber(0);
           
           const position = userPositions.find(pos => 
@@ -1747,10 +1736,11 @@ export class Hydration {
       fee = new BigNumber(Number.NaN);
     }
 
-    let formattedSharesRemoved = userSharesToRemove;
-    if (poolType === POOL_TYPE.XYK || poolType === POOL_TYPE.STABLESWAP) {
-      formattedSharesRemoved = userSharesToRemove.dividedBy(Math.pow(10, shareTokenDecimals));
+    if (poolType === POOL_TYPE.OMNIPOOL) {
+      shareTokenDecimals = 18;
     }
+    
+    let formattedSharesRemoved = userSharesToRemove.dividedBy(Math.pow(10, shareTokenDecimals));
 
     return {
       signature: txHash,

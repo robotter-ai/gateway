@@ -1,10 +1,12 @@
-import { isFractionString } from '../../services/string-utils';
 import { UniswapConfig } from './uniswap.config';
-import { findPoolAddress, isValidV2Pool, isValidV3Pool } from './uniswap.utils';
-import { Ethereum } from '../../chains/ethereum/ethereum';
+import {
+  findPoolAddress,
+  isValidV2Pool,
+  isValidV3Pool,
+  isFractionString,
+} from './uniswap.utils';
 
 // V2 (AMM) imports
-import { Pair as V2Pair } from '@uniswap/v2-sdk';
 
 // Define minimal ABIs for Uniswap V2 contracts
 const IUniswapV2PairABI = {
@@ -116,15 +118,19 @@ const IUniswapV2RouterABI = {
 };
 
 // V3 (CLMM) imports
-import { AlphaRouter } from '@uniswap/smart-order-router';
-import { FeeAmount, Pool as V3Pool } from '@uniswap/v3-sdk';
-import { abi as IUniswapV3PoolABI } from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json';
-import { abi as IUniswapV3FactoryABI } from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Factory.sol/IUniswapV3Factory.json';
 import { Token, CurrencyAmount, Percent } from '@uniswap/sdk-core';
+import { AlphaRouter } from '@uniswap/smart-order-router';
+import { Pair as V2Pair } from '@uniswap/v2-sdk';
+import { abi as IUniswapV3FactoryABI } from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Factory.sol/IUniswapV3Factory.json';
+import { abi as IUniswapV3PoolABI } from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json';
+import { FeeAmount, Pool as V3Pool } from '@uniswap/v3-sdk';
 import { Contract, constants } from 'ethers';
-import { logger } from '../../services/logger';
-import { percentRegexp } from '../../services/config-manager-v2';
 import { getAddress } from 'ethers/lib/utils';
+import JSBI from 'jsbi';
+
+import { Ethereum } from '../../chains/ethereum/ethereum';
+import { percentRegexp } from '../../services/config-manager-v2';
+import { logger } from '../../services/logger';
 
 export class Uniswap {
   private static _instances: { [name: string]: Uniswap };
@@ -152,32 +158,6 @@ export class Uniswap {
 
   // Network information
   private networkName: string;
-
-  /**
-   * Returns the appropriate spender address based on the schema
-   * @param schema The schema type (amm, clmm, etc.)
-   * @returns The address of the contract that should be approved to spend tokens
-   */
-  public getSpender(schema: string = 'clmm'): string {
-    // For AMM (V2), use the V2 Router
-    if (schema === 'amm') {
-      return this.config.uniswapV2RouterAddress(this.networkName);
-    }
-
-    // For CLMM (V3), use the NFT Position Manager
-    if (schema === 'clmm') {
-      return this.config.uniswapV3NftManagerAddress(this.networkName);
-    }
-
-    // For router operations or swaps, use the Universal Router when available
-    const universalRouterAddress = this.getUniversalRouterAddress();
-    if (universalRouterAddress) {
-      return universalRouterAddress;
-    }
-
-    // Default to NFT Manager if no Universal Router
-    return this.config.uniswapV3NftManagerAddress(this.networkName);
-  }
 
   private constructor(network: string) {
     this.networkName = network;
@@ -301,14 +281,6 @@ export class Uniswap {
    */
   public ready(): boolean {
     return this._ready;
-  }
-  
-  /**
-   * Get the Universal Router address for the current network
-   * @returns The Universal Router address for the current network, or null if not available
-   */
-  public getUniversalRouterAddress(): string {
-    return this.config.uniswapV3SmartOrderRouterAddress(this.networkName);
   }
 
   /**
@@ -503,6 +475,7 @@ export class Uniswap {
 
       const [sqrtPriceX96, tick] = slot0;
 
+      // Create the pool with a tick data provider to avoid 'No tick data provider' error
       return new V3Pool(
         tokenAObj,
         tokenBObj,
@@ -510,6 +483,22 @@ export class Uniswap {
         sqrtPriceX96.toString(),
         liquidity.toString(),
         tick,
+        // Add a tick data provider to make SDK operations work
+        {
+          async getTick(index) {
+            return {
+              index,
+              liquidityNet: JSBI.BigInt(0),
+              liquidityGross: JSBI.BigInt(0),
+            };
+          },
+          async nextInitializedTickWithinOneWord(tick, lte, tickSpacing) {
+            // Always return a valid result to prevent errors
+            // Use the direction parameter (lte) to determine which way to go
+            const nextTick = lte ? tick - tickSpacing : tick + tickSpacing;
+            return [nextTick, false];
+          },
+        },
       );
     } catch (error) {
       logger.error(`Error getting V3 pool: ${error.message}`);

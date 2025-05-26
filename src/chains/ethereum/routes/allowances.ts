@@ -1,14 +1,18 @@
-import { FastifyPluginAsync, FastifyInstance } from 'fastify';
 import { Type } from '@sinclair/typebox';
-import { Ethereum } from '../ethereum';
-import { logger } from '../../../services/logger';
-import { AllowancesRequestType, AllowancesResponseType } from '../../../schemas/chain-schema';
-import { TokenInfo } from '../ethereum';
+import { FastifyPluginAsync, FastifyInstance } from 'fastify';
+
+import { getSpender } from '../../../connectors/uniswap/uniswap.contracts';
+import {
+  AllowancesRequestType,
+  AllowancesResponseType,
+} from '../../../schemas/chain-schema';
 import { tokenValueToString } from '../../../services/base';
+import { logger } from '../../../services/logger';
+import { Ethereum, TokenInfo } from '../ethereum';
 
 export async function getTokensToTokenInfo(
   ethereum: Ethereum,
-  tokens: Array<string>
+  tokens: Array<string>,
 ): Promise<Record<string, TokenInfo>> {
   const tokenInfoMap: Record<string, TokenInfo> = {};
 
@@ -28,15 +32,15 @@ export async function getEthereumAllowances(
   fastify: FastifyInstance,
   network: string,
   address: string,
-  spenderAddress: string,
-  tokens: string[]
+  spender: string,
+  tokens: string[],
 ) {
   try {
     const ethereum = await Ethereum.getInstance(network);
     await ethereum.init();
     const wallet = await ethereum.getWallet(address);
     const tokenInfoMap = await getTokensToTokenInfo(ethereum, tokens);
-    
+
     // Check if any tokens were not found and create a helpful error message
     const foundSymbols = Object.keys(tokenInfoMap);
     if (foundSymbols.length === 0) {
@@ -44,16 +48,37 @@ export async function getEthereumAllowances(
       logger.error(errorMsg);
       throw fastify.httpErrors.badRequest(errorMsg);
     }
-    
-    const missingTokens = tokens.filter((t) => 
-      !Object.values(tokenInfoMap).some((token) => 
-        token.symbol.toUpperCase() === t.toUpperCase() || 
-        token.address.toLowerCase() === t.toLowerCase()
-      )
+
+    const missingTokens = tokens.filter(
+      (t) =>
+        !Object.values(tokenInfoMap).some(
+          (token) =>
+            token.symbol.toUpperCase() === t.toUpperCase() ||
+            token.address.toLowerCase() === t.toLowerCase(),
+        ),
     );
-    
+
     if (missingTokens.length > 0) {
       logger.warn(`Some tokens were not found: ${missingTokens.join(', ')}`);
+    }
+
+    // Determine the spender address based on the input
+    let spenderAddress: string;
+    try {
+      // Check if the spender parameter is a connector name
+      if (spender.includes('/') || spender === 'uniswap') {
+        logger.info(`Looking up spender address for connector: ${spender}`);
+        spenderAddress = getSpender(network, spender);
+        logger.info(
+          `Resolved connector ${spender} to spender address: ${spenderAddress}`,
+        );
+      } else {
+        // Otherwise assume it's a direct address
+        spenderAddress = spender;
+      }
+    } catch (error) {
+      logger.error(`Failed to resolve spender address: ${error.message}`);
+      throw fastify.httpErrors.badRequest(`Invalid spender: ${error.message}`);
     }
 
     const approvals: Record<string, string> = {};
@@ -61,17 +86,17 @@ export async function getEthereumAllowances(
       Object.keys(tokenInfoMap).map(async (symbol) => {
         const contract = ethereum.getContract(
           tokenInfoMap[symbol].address,
-          ethereum.provider
+          ethereum.provider,
         );
         approvals[symbol] = tokenValueToString(
           await ethereum.getERC20Allowance(
             contract,
             wallet,
             spenderAddress,
-            tokenInfoMap[symbol].decimals
-          )
+            tokenInfoMap[symbol].decimals,
+          ),
         );
-      })
+      }),
     );
 
     return {
@@ -83,7 +108,9 @@ export async function getEthereumAllowances(
     if (error.statusCode === 400) {
       throw error; // Rethrow badRequest errors
     }
-    throw fastify.httpErrors.internalServerError(`Failed to get allowances: ${error.message}`);
+    throw fastify.httpErrors.internalServerError(
+      `Failed to get allowances: ${error.message}`,
+    );
   }
 }
 
@@ -91,9 +118,10 @@ export const allowancesRoute: FastifyPluginAsync = async (fastify) => {
   // Get first wallet address for example
   const ethereum = await Ethereum.getInstance('base');
   let firstWalletAddress = '<ethereum-wallet-address>';
-  
+
   try {
-    firstWalletAddress = await ethereum.getFirstWalletAddress() || firstWalletAddress;
+    firstWalletAddress =
+      (await ethereum.getFirstWalletAddress()) || firstWalletAddress;
   } catch (error) {
     logger.warn('No wallets found for examples in schema');
   }
@@ -108,29 +136,52 @@ export const allowancesRoute: FastifyPluginAsync = async (fastify) => {
         description: 'Get token allowances',
         tags: ['ethereum'],
         body: Type.Object({
-          network: Type.String({ examples: ['base', 'mainnet', 'sepolia', 'polygon'] }),
+          network: Type.String({
+            examples: [
+              'mainnet',
+              'arbitrum',
+              'optimism',
+              'base',
+              'sepolia',
+              'bsc',
+              'avalanche',
+              'celo',
+              'polygon',
+              'blast',
+              'zora',
+              'worldchain',
+            ],
+          }),
           address: Type.String({ examples: [firstWalletAddress] }),
-          spenderAddress: Type.String({ examples: ['0xC36442b4a4522E871399CD717aBDD847Ab11FE88'] }),
-          tokens: Type.Array(Type.String(), { examples: [['USDC', 'DAI']] })
+          spender: Type.String({
+            examples: [
+              'uniswap/clmm',
+              'uniswap',
+              '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
+            ],
+            description:
+              'Spender can be a connector name (e.g., uniswap/clmm, uniswap/amm, uniswap) or a direct contract address',
+          }),
+          tokens: Type.Array(Type.String(), { examples: [['USDC', 'DAI']] }),
         }),
         response: {
           200: Type.Object({
             spender: Type.String(),
-            approvals: Type.Record(Type.String(), Type.String())
-          })
-        }
-      }
+            approvals: Type.Record(Type.String(), Type.String()),
+          }),
+        },
+      },
     },
     async (request) => {
-      const { network, address, spenderAddress, tokens } = request.body;
+      const { network, address, spender, tokens } = request.body;
       return await getEthereumAllowances(
-        fastify, 
-        network, 
-        address, 
-        spenderAddress, 
-        tokens
+        fastify,
+        network,
+        address,
+        spender,
+        tokens,
       );
-    }
+    },
   );
 };
 

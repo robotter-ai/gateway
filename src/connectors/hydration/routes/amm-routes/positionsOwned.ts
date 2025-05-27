@@ -68,15 +68,32 @@ export const positionsOwnedRoute: FastifyPluginAsync = async (fastify) => {
 
         // Get Hydration instance
         const hydration = await Hydration.getInstance(network);
-        
+
         // Use poolAddress if provided, otherwise use tokenId
         const identifier = poolAddress || tokenId;
-        
+
         // Get positions owned by the wallet
-        const positions = await hydration.getPositionsOwned(
+        const rawPositions = await hydration.getPositionsOwned(
           walletAddress,
           identifier,
         );
+
+        // Fetch pool info for base/quote token addresses
+        let poolInfo = null;
+        if (poolAddress) {
+          poolInfo = await hydration.getPoolInfo(poolAddress);
+        }
+
+        const positions = rawPositions.map((pos) => ({
+          id: pos.positionId,
+          walletAddress,
+          poolAddress: poolAddress || '',
+          baseTokenAddress: poolInfo?.baseTokenAddress || '',
+          quoteTokenAddress: poolInfo?.quoteTokenAddress || '',
+          shares: pos.shares,
+          amount: pos.amount,
+          price: pos.price?.toString(),
+        }));
 
         return positions;
       } catch (e) {

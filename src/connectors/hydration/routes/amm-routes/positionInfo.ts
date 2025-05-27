@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
-import { Hydration } from '../../hydration';
+
 import { logger } from '../../../../services/logger';
+import { Hydration } from '../../hydration';
 import {
   HydrationPositionInfo,
   HydrationPositionInfoSchema,

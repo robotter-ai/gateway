@@ -1,16 +1,16 @@
-import type { FastifyPluginAsync } from 'fastify';
 import sensible from '@fastify/sensible';
+import type { FastifyPluginAsync } from 'fastify';
 
 // import { fetchPoolsRoute } from './routes/amm-routes/fetchPools';
-import { poolInfoRoute } from './routes/amm-routes/poolInfo';
-import { quoteSwapRoute } from './routes/amm-routes/quoteSwap';
-import { executeSwapRoute } from './routes/amm-routes/executeSwap';
 import { addLiquidityRoute } from './routes/amm-routes/addLiquidity';
-import { removeLiquidityRoute } from './routes/amm-routes/removeLiquidity';
-import { quoteLiquidityRoute } from './routes/amm-routes/quoteLiquidity';
+import { executeSwapRoute } from './routes/amm-routes/executeSwap';
 import { listPoolsRoute } from './routes/amm-routes/listPools';
+import { poolInfoRoute } from './routes/amm-routes/poolInfo';
 import { positionInfoRoute } from './routes/amm-routes/positionInfo';
 import { positionsOwnedRoute } from './routes/amm-routes/positionsOwned';
+import { quoteLiquidityRoute } from './routes/amm-routes/quoteLiquidity';
+import { quoteSwapRoute } from './routes/amm-routes/quoteSwap';
+import { removeLiquidityRoute } from './routes/amm-routes/removeLiquidity';
 /**
  * Registers all Hydration AMM routes to the Fastify instance.
  * Includes routes for pool management, liquidity operations, and swap functionality.

@@ -737,7 +737,12 @@ export class Polkadot {
 
   @runWithRetryAndTimeout()
   public async apiPromiseCreate(options: any): Promise<ApiPromise> {
-    return ApiPromise.create(options);
+    return ApiPromise.create({
+      ...options,
+      noInitWarn: true,
+      throwOnConnect: true,
+      throwOnUnknown: true
+    });
   }
 
   @runWithRetryAndTimeout()

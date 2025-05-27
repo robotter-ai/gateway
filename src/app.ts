@@ -1,12 +1,14 @@
 // External dependencies
-import Fastify, { FastifyInstance } from 'fastify';
-import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import fastifySwagger from '@fastify/swagger';
-import fastifySwaggerUi from '@fastify/swagger-ui';
-import { Type } from '@sinclair/typebox';
 import { spawn } from 'child_process';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
+import { Type } from '@sinclair/typebox';
+import Fastify, { FastifyInstance } from 'fastify';
+
 // Internal services
 import { logger } from './services/logger';
 import { getHttpsOptions } from './https';
@@ -14,19 +16,18 @@ import { ConfigManagerV2 } from './services/config-manager-v2';
 import { asciiLogo } from './index';
 
 // Routes
-import { solanaRoutes } from './chains/solana/solana.routes';
-import { ethereumRoutes } from './chains/ethereum/ethereum.routes';
 import { chainRoutes } from './chains/chain.routes';
+import { ethereumRoutes } from './chains/ethereum/ethereum.routes';
+import { solanaRoutes } from './chains/solana/solana.routes';
+import { polkadotRoutes } from './chains/polkadot/polkadot.routes';
+import { configRoutes } from './config/config.routes';
+import { connectorsRoutes } from './connectors/connector.routes';
 import { jupiterRoutes } from './connectors/jupiter/jupiter.routes';
 import { meteoraRoutes } from './connectors/meteora/meteora.routes';
-import { uniswapRoutes } from './connectors/uniswap/uniswap.routes';
 import { raydiumRoutes } from './connectors/raydium/raydium.routes';
-import { polkadotRoutes } from './chains/polkadot/polkadot.routes';
+import { uniswapRoutes } from './connectors/uniswap/uniswap.routes';
 import { hydrationRoutes } from './connectors/hydration/hydration.routes';
-import { connectorsRoutes } from './connectors/connector.routes';
-import { configRoutes } from './config/config.routes';
 import { walletRoutes } from './wallet/wallet.routes';
-
 
 // Change version for each release
 const GATEWAY_VERSION = 'dev-2.6.0';
@@ -36,7 +37,8 @@ const GATEWAY_VERSION = 'dev-2.6.0';
 // When false, runs server in HTTPS mode (secure, default for production)
 // Use --dev flag to enable HTTP mode, e.g.: pnpm start --dev
 // Tests automatically run in dev mode via GATEWAY_TEST_MODE=dev
-const devMode = process.argv.includes('--dev') || process.env.GATEWAY_TEST_MODE === 'dev';
+const devMode =
+  process.argv.includes('--dev') || process.env.GATEWAY_TEST_MODE === 'dev';
 
 // Promisify exec for async/await usage
 const execPromise = promisify(exec);
@@ -45,8 +47,9 @@ const swaggerOptions = {
   openapi: {
     info: {
       title: 'Hummingbot Gateway',
-      description: 'API endpoints for interacting with DEX connectors on various blockchain networks',
-      version: GATEWAY_VERSION
+      description:
+        'API endpoints for interacting with DEX connectors on various blockchain networks',
+      version: GATEWAY_VERSION,
     },
     servers: [
       {
@@ -54,21 +57,45 @@ const swaggerOptions = {
       },
     ],
     tags: [
-      { name: 'chains', description: 'Available blockchain networks' },
-      { name: 'connectors', description: 'Available DEX connectors' },
-      { name: 'config', description: 'Configuration endpoints' },
-      { name: 'wallet', description: 'Wallet endpoints' },
+      // Main categories
+      { name: 'system', description: 'System configuration endpoints' },
+      { name: 'wallet', description: 'Wallet management endpoints' },
+
+      // Chains
       { name: 'solana', description: 'Solana chain endpoints' },
-      { name: 'jupiter', description: 'Jupiter connector endpoints' },
-      { name: 'raydium/clmm', description: 'Raydium Concentrated connector endpoints' },
-      { name: 'raydium/amm', description: 'Raydium Standard connector endpoints' },
-      { name: 'meteora/clmm', description: 'Meteora DLMM connector endpoints' },
       { name: 'ethereum', description: 'Ethereum chain endpoints' },
-      { name: 'uniswap', description: 'Uniswap Univeral Router connector endpoints' },
-      { name: 'uniswap/clmm', description: 'Uniswap V3 connector endpoints' },
-      { name: 'uniswap/amm', description: 'Uniswap V2 connector endpoints' },
       { name: 'polkadot', description: 'Polkadot chain endpoints' },
-      { name: 'hydration/amm', description: 'Hydration connector endpoints' },
+
+      // Connectors
+      { name: 'jupiter', description: 'Jupiter DEX aggregator (Solana)' },
+      {
+        name: 'raydium/amm',
+        description: 'Raydium Standard pool connector (Solana)',
+      },
+      {
+        name: 'raydium/clmm',
+        description: 'Raydium Concentrated pool connector (Solana)',
+      },
+      {
+        name: 'meteora/clmm',
+        description: 'Meteora DLMM pool connector (Solana)',
+      },
+      {
+        name: 'uniswap',
+        description: 'Uniswap router connector (Ethereum mainnet)',
+      },
+      {
+        name: 'uniswap/amm',
+        description: 'Uniswap V2 pool connector (Ethereum)',
+      },
+      {
+        name: 'uniswap/clmm',
+        description: 'Uniswap V3 pool connector (Ethereum)',
+      },
+      {
+        name: 'hydration/amm',
+        description: 'Hydration AMM connector (Polkadot)',
+      },
     ],
     components: {
       parameters: {
@@ -76,11 +103,11 @@ const swaggerOptions = {
           in: 'query',
           name: 'example',
           schema: {
-            type: 'object' as const
-          }
-        }
-      }
-    }
+            type: 'object' as const,
+          },
+        },
+      },
+    },
   },
   transform: ({ schema, url }) => {
     try {
@@ -93,7 +120,7 @@ const swaggerOptions = {
     }
   },
   hideUntagged: true,
-  exposeRoute: true
+  exposeRoute: true,
 };
 
 // Make docsServer accessible to startGateway
@@ -102,23 +129,25 @@ let docsServer: FastifyInstance | null = null;
 // Create gateway app configuration function
 const configureGatewayServer = () => {
   const server = Fastify({
-    logger: ConfigManagerV2.getInstance().get('server.fastifyLogs') ? {
-      level: 'info',
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          translateTime: 'HH:MM:ss Z',
-          ignore: 'pid,hostname',
-        },
-      },
-    } : false,
-    https: devMode ? undefined : getHttpsOptions()
+    logger: ConfigManagerV2.getInstance().get('server.fastifyLogs')
+      ? {
+          level: 'info',
+          transport: {
+            target: 'pino-pretty',
+            options: {
+              translateTime: 'HH:MM:ss Z',
+              ignore: 'pid,hostname',
+            },
+          },
+        }
+      : false,
+    https: devMode ? undefined : getHttpsOptions(),
   });
-  
+
   const docsPort = ConfigManagerV2.getInstance().get('server.docsPort');
-  
+
   docsServer = docsPort ? Fastify() : null;
-  
+
   // Register TypeBox provider
   server.withTypeProvider<TypeBoxTypeProvider>();
   if (docsServer) {
@@ -127,7 +156,7 @@ const configureGatewayServer = () => {
 
   // Register Swagger
   server.register(fastifySwagger, swaggerOptions);
-  
+
   // Register Swagger UI based on configuration
   if (!docsPort) {
     // If no docs port, serve docs on main server at /docs
@@ -141,10 +170,10 @@ const configureGatewayServer = () => {
         persistAuthorization: true,
         filter: true,
         defaultModelExpandDepth: 3,
-        defaultModelsExpandDepth: 3
+        defaultModelsExpandDepth: 3,
       },
       staticCSP: true,
-      transformStaticCSP: (header) => header
+      transformStaticCSP: (header) => header,
     });
   } else {
     // Otherwise set up separate docs server
@@ -167,32 +196,32 @@ const configureGatewayServer = () => {
     // Register system routes
     app.register(configRoutes, { prefix: '/config' });
     app.register(walletRoutes, { prefix: '/wallet' });
-    
+
     // Register connector list route
     app.register(connectorsRoutes, { prefix: '/connectors' });
-    
+
     // Register chain list route
     app.register(chainRoutes, { prefix: '/chains' });
-    
+
     // Register DEX connector routes
-    app.register(jupiterRoutes.swap, { prefix: '/jupiter' });
-    
+    app.register(jupiterRoutes.swap, { prefix: '/connectors/jupiter' });
+
     // Meteora routes
-    app.register(meteoraRoutes.clmm, { prefix: '/meteora/clmm' });
-    
+    app.register(meteoraRoutes.clmm, { prefix: '/connectors/meteora/clmm' });
+
     // Raydium routes
-    app.register(raydiumRoutes.clmm, { prefix: '/raydium/clmm' });
-    app.register(raydiumRoutes.amm, { prefix: '/raydium/amm' });
-    
-    app.register(uniswapRoutes, { prefix: '/uniswap' });
+    app.register(raydiumRoutes.clmm, { prefix: '/connectors/raydium/clmm' });
+    app.register(raydiumRoutes.amm, { prefix: '/connectors/raydium/amm' });
+
+    app.register(uniswapRoutes, { prefix: '/connectors/uniswap' });
 
     // Hydration routes
-    app.register(hydrationRoutes.amm, { prefix: '/hydration/amm' });
+    app.register(hydrationRoutes.amm, { prefix: '/connectors/hydration/amm' });
 
     // Register chain routes
-    app.register(solanaRoutes, { prefix: '/solana' });
-    app.register(ethereumRoutes, { prefix: '/ethereum' });
-    app.register(polkadotRoutes, { prefix: '/polkadot' });
+    app.register(solanaRoutes, { prefix: '/chains/solana' });
+    app.register(ethereumRoutes, { prefix: '/chains/ethereum' });
+    app.register(polkadotRoutes, { prefix: '/chains/polkadot' });
   };
 
   // Register routes on main server
@@ -203,7 +232,11 @@ const configureGatewayServer = () => {
   }
 
   // Register request body parsers
-  server.addContentTypeParser('application/json', { parseAs: 'string' }, server.getDefaultJsonParser('ignore', 'ignore'));
+  server.addContentTypeParser(
+    'application/json',
+    { parseAs: 'string' },
+    server.getDefaultJsonParser('ignore', 'ignore'),
+  );
 
   // Global error handler
   server.setErrorHandler((error, request, reply) => {
@@ -213,7 +246,7 @@ const configureGatewayServer = () => {
         statusCode: 400,
         error: 'Validation Error',
         message: error.message,
-        validation: error.validation
+        validation: error.validation,
       });
     }
 
@@ -222,7 +255,7 @@ const configureGatewayServer = () => {
       return reply.status(error.statusCode).send({
         statusCode: error.statusCode,
         error: error.name,
-        message: error.message
+        message: error.message,
       });
     }
 
@@ -231,13 +264,13 @@ const configureGatewayServer = () => {
       error: error.message,
       stack: error.stack,
       url: request.url,
-      params: request.params
+      params: request.params,
     });
 
     reply.status(500).send({
       statusCode: 500,
       error: 'Internal Server Error',
-      message: 'An unexpected error occurred'
+      message: 'An unexpected error occurred',
     });
   });
 
@@ -252,7 +285,7 @@ const configureGatewayServer = () => {
     // Spawn a new instance before exiting
     spawn(process.argv[0], process.argv.slice(1), {
       detached: true,
-      stdio: 'inherit'
+      stdio: 'inherit',
     });
     process.exit(0);
   });
@@ -267,28 +300,34 @@ export const startGateway = async () => {
   const port = ConfigManagerV2.getInstance().get('server.port');
   const docsPort = ConfigManagerV2.getInstance().get('server.docsPort');
   const protocol = devMode ? 'http' : 'https';
-  
+
   // Display ASCII logo
   console.log(`\n${asciiLogo.trim()}`);
-  logger.info(`⚡️ Gateway version ${GATEWAY_VERSION} starting at ${protocol}://localhost:${port}`);
+  logger.info(
+    `⚡️ Gateway version ${GATEWAY_VERSION} starting at ${protocol}://localhost:${port}`,
+  );
 
   try {
     // Kill any process using the gateway port
     try {
       logger.info(`Checking for processes using port ${port}...`);
-      
+
       // Use more reliable platform-specific commands
       if (process.platform === 'win32') {
         try {
           // Windows command to find and kill process on port
-          const { stdout } = await execPromise(`netstat -ano | findstr :${port}`);
+          const { stdout } = await execPromise(
+            `netstat -ano | findstr :${port}`,
+          );
           if (stdout) {
             const lines = stdout.trim().split('\n');
             for (const line of lines) {
               const parts = line.trim().split(/\s+/);
               if (parts.length > 4) {
                 const pid = parts[parts.length - 1];
-                logger.info(`Found process ${pid} using port ${port}, killing...`);
+                logger.info(
+                  `Found process ${pid} using port ${port}, killing...`,
+                );
                 await execPromise(`taskkill /F /PID ${pid}`);
               }
             }
@@ -305,7 +344,9 @@ export const startGateway = async () => {
             const pids = stdout.trim().split('\n');
             for (const pid of pids) {
               if (pid.trim()) {
-                logger.info(`Found process ${pid} using port ${port}, killing...`);
+                logger.info(
+                  `Found process ${pid} using port ${port}, killing...`,
+                );
                 await execPromise(`kill -9 ${pid}`);
               }
             }
@@ -315,11 +356,15 @@ export const startGateway = async () => {
         }
       }
     } catch (error) {
-      logger.warn(`Error while checking for processes on port ${port}: ${error}`);
+      logger.warn(
+        `Error while checking for processes on port ${port}: ${error}`,
+      );
     }
 
     if (devMode) {
-      logger.info('🔴 Running in development mode with (unsafe!) HTTP endpoints');
+      logger.info(
+        '🔴 Running in development mode with (unsafe!) HTTP endpoints',
+      );
       await gatewayApp.listen({ port, host: '0.0.0.0' });
     } else {
       logger.info('🟢 Running in secured mode with behind HTTPS endpoints');
@@ -327,12 +372,11 @@ export const startGateway = async () => {
     }
 
     // Single documentation log after server starts
-    const docsUrl = docsPort 
+    const docsUrl = docsPort
       ? `http://localhost:${docsPort}`
       : `${protocol}://localhost:${port}/docs`;
-      
-    logger.info(`📓 Documentation available at ${docsUrl}`);
 
+    logger.info(`📓 Documentation available at ${docsUrl}`);
   } catch (err) {
     logger.error(`Failed to start the server: ${err}`);
     process.exit(1);

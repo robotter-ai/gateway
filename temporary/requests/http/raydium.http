@@ -96,8 +96,8 @@ Content-Type: application/json
 
 # ===================== CHAIN ROUTES =====================
 
-# GET /<chain>/status
-GET {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/status?network={{network}}
+# GET /chains/<chain>/status
+GET {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/status?network={{network}}
 Content-Type: application/json
 
 {
@@ -105,8 +105,8 @@ Content-Type: application/json
 
 ###
 
-# POST /<chain>/estimate-gas
-POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/estimate-gas
+# POST /chains/<chain>/estimate-gas
+POST {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/estimate-gas
 Content-Type: application/json
 
 {
@@ -119,8 +119,8 @@ Content-Type: application/json
 
 # ===================== TRANSACTION ROUTES =====================
 
-# POST /{{chain}}/poll - Poll for transaction status
-POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/poll
+# POST /chains/<chain>/poll - Poll for transaction status
+POST {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/poll
 Content-Type: application/json
 
 {
@@ -132,8 +132,8 @@ Content-Type: application/json
 
 # ===================== TOKEN ROUTES =====================
 
-# GET /<chain>/tokens - Just network
-GET {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/tokens?network={{network}}
+# GET /chains/<chain>/tokens - Just network
+GET {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/tokens?network={{network}}
 Content-Type: application/json
 
 {
@@ -141,8 +141,8 @@ Content-Type: application/json
 
 ###
 
-# GET /<chain>/tokens - Single token
-GET {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/tokens?network={{network}}&tokenSymbols={{nativeTokenSymbol}}
+# GET /chains/<chain>/tokens - Single token
+GET {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/tokens?network={{network}}&tokenSymbols={{nativeTokenSymbol}}
 Content-Type: application/json
 
 {
@@ -150,8 +150,8 @@ Content-Type: application/json
 
 ###
 
-# GET /<chain>/tokens - Multiple tokens
-GET {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/tokens?network={{network}}&tokenSymbols={{nativeTokenSymbol}},{{baseTokenSymbol}},{{quoteTokenSymbol}}
+# GET /chains/<chain>/tokens - Multiple tokens
+GET {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/tokens?network={{network}}&tokenSymbols={{nativeTokenSymbol}},{{baseTokenSymbol}},{{quoteTokenSymbol}}
 Content-Type: application/json
 
 {
@@ -161,8 +161,8 @@ Content-Type: application/json
 
 # ===================== BALANCE ROUTES =====================
 
-# POST /{{chain}}/balances - All balances
-POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/balances
+# POST /chains/<chain>/balances - All balances
+POST {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/balances
 Content-Type: application/json
 
 {
@@ -172,8 +172,8 @@ Content-Type: application/json
 
 ###
 
-# POST /{{chain}}/balances - Single token (string format)
-POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/balances
+# POST /chains/<chain>/balances - Single token (string format)
+POST {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/balances
 Content-Type: application/json
 
 {
@@ -184,8 +184,8 @@ Content-Type: application/json
 
 ###
 
-# POST /{{chain}}/balances - Single token (array format)
-POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/balances
+# POST /chains/<chain>/balances - Single token (array format)
+POST {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/balances
 Content-Type: application/json
 
 {
@@ -195,8 +195,9 @@ Content-Type: application/json
 }
 
 ###
-# POST /{{chain}}/balances - Multiple tokens
-POST {{httpProtocol}}://{{host}}:{{port}}/{{chain}}/balances
+
+# POST /chains/<chain>/balances - Multiple tokens
+POST {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/balances
 Content-Type: application/json
 
 {
@@ -211,40 +212,40 @@ Content-Type: application/json
 
 # ===================== LIST POOLS =====================
 
-# GET /{{connector}}/amm/list-pools - List all pools
-GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/list-pools?network={{network}}
+# GET /connectors/{{connector}}/amm/list-pools - List all pools
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/list-pools?network={{network}}
 Content-Type: application/json
 
 ###
 
-# GET /{{connector}}/amm/list-pools - Filter by tokenSymbols
-GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/list-pools?network={{network}}&tokenSymbols={{baseTokenSymbol}}&tokenSymbols={{quoteTokenSymbol}}
+# GET /connectors/{{connector}}/amm/list-pools - Filter by tokenSymbols
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/list-pools?network={{network}}&tokenSymbols={{baseTokenSymbol}}&tokenSymbols={{quoteTokenSymbol}}
 Content-Type: application/json
 
 ###
 
-# GET /{{connector}}/amm/list-pools - Filter by pool types
-GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/list-pools?network={{network}}&types=amm
+# GET /connectors/{{connector}}/amm/list-pools - Filter by pool types
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/list-pools?network={{network}}&types=amm
 Content-Type: application/json
 
 ###
 
-# GET /{{connector}}/amm/list-pools - Filter by tokenAddresses (USDC/USDT)
-GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/list-pools?network={{network}}&tokenAddresses=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&tokenAddresses=Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB
+# GET /connectors/{{connector}}/amm/list-pools - Filter by tokenAddresses (USDC/USDT)
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/list-pools?network={{network}}&tokenAddresses=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&tokenAddresses=Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB
 Content-Type: application/json
 
 ###
 
-# GET /{{connector}}/amm/list-pools - Combined filtering with useOfficialTokens
-GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/list-pools?network={{network}}&tokenSymbols=USDC&tokenSymbols=USDT&types=amm&types=amm&maxNumberOfPages=2&useOfficialTokens=true
+# GET /connectors/{{connector}}/amm/list-pools - Combined filtering with useOfficialTokens
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/list-pools?network={{network}}&tokenSymbols=USDC&tokenSymbols=USDT&types=amm&types=amm&maxNumberOfPages=2&useOfficialTokens=true
 Content-Type: application/json
 
 ###
 
 # =======================================================
 
-# GET /{{connector}}/amm/pool-info - RAYDIUM
-GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/pool-info?network={{network}}&poolAddress={{poolAddress}}
+# GET /connectors/{{connector}}/amm/pool-info - RAYDIUM
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/pool-info?network={{network}}&poolAddress={{poolAddress}}
 Content-Type: application/json
 
 {
@@ -252,8 +253,8 @@ Content-Type: application/json
 
 ###
 
-# GET /{{connector}}/amm/quote-swap - RAYDIUM
-GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{baseTokenSymbol}}&quoteToken={{quoteTokenSymbol}}&amount={{amount}}&side={{side}}&poolAddress={{poolAddress}}&slippagePct={{slippagePercentage}}
+# GET /connectors/{{connector}}/amm/quote-swap - RAYDIUM
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{baseTokenSymbol}}&quoteToken={{quoteTokenSymbol}}&amount={{amount}}&side={{side}}&poolAddress={{poolAddress}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
 
 {
@@ -261,8 +262,8 @@ Content-Type: application/json
 
 ###
 
-# GET /{{connector}}/amm/quote-liquidity - RADYDIUM
-GET {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddress}}&baseTokenAmount={{baseTokenAmount}}&quoteTokenAmount={{quoteTokenAmount}}&slippagePct={{slippagePercentage}}
+# GET /connectors/{{connector}}/amm/quote-liquidity - RAYDIUM
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddress}}&baseTokenAmount={{baseTokenAmount}}&quoteTokenAmount={{quoteTokenAmount}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
 
 {
@@ -270,8 +271,8 @@ Content-Type: application/json
 
 ###
 
-# POST /{{connector}}/amm/execute-swap - RAYDIUM
-POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/execute-swap
+# POST /connectors/{{connector}}/amm/execute-swap - RAYDIUM
+POST {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/execute-swap
 Content-Type: application/json
 
 {
@@ -287,9 +288,8 @@ Content-Type: application/json
 
 ###
 
-
-# POST /{{connector}}/amm/add-liquidity - RAYDIUM
-POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/add-liquidity
+# POST /connectors/{{connector}}/amm/add-liquidity - RAYDIUM
+POST {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/add-liquidity
 Content-Type: application/json
 
 {
@@ -303,8 +303,8 @@ Content-Type: application/json
 
 ###
 
-# POST /{{connector}}/amm/remove-liquidity - RAYDIUM
-POST {{httpProtocol}}://{{host}}:{{port}}/{{connector}}/amm/remove-liquidity
+# POST /connectors/{{connector}}/amm/remove-liquidity - RAYDIUM
+POST {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/remove-liquidity
 Content-Type: application/json
 
 {

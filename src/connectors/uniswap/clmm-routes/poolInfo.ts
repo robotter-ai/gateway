@@ -1,15 +1,16 @@
+import { FeeAmount } from '@uniswap/v3-sdk';
 import { FastifyPluginAsync } from 'fastify';
-import { Uniswap } from '../uniswap';
+
 import { Ethereum } from '../../../chains/ethereum/ethereum';
-import { logger } from '../../../services/logger';
-import { 
-  GetPoolInfoRequestType, 
+import {
+  GetPoolInfoRequestType,
   GetPoolInfoRequest,
   PoolInfo,
-  PoolInfoSchema
+  PoolInfoSchema,
 } from '../../../schemas/trading-types/clmm-schema';
+import { logger } from '../../../services/logger';
+import { Uniswap } from '../uniswap';
 import { formatTokenAmount } from '../uniswap.utils';
-import { FeeAmount } from '@uniswap/v3-sdk';
 
 export const poolInfoRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
@@ -25,107 +26,111 @@ export const poolInfoRoute: FastifyPluginAsync = async (fastify) => {
           ...GetPoolInfoRequest,
           properties: {
             network: { type: 'string', default: 'base' },
-            poolAddress: { 
-              type: 'string', 
-              examples: [''] 
+            poolAddress: {
+              type: 'string',
+              examples: [''],
             },
             baseToken: { type: 'string', examples: ['WETH'] },
             quoteToken: { type: 'string', examples: ['USDC'] },
-            feeTier: { type: 'string', enum: ['LOWEST', 'LOW', 'MEDIUM', 'HIGH'], default: 'MEDIUM' }
-          }
+          },
         },
         response: {
-          200: PoolInfoSchema
+          200: PoolInfoSchema,
         },
-      }
+      },
     },
     async (request): Promise<PoolInfo> => {
       try {
-        const { poolAddress, baseToken, quoteToken, feeTier } = request.query;
+        const { poolAddress, baseToken, quoteToken } = request.query;
         const network = request.query.network || 'base';
         const chain = 'ethereum'; // Default to ethereum
-        
+
         const uniswap = await Uniswap.getInstance(network);
-        
+
         // Check if either poolAddress or both baseToken and quoteToken are provided
         if (!poolAddress && (!baseToken || !quoteToken)) {
           throw fastify.httpErrors.badRequest(
-            'Either poolAddress or both baseToken and quoteToken must be provided'
+            'Either poolAddress or both baseToken and quoteToken must be provided',
           );
         }
-        
+
         let poolAddressToUse = poolAddress;
-        
+
         // If no pool address provided, find default pool using base and quote tokens
         if (!poolAddressToUse) {
-          // Convert feeTier string to FeeAmount if provided
-          let feeAmount: FeeAmount | undefined;
-          if (feeTier) {
-            switch (feeTier.toUpperCase()) {
-              case 'LOWEST':
-                feeAmount = FeeAmount.LOWEST;
-                break;
-              case 'LOW':
-                feeAmount = FeeAmount.LOW;
-                break;
-              case 'MEDIUM':
-                feeAmount = FeeAmount.MEDIUM;
-                break;
-              case 'HIGH':
-                feeAmount = FeeAmount.HIGH;
-                break;
-              default:
-                feeAmount = FeeAmount.MEDIUM;
-            }
-          }
-          
-          // Find pool using tokens and optional fee amount
-          poolAddressToUse = await uniswap.findDefaultPool(baseToken, quoteToken, 'clmm');
+          // Find pool using tokens
+          poolAddressToUse = await uniswap.findDefaultPool(
+            baseToken,
+            quoteToken,
+            'clmm',
+          );
           if (!poolAddressToUse) {
             throw fastify.httpErrors.notFound(
-              `No CLMM pool found for pair ${baseToken}-${quoteToken}`
+              `No CLMM pool found for pair ${baseToken}-${quoteToken}`,
             );
           }
         }
-        
+
         // Get base and quote token objects
-        const baseTokenObj = baseToken ? uniswap.getTokenBySymbol(baseToken) : null;
-        const quoteTokenObj = quoteToken ? uniswap.getTokenBySymbol(quoteToken) : null;
-        
-        // Get V3 pool details
+        const baseTokenObj = baseToken
+          ? uniswap.getTokenBySymbol(baseToken)
+          : null;
+        const quoteTokenObj = quoteToken
+          ? uniswap.getTokenBySymbol(quoteToken)
+          : null;
+
+        // Get V3 pool details - using null coalescing with type assertion to handle type checking
         const pool = await uniswap.getV3Pool(
-          baseTokenObj || '',
-          quoteTokenObj || '',
+          baseTokenObj || (baseTokenObj as any),
+          quoteTokenObj || (quoteTokenObj as any),
           undefined,
-          poolAddressToUse
+          poolAddressToUse,
         );
-        
+
         if (!pool) {
           throw fastify.httpErrors.notFound('Pool not found');
         }
+
+        // Determine token ordering
+        const token0 = pool.token0;
+        const token1 = pool.token1;
+        const isBaseToken0 = baseTokenObj.address.toLowerCase() === token0.address.toLowerCase();
         
-        // Get token amounts from pool liquidity
-        const sqrt = BigInt(pool.sqrtRatioX96.toString());
-        const q96 = BigInt(2) ** BigInt(96);
-        const price = Number((sqrt * sqrt) / q96) / (2 ** 96);
+        // Calculate price based on sqrtPriceX96
+        // sqrtPriceX96 = sqrt(price) * 2^96
+        // price = (sqrtPriceX96 / 2^96)^2
+        const sqrtPriceX96 = pool.sqrtRatioX96;
+        const price0 = pool.token0Price.toSignificant(15);
+        const price1 = pool.token1Price.toSignificant(15);
         
-        // Calculate token amounts based on liquidity and current price
-        const liquidity = BigInt(pool.liquidity.toString());
-        const sqrtPriceX96 = BigInt(pool.sqrtRatioX96.toString());
+        // Get the price of base token in terms of quote token
+        const price = isBaseToken0 ? parseFloat(price0) : parseFloat(price1);
+
+        // Get token reserves in the pool
+        // This is a simplified calculation - actual reserves depend on the tick distribution
+        const liquidity = pool.liquidity;
+        const token0Amount = formatTokenAmount(
+          liquidity.toString(),
+          token0.decimals
+        );
+        const token1Amount = formatTokenAmount(
+          liquidity.toString(), 
+          token1.decimals
+        );
         
-        // Calculate token amounts (simplified approximation)
-        const baseTokenAmount = Number(liquidity * q96 / sqrtPriceX96 / BigInt(10 ** baseTokenObj.decimals));
-        const quoteTokenAmount = Number(liquidity * sqrtPriceX96 / q96 / BigInt(10 ** quoteTokenObj.decimals));
-        
+        // Map to base and quote amounts
+        const baseTokenAmount = isBaseToken0 ? token0Amount : token1Amount;
+        const quoteTokenAmount = isBaseToken0 ? token1Amount : token0Amount;
+
         // Convert fee percentage (fee is stored as a fixed point number in parts per million)
         const feePct = pool.fee / 10000;
-        
+
         // Get bin step (ticks in Uniswap V3 terms)
         const tickSpacing = pool.tickSpacing;
-        
+
         // Get active tick/bin
         const activeBinId = pool.tickCurrent;
-        
+
         return {
           address: poolAddressToUse,
           baseTokenAddress: baseTokenObj.address,
@@ -135,13 +140,15 @@ export const poolInfoRoute: FastifyPluginAsync = async (fastify) => {
           price: price,
           baseTokenAmount: baseTokenAmount,
           quoteTokenAmount: quoteTokenAmount,
-          activeBinId: activeBinId
+          activeBinId: activeBinId,
         };
       } catch (e) {
         logger.error(e);
-        throw fastify.httpErrors.internalServerError('Failed to fetch pool info');
+        throw fastify.httpErrors.internalServerError(
+          'Failed to fetch pool info',
+        );
       }
-    }
+    },
   );
 };
 

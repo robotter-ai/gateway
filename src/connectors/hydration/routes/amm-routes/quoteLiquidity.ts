@@ -20,29 +20,35 @@ import {
  * @returns Liquidity quote with token amounts and price limits
  */
 export async function getHydrationLiquidityQuote(
-  _fastify: FastifyInstance,
+  fastify: FastifyInstance,
   network: string,
   poolAddress: string,
   baseTokenAmount?: number,
   quoteTokenAmount?: number,
   slippagePct: number = 1
 ): Promise<HydrationQuoteLiquidityResponse> {
+  // Validate required parameters
   if (!network) {
-    throw new Error('Network parameter is required');
+    throw fastify.httpErrors.badRequest('Network parameter is required');
   }
   
   if (!poolAddress) {
-    throw new Error('Pool address parameter is required');
+    throw fastify.httpErrors.badRequest('Pool address parameter is required');
   }
   
   if (!baseTokenAmount && !quoteTokenAmount) {
-    throw new Error('Either baseTokenAmount or quoteTokenAmount must be provided');
+    throw fastify.httpErrors.badRequest('Either baseTokenAmount or quoteTokenAmount must be provided');
   }
 
+  // Get Hydration instance
   const hydration = await Hydration.getInstance(network);
   if (!hydration) {
-    throw new Error('Hydration service unavailable');
+    throw fastify.httpErrors.serviceUnavailable('Hydration service unavailable');
   }
+
+  // Log request parameters
+  logger.info(`Getting liquidity quote for pool ${poolAddress} on ${network}`);
+  logger.info(`Base amount: ${baseTokenAmount || 'not set'}, Quote amount: ${quoteTokenAmount || 'not set'}, Slippage: ${slippagePct}%`);
 
   try {
     const quote = await hydration.quoteLiquidity(
@@ -52,19 +58,20 @@ export async function getHydrationLiquidityQuote(
       slippagePct
     );
     
+    // Log successful execution
+    logger.info(`Successfully got liquidity quote for pool ${poolAddress}`);
+
     return quote;
   } catch (error) {
-    if (error.message?.includes('not found')) {
-      throw new Error(error.message);
-    }
+    // Log error details
     logger.error(`Error getting liquidity quote: ${error.message}`);
-    throw new Error('Failed to get liquidity quote');
+    
+    if (error.message?.includes('not found')) {
+      throw fastify.httpErrors.notFound(error.message);
+    }
+    
+    throw fastify.httpErrors.internalServerError('Failed to get liquidity quote');
   }
-}
-
-// Define error response interface
-interface ErrorResponse {
-  error: string;
 }
 
 /**
@@ -74,20 +81,23 @@ interface ErrorResponse {
 export const quoteLiquidityRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
     Querystring: HydrationQuoteLiquidityRequest;
-    Reply: HydrationQuoteLiquidityResponse | ErrorResponse;
+    Reply: HydrationQuoteLiquidityResponse;
   }>(
     '/quote-liquidity',
     {
       schema: {
-        description: 'Get a liquidity quote for adding liquidity to a Hydration pool',
-        tags: ['hydration'],
+        description: 'Get a quote for adding liquidity to a Hydration pool',
+        tags: ['hydration/amm'],
         querystring: HydrationQuoteLiquidityRequestSchema,
         response: {
-          200: HydrationQuoteLiquidityResponseSchema
+          200: HydrationQuoteLiquidityResponseSchema,
+          400: { type: 'object', properties: { error: { type: 'string' } } },
+          404: { type: 'object', properties: { error: { type: 'string' } } },
+          500: { type: 'object', properties: { error: { type: 'string' } } }
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       try {
         const { 
           network = 'mainnet',
@@ -108,19 +118,8 @@ export const quoteLiquidityRoute: FastifyPluginAsync = async (fastify) => {
 
         return result;
       } catch (error) {
-        logger.error('Error in quote-liquidity endpoint:', error);
-
-        if (error.statusCode) {
-          return reply.status(error.statusCode).send({ error: error.message });
-        }
-
-        if (error.message?.includes('not found')) {
-          return reply.status(404).send({ error: error.message });
-        } else if (error.message?.includes('must be provided')) {
-          return reply.status(400).send({ error: error.message });
-        }
-
-        return reply.status(500).send({ error: 'Internal server error' });
+        // Error handling is done in getHydrationLiquidityQuote
+        throw error;
       }
     }
   );

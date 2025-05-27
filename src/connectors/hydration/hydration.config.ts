@@ -1,4 +1,7 @@
-import {ConfigManagerV2} from '../../services/config-manager-v2';
+import { ConfigManagerV2 } from '../../services/config-manager-v2';
+
+// Network constants matching core-2.6
+export const hydrationNetworks = ['mainnet'];
 
 interface AvailableNetworks {
   chain: string;
@@ -35,6 +38,9 @@ export namespace HydrationConfig {
 
     /** Gas cost for the transaction */
     gasCost: number;
+
+    /** Priority level for the transaction */
+    priorityLevel: string;
   }
 
   const configManager = ConfigManagerV2.getInstance();
@@ -44,13 +50,18 @@ export namespace HydrationConfig {
    * Contains network settings and default values.
    */
   export const config: NetworkConfig = {
-    availableNetworks: [{ chain: 'polkadot', networks: ['mainnet'] }],
-    tradingTypes: ['AMM'],
-    feePaymentCurrencySymbol: configManager.get('hydration.feePaymentCurrencySymbol'),
     allowedSlippage: configManager.get('hydration.allowedSlippage'),
+    priorityLevel: configManager.get('hydration.priorityLevel'),
+    tradingTypes: ['amm', 'swap'],
+    availableNetworks: [{ chain: 'polkadot', networks: ['mainnet'] }],
+    feePaymentCurrencySymbol: configManager.get('hydration.feePaymentCurrencySymbol'),
     gasPrice: 0.00000177,
     gasLimit: 338667,
     gasCost: 0.6, // in HDX
   };
+
+  // Direct properties matching core-2.6
+  export const chain = 'polkadot';
+  export const networks = ['mainnet'];
 }
 

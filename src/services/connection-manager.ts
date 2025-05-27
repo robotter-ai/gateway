@@ -25,7 +25,10 @@ export async function getInitializedChain<_T>(
   chain: string,
   network: string,
 ): Promise<ChainInstance> {
-  const chainInstance = await getChainInstance(chain, network) as ChainInstance;
+  const chainInstance = (await getChainInstance(
+    chain,
+    network,
+  )) as ChainInstance;
 
   if (chainInstance === undefined) {
     throw new UnsupportedChainException(`unsupported chain ${chain}`);
@@ -34,17 +37,27 @@ export async function getInitializedChain<_T>(
   return chainInstance;
 }
 
+/**
+ * Returns the list of supported chains
+ * @returns Array of supported chain names
+ */
+export function getSupportedChains(): string[] {
+  // These should match the chains in getChainInstance
+  return ['ethereum', 'solana', 'polkadot'];
+}
+
 export async function getChainInstance(
   chain: string,
   network: string,
 ): Promise<ChainInstance | undefined> {
   let connection: ChainInstance | undefined;
+  const chainLower = chain.toLowerCase();
 
-  if (chain === 'ethereum') {
+  if (chainLower === 'ethereum') {
     connection = await Ethereum.getInstance(network);
-  } else if (chain === 'solana') {
+  } else if (chainLower === 'solana') {
     connection = await Solana.getInstance(network);
-  } else if (chain === 'polkadot') {
+  } else if (chainLower === 'polkadot') {
     connection = await Polkadot.getInstance(network);
   } else {
     connection = undefined;

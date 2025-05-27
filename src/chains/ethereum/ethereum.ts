@@ -1,20 +1,23 @@
+import { Provider } from '@ethersproject/abstract-provider';
 import {
   BigNumber,
   Contract,
+  ContractTransaction,
   providers,
   Transaction,
   utils,
   Wallet,
 } from 'ethers';
-import { TokenListType, TokenValue } from '../../services/base';
-import { walletPath } from '../../wallet/utils';
+import { getAddress } from 'ethers/lib/utils';
 import fse from 'fs-extra';
+
+import { TokenListType, TokenValue } from '../../services/base';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import { logger } from '../../services/logger';
-import { getAddress } from 'ethers/lib/utils';
 import { TokenListResolutionStrategy } from '../../services/token-list-resolution';
+import { walletPath } from '../../wallet/utils';
+
 import { getEthereumConfig } from './ethereum.config';
-import { Provider } from '@ethersproject/abstract-provider';
 
 // information about an Ethereum token
 export interface TokenInfo {
@@ -49,11 +52,12 @@ export class Ethereum {
   }
 
   private constructor(network: string) {
-    logger.info(`Initializing Ethereum connector for network: ${network}`);
     const config = getEthereumConfig('ethereum', network);
-
     this.chainId = config.network.chainID;
     this.rpcUrl = config.network.nodeURL;
+    logger.info(
+      `Initializing Ethereum connector for network: ${network}, nodeURL: ${this.rpcUrl}`,
+    );
     this.provider = new providers.StaticJsonRpcProvider(this.rpcUrl);
     this.tokenListSource = config.network.tokenListSource;
     this.tokenListType = config.network.tokenListType;
@@ -254,11 +258,11 @@ export class Ethereum {
         token.symbol.toUpperCase() === tokenSymbol.toUpperCase() &&
         token.chainId === this.chainId,
     );
-    
+
     if (tokenBySymbol) {
       return tokenBySymbol;
     }
-    
+
     // If not found by symbol, check if it's a valid address
     try {
       const normalizedAddress = utils.getAddress(tokenSymbol);
@@ -284,24 +288,53 @@ export class Ethereum {
   /**
    * Get a wallet from stored encrypted key
    */
-  public async getWallet(address: string): Promise<Wallet> {
-    const path = `${walletPath}/ethereum`;
-    const encryptedPrivateKey = await fse.readFile(
-      `${path}/${address}.json`,
-      'utf8',
-    );
-
-    const passphrase = ConfigManagerCertPassphrase.readPassphrase();
-    if (!passphrase) {
-      throw new Error('Missing passphrase');
+  /**
+   * Validate Ethereum address format
+   * @param address The address to validate
+   * @returns The checksummed address if valid
+   * @throws Error if the address is invalid
+   */
+  public static validateAddress(address: string): string {
+    try {
+      // getAddress will both validate the address format and return a checksummed version
+      return getAddress(address);
+    } catch (error) {
+      throw new Error(`Invalid Ethereum address format: ${address}`);
     }
-    return await this.decrypt(encryptedPrivateKey, passphrase);
+  }
+
+  public async getWallet(address: string): Promise<Wallet> {
+    try {
+      // Validate the address format first
+      const validatedAddress = Ethereum.validateAddress(address);
+
+      const path = `${walletPath}/ethereum`;
+      const encryptedPrivateKey = await fse.readFile(
+        `${path}/${validatedAddress}.json`,
+        'utf8',
+      );
+
+      const passphrase = ConfigManagerCertPassphrase.readPassphrase();
+      if (!passphrase) {
+        throw new Error('Missing passphrase');
+      }
+      return await this.decrypt(encryptedPrivateKey, passphrase);
+    } catch (error) {
+      if (error.message.includes('Invalid Ethereum address')) {
+        throw error; // Re-throw validation errors
+      }
+      if (error.code === 'ENOENT') {
+        throw new Error(`Wallet not found for address: ${address}`);
+      }
+      throw error;
+    }
   }
 
   /**
-   * Get the first available wallet address
+   * Get the first available Ethereum wallet address
    */
   public async getFirstWalletAddress(): Promise<string | null> {
+    // Specifically look in the ethereum subdirectory, not in any other chain's directory
     const path = `${walletPath}/ethereum`;
     try {
       // Create directory if it doesn't exist
@@ -316,8 +349,19 @@ export class Ethereum {
       }
 
       // Return first wallet address (without .json extension)
-      return walletFiles[0].slice(0, -5);
+      const walletAddress = walletFiles[0].slice(0, -5);
+
+      // Validate it looks like an Ethereum address (0x followed by 40 hex chars)
+      if (!walletAddress.startsWith('0x') || walletAddress.length !== 42) {
+        logger.warn(
+          `Invalid Ethereum address found in wallet directory: ${walletAddress}`,
+        );
+        return null;
+      }
+
+      return walletAddress;
     } catch (error) {
+      logger.error(`Error getting Ethereum wallet address: ${error.message}`);
       return null;
     }
   }
@@ -359,9 +403,25 @@ export class Ethereum {
     contract: Contract,
     wallet: Wallet,
     decimals: number,
+    timeoutMs: number = 5000, // Default 5 second timeout
   ): Promise<TokenValue> {
-    const balance: BigNumber = await contract.balanceOf(wallet.address);
-    logger.info(`Token balance for ${wallet.address}: ${balance.toString()}`);
+    // Add timeout to prevent hanging on problematic tokens
+    const balancePromise = contract.balanceOf(wallet.address);
+
+    // Create a timeout promise that rejects after specified timeout
+    const timeoutPromise = new Promise<BigNumber>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('Token balance request timed out'));
+      }, timeoutMs);
+    });
+
+    // Race the balance request against the timeout
+    const balance: BigNumber = await Promise.race([
+      balancePromise,
+      timeoutPromise,
+    ]);
+
+    logger.debug(`Token balance for ${wallet.address}: ${balance.toString()}`);
     return { value: balance, decimals: decimals };
   }
 
@@ -436,5 +496,144 @@ export class Ethereum {
     if (this.network in Ethereum._instances) {
       delete Ethereum._instances[this.network];
     }
+  }
+
+  // WETH ABI for wrap/unwrap operations
+  private static WETH9ABI = [
+    // Standard ERC20 functions
+    'function name() view returns (string)',
+    'function symbol() view returns (string)',
+    'function decimals() view returns (uint8)',
+    'function balanceOf(address owner) view returns (uint256)',
+    'function transfer(address to, uint256 amount) returns (bool)',
+
+    // WETH-specific functions
+    'function deposit() public payable',
+    'function withdraw(uint256 amount) public',
+  ];
+
+  // Define wrapped native token addresses for different networks
+  private static WRAPPED_ADDRESSES: {
+    [key: string]: { address: string; symbol: string; nativeSymbol: string };
+  } = {
+    mainnet: {
+      address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      symbol: 'WETH',
+      nativeSymbol: 'ETH',
+    },
+    arbitrum: {
+      address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+      symbol: 'WETH',
+      nativeSymbol: 'ETH',
+    },
+    optimism: {
+      address: '0x4200000000000000000000000000000000000006',
+      symbol: 'WETH',
+      nativeSymbol: 'ETH',
+    },
+    base: {
+      address: '0x4200000000000000000000000000000000000006',
+      symbol: 'WETH',
+      nativeSymbol: 'ETH',
+    },
+    sepolia: {
+      address: '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14',
+      symbol: 'WETH',
+      nativeSymbol: 'ETH',
+    },
+    polygon: {
+      address: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+      symbol: 'WETH',
+      nativeSymbol: 'MATIC',
+    },
+    bsc: {
+      address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+      symbol: 'WBNB',
+      nativeSymbol: 'BNB',
+    },
+    avalanche: {
+      address: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
+      symbol: 'WAVAX',
+      nativeSymbol: 'AVAX',
+    },
+    celo: {
+      address: '0x471EcE3750Da237f93B8E339c536989b8978a438',
+      symbol: 'WCELO',
+      nativeSymbol: 'CELO',
+    },
+    blast: {
+      address: '0x4300000000000000000000000000000000000004',
+      symbol: 'WETH',
+      nativeSymbol: 'ETH',
+    },
+    zora: {
+      address: '0x4200000000000000000000000000000000000006',
+      symbol: 'WETH',
+      nativeSymbol: 'ETH',
+    },
+    worldchain: {
+      address: '0x4300000000000000000000000000000000000004',
+      symbol: 'WETH',
+      nativeSymbol: 'ETH',
+    },
+  };
+
+  /**
+   * Get the wrapped token (WETH, WBNB, etc.) address for the current network
+   * @returns The address of the wrapped token
+   */
+  public getWrappedNativeTokenAddress(): string {
+    const wrappedInfo = Ethereum.WRAPPED_ADDRESSES[this.network];
+    if (!wrappedInfo) {
+      throw new Error(
+        `Wrapped token address not found for network: ${this.network}`,
+      );
+    }
+    return wrappedInfo.address;
+  }
+
+  /**
+   * Check if a token is the wrapped native token (WETH, WBNB, etc.)
+   * @param tokenAddress The token address to check
+   * @returns True if the token is the wrapped native token
+   */
+  public isWrappedNativeToken(tokenAddress: string): boolean {
+    const wrappedAddress = this.getWrappedNativeTokenAddress();
+    return tokenAddress.toLowerCase() === wrappedAddress.toLowerCase();
+  }
+
+  /**
+   * Wraps native ETH to WETH (or equivalent on other chains)
+   * @param wallet The wallet to use for wrapping
+   * @param amountInWei The amount of ETH to wrap in wei (as a BigNumber)
+   * @returns The transaction receipt
+   */
+  public async wrapNativeToken(
+    wallet: Wallet,
+    amountInWei: BigNumber,
+  ): Promise<ContractTransaction> {
+    const wrappedAddress = this.getWrappedNativeTokenAddress();
+
+    // Create wrapped token contract instance
+    const wrappedContract = new Contract(
+      wrappedAddress,
+      Ethereum.WETH9ABI,
+      wallet,
+    );
+
+    // Set transaction parameters
+    const params: any = {
+      gasLimit: this.gasLimitTransaction,
+      nonce: await this.provider.getTransactionCount(wallet.address),
+      value: amountInWei, // Send native token with the transaction
+    };
+
+    // Always fetch gas price from the network
+    const currentGasPrice = await this.provider.getGasPrice();
+    params.gasPrice = currentGasPrice.toString();
+
+    // Create transaction to call deposit() function
+    logger.info(`Wrapping ${utils.formatEther(amountInWei)} ETH to WETH`);
+    return await wrappedContract.deposit(params);
   }
 }

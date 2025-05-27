@@ -1,30 +1,25 @@
-import { FastifyPluginAsync, FastifyInstance } from 'fastify'
-import { Uniswap } from '../uniswap'
-import { Ethereum } from '../../../chains/ethereum/ethereum'
-import { logger } from '../../../services/logger'
-import { 
-  GetSwapQuoteResponseType,
-  GetSwapQuoteResponse,
-  GetSwapQuoteRequestType,
-  GetSwapQuoteRequest
-} from '../../../schemas/trading-types/swap-schema'
-import { formatTokenAmount } from '../uniswap.utils'
-import {
-  Token,
-  CurrencyAmount,
-  Percent,
-  TradeType,
-} from '@uniswap/sdk-core'
+import { Token, CurrencyAmount, Percent, TradeType } from '@uniswap/sdk-core';
 import {
   Pool as V3Pool,
   SwapQuoter,
   SwapOptions,
   Route as V3Route,
-  Trade as V3Trade
-} from '@uniswap/v3-sdk'
-import { BigNumber } from 'ethers'
-import { parseFeeTier } from '../uniswap.utils'
-import JSBI from 'jsbi'
+  Trade as V3Trade,
+} from '@uniswap/v3-sdk';
+import { BigNumber } from 'ethers';
+import { FastifyPluginAsync, FastifyInstance } from 'fastify';
+import JSBI from 'jsbi';
+
+import { Ethereum } from '../../../chains/ethereum/ethereum';
+import {
+  GetSwapQuoteResponseType,
+  GetSwapQuoteResponse,
+  GetSwapQuoteRequestType,
+  GetSwapQuoteRequest,
+} from '../../../schemas/trading-types/swap-schema';
+import { logger } from '../../../services/logger';
+import { Uniswap } from '../uniswap';
+import { formatTokenAmount, parseFeeTier } from '../uniswap.utils';
 
 async function quoteClmmSwap(
   uniswap: Uniswap,
@@ -33,68 +28,95 @@ async function quoteClmmSwap(
   quoteToken: Token,
   amount: number,
   side: 'BUY' | 'SELL',
-  feeTier?: string,
-  slippagePct?: number
+  slippagePct?: number,
 ): Promise<any> {
   try {
-    // Get the V3 pool - prioritize poolAddress
-    // If a feeTier is provided, it's just a hint but we'll use the poolAddress
-    let feeAmount = undefined;
-    if (feeTier) {
-      feeAmount = parseFeeTier(feeTier);
-    }
-    
-    const pool = await uniswap.getV3Pool(baseToken, quoteToken, feeAmount, poolAddress);
+    // Get the V3 pool - only use poolAddress
+    const pool = await uniswap.getV3Pool(
+      baseToken,
+      quoteToken,
+      undefined, // No fee amount needed, using poolAddress directly
+      poolAddress,
+    );
     if (!pool) {
-      throw new Error(`Pool not found for ${baseToken.symbol}-${quoteToken.symbol}`);
+      throw new Error(
+        `Pool not found for ${baseToken.symbol}-${quoteToken.symbol}`,
+      );
     }
 
     // Determine which token is being traded (exact in/out)
     const exactIn = side === 'SELL';
-    const [inputToken, outputToken] = exactIn 
-      ? [baseToken, quoteToken] 
+    const [inputToken, outputToken] = exactIn
+      ? [baseToken, quoteToken]
       : [quoteToken, baseToken];
-
-    // Convert amount to token units with decimals
-    const inputAmount = CurrencyAmount.fromRawAmount(
-      inputToken,
-      JSBI.BigInt(Math.floor(amount * Math.pow(10, inputToken.decimals)).toString())
-    );
 
     // Create a route for the trade
     const route = new V3Route([pool], inputToken, outputToken);
 
     // Create the V3 trade
-    const trade = await V3Trade.fromRoute(
-      route,
-      inputAmount,
-      exactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT
-    );
+    let trade;
+    if (exactIn) {
+      // For SELL (exactIn), we use the input amount and EXACT_INPUT trade type
+      const inputAmount = CurrencyAmount.fromRawAmount(
+        inputToken,
+        JSBI.BigInt(
+          Math.floor(amount * Math.pow(10, inputToken.decimals)).toString(),
+        ),
+      );
+      trade = await V3Trade.fromRoute(
+        route,
+        inputAmount,
+        TradeType.EXACT_INPUT,
+      );
+    } else {
+      // For BUY (exactOut), we use the output amount and EXACT_OUTPUT trade type
+      const outputAmount = CurrencyAmount.fromRawAmount(
+        outputToken,
+        JSBI.BigInt(
+          Math.floor(amount * Math.pow(10, outputToken.decimals)).toString(),
+        ),
+      );
+      trade = await V3Trade.fromRoute(
+        route,
+        outputAmount,
+        TradeType.EXACT_OUTPUT,
+      );
+    }
 
     // Calculate slippage-adjusted amounts
-    const slippageTolerance = slippagePct 
-      ? new Percent(slippagePct, 100) 
-      : uniswap.getAllowedSlippage();
+    // Convert slippagePct to integer basis points (0.5% -> 50 basis points)
+    const slippageTolerance =
+      slippagePct !== undefined
+        ? new Percent(Math.floor(slippagePct * 100), 10000)
+        : uniswap.getAllowedSlippage();
 
     const minAmountOut = exactIn
       ? trade.minimumAmountOut(slippageTolerance).quotient.toString()
-      : inputAmount.quotient.toString();
+      : trade.outputAmount.quotient.toString();
 
     const maxAmountIn = exactIn
-      ? inputAmount.quotient.toString()
+      ? trade.inputAmount.quotient.toString()
       : trade.maximumAmountIn(slippageTolerance).quotient.toString();
 
-    // Calculate amounts
-    const estimatedAmountIn = exactIn
-      ? formatTokenAmount(inputAmount.quotient.toString(), inputToken.decimals)
-      : formatTokenAmount(trade.inputAmount.quotient.toString(), inputToken.decimals);
+    // Calculate amounts - trade object has inputAmount and outputAmount for both types
+    const estimatedAmountIn = formatTokenAmount(
+      trade.inputAmount.quotient.toString(),
+      inputToken.decimals,
+    );
 
-    const estimatedAmountOut = exactIn
-      ? formatTokenAmount(trade.outputAmount.quotient.toString(), outputToken.decimals)
-      : formatTokenAmount(inputAmount.quotient.toString(), outputToken.decimals);
+    const estimatedAmountOut = formatTokenAmount(
+      trade.outputAmount.quotient.toString(),
+      outputToken.decimals,
+    );
 
-    const minAmountOutValue = formatTokenAmount(minAmountOut, outputToken.decimals);
-    const maxAmountInValue = formatTokenAmount(maxAmountIn, inputToken.decimals);
+    const minAmountOutValue = formatTokenAmount(
+      minAmountOut,
+      outputToken.decimals,
+    );
+    const maxAmountInValue = formatTokenAmount(
+      maxAmountIn,
+      inputToken.decimals,
+    );
 
     // Calculate price impact
     const priceImpact = parseFloat(trade.priceImpact.toSignificant(4));
@@ -109,6 +131,12 @@ async function quoteClmmSwap(
       inputToken,
       outputToken,
       trade,
+      // Add raw values for execution
+      rawAmountIn: trade.inputAmount.quotient.toString(),
+      rawAmountOut: trade.outputAmount.quotient.toString(),
+      rawMinAmountOut: minAmountOut,
+      rawMaxAmountIn: maxAmountIn,
+      feeTier: pool.fee,
     };
   } catch (error) {
     logger.error(`Error quoting CLMM swap: ${error.message}`);
@@ -116,7 +144,7 @@ async function quoteClmmSwap(
   }
 }
 
-async function formatSwapQuote(
+export async function getUniswapClmmQuote(
   _fastify: FastifyInstance,
   network: string,
   poolAddress: string,
@@ -124,73 +152,115 @@ async function formatSwapQuote(
   quoteToken: string,
   amount: number,
   side: 'BUY' | 'SELL',
-  feeTier?: string,
-  slippagePct?: number
+  slippagePct?: number,
+): Promise<{
+  quote: any;
+  uniswap: any;
+  ethereum: any;
+  baseTokenObj: any;
+  quoteTokenObj: any;
+}> {
+  // Get instances
+  const uniswap = await Uniswap.getInstance(network);
+  const ethereum = await Ethereum.getInstance(network);
+
+  if (!ethereum.ready()) {
+    logger.info('Ethereum instance not ready, initializing...');
+    await ethereum.init();
+  }
+
+  // Resolve tokens
+  const baseTokenObj = uniswap.getTokenBySymbol(baseToken);
+  const quoteTokenObj = uniswap.getTokenBySymbol(quoteToken);
+
+  if (!baseTokenObj) {
+    logger.error(`Base token not found: ${baseToken}`);
+    throw new Error(`Base token not found: ${baseToken}`);
+  }
+
+  if (!quoteTokenObj) {
+    logger.error(`Quote token not found: ${quoteToken}`);
+    throw new Error(`Quote token not found: ${quoteToken}`);
+  }
+
+  logger.info(
+    `Base token: ${baseTokenObj.symbol}, address=${baseTokenObj.address}, decimals=${baseTokenObj.decimals}`,
+  );
+  logger.info(
+    `Quote token: ${quoteTokenObj.symbol}, address=${quoteTokenObj.address}, decimals=${quoteTokenObj.decimals}`,
+  );
+
+  // Get the quote
+  const quote = await quoteClmmSwap(
+    uniswap,
+    poolAddress,
+    baseTokenObj,
+    quoteTokenObj,
+    amount,
+    side as 'BUY' | 'SELL',
+    slippagePct,
+  );
+
+  if (!quote) {
+    throw new Error('Failed to get swap quote');
+  }
+
+  return {
+    quote,
+    uniswap,
+    ethereum,
+    baseTokenObj,
+    quoteTokenObj,
+  };
+}
+
+async function formatSwapQuote(
+  fastify: FastifyInstance,
+  network: string,
+  poolAddress: string,
+  baseToken: string,
+  quoteToken: string,
+  amount: number,
+  side: 'BUY' | 'SELL',
+  slippagePct?: number,
 ): Promise<GetSwapQuoteResponseType> {
-  logger.info(`formatSwapQuote: poolAddress=${poolAddress}, baseToken=${baseToken}, quoteToken=${quoteToken}, amount=${amount}, side=${side}, network=${network}`);
-  
+  logger.info(
+    `formatSwapQuote: poolAddress=${poolAddress}, baseToken=${baseToken}, quoteToken=${quoteToken}, amount=${amount}, side=${side}, network=${network}`,
+  );
+
   try {
-    // Get instances
-    const uniswap = await Uniswap.getInstance(network);
-    const ethereum = await Ethereum.getInstance(network);
-    
-    // Check if instances are ready
-    if (!uniswap.ready()) {
-      logger.info('Uniswap instance not ready, initializing...');
-      await uniswap.init();
-    }
-    
-    if (!ethereum.ready()) {
-      logger.info('Ethereum instance not ready, initializing...');
-      await ethereum.init();
-    }
+    // Use the extracted quote function
+    const { quote, uniswap, ethereum, baseTokenObj, quoteTokenObj } =
+      await getUniswapClmmQuote(
+        fastify,
+        network,
+        poolAddress,
+        baseToken,
+        quoteToken,
+        amount,
+        side,
+        slippagePct,
+      );
 
-    // Resolve tokens
-    const baseTokenObj = uniswap.getTokenBySymbol(baseToken);
-    const quoteTokenObj = uniswap.getTokenBySymbol(quoteToken);
-
-    if (!baseTokenObj) {
-      logger.error(`Base token not found: ${baseToken}`);
-      throw new Error(`Base token not found: ${baseToken}`);
-    }
-    
-    if (!quoteTokenObj) {
-      logger.error(`Quote token not found: ${quoteToken}`);
-      throw new Error(`Quote token not found: ${quoteToken}`);
-    }
-    
-    logger.info(`Base token: ${baseTokenObj.symbol}, address=${baseTokenObj.address}, decimals=${baseTokenObj.decimals}`);
-    logger.info(`Quote token: ${quoteTokenObj.symbol}, address=${quoteTokenObj.address}, decimals=${quoteTokenObj.decimals}`);
-
-    // Get the quote
-    const quote = await quoteClmmSwap(
-      uniswap,
-      poolAddress,
-      baseTokenObj,
-      quoteTokenObj,
-      amount,
-      side as 'BUY' | 'SELL',
-      feeTier,
-      slippagePct
+    logger.info(
+      `Quote result: estimatedAmountIn=${quote.estimatedAmountIn}, estimatedAmountOut=${quote.estimatedAmountOut}`,
     );
-    
-    if (!quote) {
-      throw new Error('Failed to get swap quote');
-    }
-    
-    logger.info(`Quote result: estimatedAmountIn=${quote.estimatedAmountIn}, estimatedAmountOut=${quote.estimatedAmountOut}`);
 
     // Calculate balance changes based on which tokens are being swapped
-    const baseTokenBalanceChange = side === 'BUY' ? quote.estimatedAmountOut : -quote.estimatedAmountIn;
-    const quoteTokenBalanceChange = side === 'BUY' ? -quote.estimatedAmountIn : quote.estimatedAmountOut;
-    
-    logger.info(`Balance changes: baseTokenBalanceChange=${baseTokenBalanceChange}, quoteTokenBalanceChange=${quoteTokenBalanceChange}`);
+    const baseTokenBalanceChange =
+      side === 'BUY' ? quote.estimatedAmountOut : -quote.estimatedAmountIn;
+    const quoteTokenBalanceChange =
+      side === 'BUY' ? -quote.estimatedAmountIn : quote.estimatedAmountOut;
+
+    logger.info(
+      `Balance changes: baseTokenBalanceChange=${baseTokenBalanceChange}, quoteTokenBalanceChange=${quoteTokenBalanceChange}`,
+    );
 
     // Get gas estimate for V3 swap
     const estimatedGasValue = 200000; // V3 swaps use more gas than V2
     const gasPrice = await ethereum.provider.getGasPrice();
     logger.info(`Gas price from provider: ${gasPrice.toString()}`);
-    
+
     // Calculate gas cost
     const estimatedGasBN = BigNumber.from(estimatedGasValue.toString());
     const gasCostRaw = gasPrice.mul(estimatedGasBN);
@@ -199,7 +269,7 @@ async function formatSwapQuote(
 
     // Calculate price
     const price = quote.estimatedAmountOut / quote.estimatedAmountIn;
-    
+
     // Format gas price as Gwei
     const gasPriceGwei = formatTokenAmount(gasPrice.toString(), 9); // Convert to Gwei
     logger.info(`Gas price in Gwei: ${gasPriceGwei}`);
@@ -215,7 +285,7 @@ async function formatSwapQuote(
       price,
       gasPrice: Number(gasPriceGwei), // Convert to number
       gasLimit: estimatedGasValue, // Already a number
-      gasCost
+      gasCost,
     };
   } catch (error) {
     logger.error(`Error formatting swap quote: ${error.message}`);
@@ -227,6 +297,9 @@ async function formatSwapQuote(
 }
 
 export const quoteSwapRoute: FastifyPluginAsync = async (fastify) => {
+  // Import the httpErrors plugin to ensure it's available
+  await fastify.register(require('@fastify/sensible'));
+
   fastify.get<{
     Querystring: GetSwapQuoteRequestType;
     Reply: GetSwapQuoteResponseType;
@@ -236,7 +309,7 @@ export const quoteSwapRoute: FastifyPluginAsync = async (fastify) => {
       schema: {
         description: 'Get swap quote for Uniswap V3 CLMM',
         tags: ['uniswap/clmm'],
-        querystring:{ 
+        querystring: {
           ...GetSwapQuoteRequest,
           properties: {
             ...GetSwapQuoteRequest.properties,
@@ -245,47 +318,50 @@ export const quoteSwapRoute: FastifyPluginAsync = async (fastify) => {
             quoteToken: { type: 'string', examples: ['USDC'] },
             amount: { type: 'number', examples: [0.001] },
             side: { type: 'string', enum: ['BUY', 'SELL'], examples: ['SELL'] },
-            slippagePct: { type: 'number', examples: [0.5] }
-          }
+            slippagePct: { type: 'number', examples: [1] },
+          },
         },
         response: {
           200: {
             properties: {
               ...GetSwapQuoteResponse.properties,
-            }
-          }
+            },
+          },
         },
-      }
+      },
     },
     async (request) => {
       try {
-        const { 
-          network, 
-          poolAddress: requestedPoolAddress, 
-          baseToken, 
-          quoteToken, 
-          amount, 
+        const {
+          network,
+          poolAddress: requestedPoolAddress,
+          baseToken,
+          quoteToken,
+          amount,
           side,
-          slippagePct 
+          slippagePct,
         } = request.query;
-        
+
         const networkToUse = network || 'base';
 
         const uniswap = await Uniswap.getInstance(networkToUse);
         let poolAddress = requestedPoolAddress;
-        
+
         if (!poolAddress) {
           // Look up the pool from configuration pools dictionary
-          poolAddress = await uniswap.findDefaultPool(baseToken, quoteToken, 'clmm');
-          
+          poolAddress = await uniswap.findDefaultPool(
+            baseToken,
+            quoteToken,
+            'clmm',
+          );
+
           if (!poolAddress) {
             throw fastify.httpErrors.notFound(
-              `No CLMM pool found for pair ${baseToken}-${quoteToken}`
+              `No CLMM pool found for pair ${baseToken}-${quoteToken}`,
             );
           }
         }
-        
-        // We no longer pass feeTier from query parameters
+
         return await formatSwapQuote(
           fastify,
           networkToUse,
@@ -294,17 +370,18 @@ export const quoteSwapRoute: FastifyPluginAsync = async (fastify) => {
           quoteToken,
           amount,
           side as 'BUY' | 'SELL',
-          undefined, // feeTier is now undefined
-          slippagePct
+          slippagePct,
         );
       } catch (e) {
         logger.error(e);
         if (e.statusCode) {
           throw e;
         }
-        throw fastify.httpErrors.internalServerError(`Error getting swap quote: ${e.message}`);
+        throw fastify.httpErrors.internalServerError(
+          `Error getting swap quote: ${e.message}`,
+        );
       }
-    }
+    },
   );
 };
 

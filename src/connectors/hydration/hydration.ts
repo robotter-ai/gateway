@@ -781,7 +781,12 @@ export class Hydration {
    */
   @runWithRetryAndTimeout()
   public async apiPromiseCreate(options: { provider: WsProvider | HttpProvider }): Promise<ApiPromise> {
-    return await ApiPromise.create(options);
+    return await ApiPromise.create({
+      ...options,
+      noInitWarn: true,
+      throwOnConnect: true,
+      throwOnUnknown: true
+    });
   }
 
   /**

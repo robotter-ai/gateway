@@ -2,6 +2,7 @@ import sensible from '@fastify/sensible';
 import type { FastifyPluginAsync } from 'fastify';
 
 // CLMM routes
+import { listPoolsRoute as ammListPoolsRoute } from './amm-routes/listPools';
 import { addLiquidityRoute as ammAddLiquidityRoute } from './amm-routes/addLiquidity';
 import { executeSwapRoute as ammExecuteSwapRoute } from './amm-routes/executeSwap';
 import { poolInfoRoute as ammPoolInfoRoute } from './amm-routes/poolInfo';
@@ -66,6 +67,7 @@ const raydiumAmmRoutes: FastifyPluginAsync = async (fastify) => {
     await instance.register(ammExecuteSwapRoute);
     await instance.register(ammAddLiquidityRoute);
     await instance.register(ammRemoveLiquidityRoute);
+    await instance.register(ammListPoolsRoute);
   });
 };
 

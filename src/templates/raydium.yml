@@ -16,6 +16,7 @@ networks:
       POPCAT-SOL: 'FRhB8L7Y9Qq41qZXYLtC2nw8An1RJfLLxRF2x9RwLLMo'
       SOL-TRUMP: 'HKuJrP5tYQLbEUdjKwjgnHs2957QKjR2iWhJKTtMa1xs'
       LAYER-USDC: 'G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3'
+      USDC-USDT: '7TbGqz32RsuwXbXY7EyBCiAnMbJq1gm1wKmfjQjuwoyF'
     
     # CLMM (Raydium CLMM) pools for Solana mainnet
     clmm:

@@ -8,6 +8,7 @@ import {
   ListPoolsResponseType
 } from '../../../schemas/trading-types/amm-schema';
 import { PublicKey } from '@solana/web3.js';
+import { RaydiumConfig } from '../raydium.config';
 
 // Known token mint addresses for quick access
 const KNOWN_TOKEN_MINTS = {
@@ -23,10 +24,46 @@ interface ExtendedListPoolsRequestType extends ListPoolsRequestType {
   types?: string[]; // Array of pool types (e.g. ['amm', 'cpmm', 'clmm'])
   maxNumberOfPages?: number;
   useOfficialTokens?: boolean;
+  useConfigPools?: boolean; // Whether to use pool addresses from configuration
   
   // Specific token parameters
   tokenSymbols?: string[]; // Array of token symbols (e.g. ['USDC', 'USDT'])
   tokenAddresses?: string[]; // Array of token addresses (e.g. ['EPjFWdd5...', 'Es9vMFrz...'])
+}
+
+// Function to get configured pools from RaydiumConfig
+function getConfiguredPools(network: string, types: string[]): any[] {
+  try {
+    const configuredPools = [];
+    
+    // Get pools from RaydiumConfig for each type
+    for (const poolType of types) {
+      const pools = RaydiumConfig.getNetworkPools(network, poolType as 'amm' | 'clmm');
+      
+      // Process each pool in the configuration
+      for (const [tokenPair, poolAddress] of Object.entries(pools)) {
+        const [baseToken, quoteToken] = tokenPair.split('-');
+        
+        configuredPools.push({
+          id: poolAddress,
+          type: poolType,
+          mintA: {
+            symbol: baseToken,
+            address: KNOWN_TOKEN_MINTS[baseToken] || ''
+          },
+          mintB: {
+            symbol: quoteToken,
+            address: KNOWN_TOKEN_MINTS[quoteToken] || ''
+          }
+        });
+      }
+    }
+    
+    return configuredPools;
+  } catch (error) {
+    logger.error(`Error getting configured pools: ${error.message}`);
+    return [];
+  }
 }
 
 /**
@@ -61,6 +98,11 @@ export const listPoolsRoute: FastifyPluginAsync = async (fastify) => {
               description: 'Use official token list instead of Jupiter token list', 
               default: true 
             },
+            useConfigPools: {
+              type: 'boolean',
+              description: 'Use pool addresses from configuration file',
+              default: false
+            },
             tokenSymbols: { 
               type: 'array', 
               description: 'Array of token symbols to filter by',
@@ -88,6 +130,7 @@ export const listPoolsRoute: FastifyPluginAsync = async (fastify) => {
           types = [],
           maxNumberOfPages = 3,
           useOfficialTokens = false,
+          useConfigPools = false,
           tokenSymbols = [],
           tokenAddresses = []
         } = request.query;
@@ -96,6 +139,38 @@ export const listPoolsRoute: FastifyPluginAsync = async (fastify) => {
         const tokenSymbolsArray = Array.isArray(tokenSymbols) ? tokenSymbols : [tokenSymbols].filter(Boolean);
         const tokenAddressesArray = Array.isArray(tokenAddresses) ? tokenAddresses : [tokenAddresses].filter(Boolean);
         const typesArray = Array.isArray(types) ? types : [types].filter(Boolean);
+        
+        // If useConfigPools is true, load pools from configuration
+        if (useConfigPools) {
+          logger.info(`Loading configured pools for network ${network}`);
+          const configuredPools = getConfiguredPools(network, typesArray);
+          
+          // Filter configured pools by token symbols if specified
+          let filteredPools = configuredPools;
+          if (tokenSymbolsArray.length > 0) {
+            filteredPools = configuredPools.filter(pool => {
+              const poolSymbols = [pool.mintA.symbol, pool.mintB.symbol];
+              return tokenSymbolsArray.every(symbol => 
+                poolSymbols.includes(symbol.toUpperCase())
+              );
+            });
+          }
+          
+          // Map the pool info to response format
+          const pools = filteredPools.map((poolInfo) => ({
+            address: poolInfo.id,
+            type: poolInfo.type,
+            tokens: [
+              poolInfo.mintA.symbol,
+              poolInfo.mintB.symbol
+            ],
+            price: undefined, // Price not available from config
+            tvl: undefined, // TVL not available from config
+            fee: 0 // Default fee
+          }));
+          
+          return { pools };
+        }
         
         // Determine if we need to fetch by token
         const hasTokenSymbols = tokenSymbolsArray.length > 0;

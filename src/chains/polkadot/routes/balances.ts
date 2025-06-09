@@ -1,10 +1,16 @@
-import { FastifyPluginAsync, FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyPluginAsync } from 'fastify';
+
 import { Polkadot } from '../polkadot';
-import { PolkadotBalanceRequest, PolkadotBalanceResponse, PolkadotBalanceRequestSchema, PolkadotBalanceResponseSchema } from '../polkadot.types';
+import {
+  PolkadotBalanceRequest,
+  PolkadotBalanceResponse,
+  PolkadotBalanceRequestSchema,
+  PolkadotBalanceResponseSchema,
+} from '../polkadot.types';
 
 /**
  * Retrieves token balances for a Polkadot address
- * 
+ *
  * @param fastify Fastify instance
  * @param network Network identifier (e.g., 'mainnet', 'westend')
  * @param address Polkadot address to check balances for
@@ -15,16 +21,16 @@ export async function getPolkadotBalances(
   _fastify: FastifyInstance,
   network: string,
   address: string,
-  tokenSymbols?: string[]
+  tokenSymbols?: string[],
 ): Promise<PolkadotBalanceResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
-  
+
   if (!address) {
     throw new Error('Address parameter is required');
   }
-  
+
   const polkadot = await Polkadot.getInstance(network);
 
   return await polkadot.getAddressBalances(address, tokenSymbols);
@@ -45,18 +51,19 @@ export const balancesRoute: FastifyPluginAsync = async (fastify) => {
         tags: ['polkadot'],
         body: PolkadotBalanceRequestSchema,
         response: {
-          200: PolkadotBalanceResponseSchema
-        }
-      }
+          200: PolkadotBalanceResponseSchema,
+        },
+      },
     },
     async (request) => {
-      return await getPolkadotBalances(
-        fastify, 
-        request.body.network, 
+      const response = await getPolkadotBalances(
+        fastify,
+        request.body.network,
         request.body.address,
-        request.body.tokens
+        request.body.tokens,
       );
-    }
+      return response;
+    },
   );
 };
 

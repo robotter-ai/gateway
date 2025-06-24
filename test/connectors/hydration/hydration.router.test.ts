@@ -57,7 +57,6 @@ import { BigNumber } from '@galacticcouncil/sdk';
 import Fastify from 'fastify';
 import fs from 'fs-extra';
 
-import { Polkadot } from '../../../src/chains/polkadot/polkadot';
 import { addLiquidityRoute } from '../../../src/connectors/hydration/routes/amm-routes/addLiquidity';
 import { executeSwapRoute } from '../../../src/connectors/hydration/routes/amm-routes/executeSwap';
 import { listPoolsRoute } from '../../../src/connectors/hydration/routes/amm-routes/listPools';
@@ -124,14 +123,16 @@ const _MOCK_API = {
       }),
     },
     tokens: {
-      accounts: jest.fn().mockImplementation((tokenAddress) => {
-        if (tokenAddress === '0x1234567890abcdef') {
+      accounts: jest.fn().mockImplementation((tokenId) => {
+        // Return different balances based on the token ID
+        if (tokenId === '0x1234567890abcdef') {
           return Promise.resolve({
             free: { toString: () => '1234567890000000000000' },
           });
         }
+        // For share tokens or other tokens, return a positive balance
         return Promise.resolve({
-          free: { toString: () => '12345678900000000000' },
+          free: { toString: () => '1000000000000000000' },
         });
       }),
       totalIssuance: jest.fn().mockImplementation((tokenAddress) => {
@@ -152,9 +153,15 @@ const _MOCK_API = {
       },
     },
     xyk: {
-      shareToken: jest.fn().mockImplementation(() => {
+      shareToken: jest.fn().mockImplementation((poolAddress) => {
+        // Return different share token IDs based on pool address
+        if (poolAddress === 'pool-1') {
+          return Promise.resolve({
+            toString: () => '0x1234567890abcdef',
+          });
+        }
         return Promise.resolve({
-          toString: () => '0x1234567890abcdef',
+          toString: () => '0xabcdef1234567890',
         });
       }),
     },
@@ -289,13 +296,6 @@ jest.mock('../../../src/chains/polkadot/polkadot', () => ({
         HDX: 1000000,
         USDT: 1000000,
       }),
-      getToken: jest.fn().mockImplementation((symbol) => {
-        if (symbol === 'HDX' || symbol === '0x1')
-          return { address: '0x1', decimals: 12, symbol: 'HDX' };
-        if (symbol === 'USDT' || symbol === '0x2')
-          return { address: '0x2', decimals: 6, symbol: 'USDT' };
-        return null;
-      }),
       getNativeToken: jest
         .fn()
         .mockReturnValue({ address: '0x1', decimals: 12, symbol: 'HDX' }),
@@ -372,6 +372,67 @@ jest.mock('../../../src/connectors/hydration/hydration', () => {
               return { address: '0x1', decimals: 12, symbol: 'HDX' };
             if (symbol === 'USDT' || symbol === '0x2')
               return { address: '0x2', decimals: 6, symbol: 'USDT' };
+            if (symbol === 'H2O')
+              return {
+                address: '0x5555555555555555555555555555555555555555',
+                decimals: 18,
+                symbol: 'H2O',
+              };
+            if (symbol === 'USDC')
+              return {
+                address: '0x6666666666666666666666666666666666666666',
+                decimals: 6,
+                symbol: 'USDC',
+              };
+            // Handle token addresses directly
+            if (symbol === '0x5555555555555555555555555555555555555555')
+              return {
+                address: '0x5555555555555555555555555555555555555555',
+                decimals: 18,
+                symbol: 'H2O',
+              };
+            if (symbol === '0x6666666666666666666666666666666666666666')
+              return {
+                address: '0x6666666666666666666666666666666666666666',
+                decimals: 6,
+                symbol: 'USDC',
+              };
+            if (symbol === '0x1234567890123456789012345678901234567890')
+              return {
+                address: '0x1234567890123456789012345678901234567890',
+                decimals: 6,
+                symbol: 'USDC',
+              };
+            if (symbol === '0x0987654321098765432109876543210987654321')
+              return {
+                address: '0x0987654321098765432109876543210987654321',
+                decimals: 6,
+                symbol: 'USDT',
+              };
+            if (symbol === '0x1111111111111111111111111111111111111111')
+              return {
+                address: '0x1111111111111111111111111111111111111111',
+                decimals: 18,
+                symbol: 'H2O',
+              };
+            if (symbol === '0x2222222222222222222222222222222222222222')
+              return {
+                address: '0x2222222222222222222222222222222222222222',
+                decimals: 6,
+                symbol: 'USDC',
+              };
+            if (symbol === '0x3333333333333333333333333333333333333333')
+              return {
+                address: '0x3333333333333333333333333333333333333333',
+                decimals: 18,
+                symbol: 'H2O',
+              };
+            if (symbol === '0x4444444444444444444444444444444444444444')
+              return {
+                address: '0x4444444444444444444444444444444444444444',
+                decimals: 6,
+                symbol: 'USDC',
+              };
             return null;
           }),
           getNativeToken: jest
@@ -379,14 +440,6 @@ jest.mock('../../../src/connectors/hydration/hydration', () => {
             .mockReturnValue({ address: '0x1', decimals: 12, symbol: 'HDX' }),
           getFeePaymentToken: jest.fn().mockReturnValue({ decimals: 12 }),
         };
-
-        // realInstance.getPoolInfo = jest.fn().mockResolvedValue({
-        //   id: 'pool-1',
-        //   baseTokenAddress: '0x1',
-        //   quoteTokenAddress: '0x2',
-        //   poolType: 'XYK',
-        //   price: 10,
-        // });
 
         realInstance.getPoolService = jest.fn().mockResolvedValue({
           syncRegistry: jest.fn().mockResolvedValue(undefined),
@@ -413,27 +466,172 @@ jest.mock('../../../src/connectors/hydration/hydration', () => {
           ]),
         });
 
-        realInstance.poolServiceGetPools = jest.fn().mockResolvedValue([
-          {
-            address: 'pool-1',
-            id: 'pool-1',
-            type: 'xyk',
-            tokens: [
+        realInstance.poolServiceGetPools = jest
+          .fn()
+          .mockImplementation((includeOnly = []) => {
+            // Return different pools based on the test requirements
+            const pools = [
               {
-                symbol: 'HDX',
-                balance: '1000000000000',
-                decimals: 12,
-                id: '0x1',
+                address: 'pool-1',
+                id: '1',
+                type: 'xyk',
+                tokens: [
+                  {
+                    symbol: 'H2O',
+                    balance: '1000000000000000000000',
+                    decimals: 18,
+                    id: '0x5555555555555555555555555555555555555555',
+                  },
+                  {
+                    symbol: 'USDC',
+                    balance: '1000000000',
+                    decimals: 6,
+                    id: '0x6666666666666666666666666666666666666666',
+                  },
+                ],
               },
               {
-                symbol: 'USDT',
-                balance: '10000000000',
-                decimals: 6,
-                id: '0x2',
+                address: 'stableswap',
+                id: '2',
+                type: 'stableswap',
+                tokens: [
+                  {
+                    symbol: 'USDC',
+                    balance: '1000000000',
+                    decimals: 6,
+                    id: '0x1234567890123456789012345678901234567890',
+                  },
+                  {
+                    symbol: 'USDT',
+                    balance: '1000000000',
+                    decimals: 6,
+                    id: '0x0987654321098765432109876543210987654321',
+                  },
+                ],
               },
-            ],
-          },
-        ]);
+              {
+                address: 'omnipool',
+                id: '5',
+                type: 'omnipool',
+                tokens: [
+                  {
+                    symbol: 'H2O',
+                    balance: '1000000000000000000000',
+                    decimals: 18,
+                    id: '0x1111111111111111111111111111111111111111',
+                  },
+                  {
+                    symbol: 'USDC',
+                    balance: '1000000000',
+                    decimals: 6,
+                    id: '0x2222222222222222222222222222222222222222',
+                  },
+                ],
+              },
+              {
+                address: 'omnipool-2',
+                id: '6',
+                type: 'omnipool',
+                tokens: [
+                  {
+                    symbol: 'H2O',
+                    balance: '1000000000000000000000',
+                    decimals: 18,
+                    id: '0x1111111111111111111111111111111111111111',
+                  },
+                  {
+                    symbol: 'USDC',
+                    balance: '1000000000',
+                    decimals: 6,
+                    id: '0x2222222222222222222222222222222222222222',
+                  },
+                ],
+              },
+              {
+                address: 'unsupported-pool',
+                id: '7',
+                type: 'unsupported',
+                tokens: [
+                  {
+                    symbol: 'H2O',
+                    balance: '1000000000000000000000',
+                    decimals: 18,
+                    id: '0x3333333333333333333333333333333333333333',
+                  },
+                  {
+                    symbol: 'USDC',
+                    balance: '1000000000',
+                    decimals: 6,
+                    id: '0x4444444444444444444444444444444444444444',
+                  },
+                ],
+              },
+              {
+                address: 'invalid-stableswap-pool',
+                id: 'invalid-id',
+                type: 'stableswap',
+                tokens: [
+                  {
+                    symbol: 'H2O',
+                    balance: '1000000000000000000000',
+                    decimals: 18,
+                    id: '0x3333333333333333333333333333333333333333',
+                  },
+                  {
+                    symbol: 'USDC',
+                    balance: '1000000000',
+                    decimals: 6,
+                    id: '0x4444444444444444444444444444444444444444',
+                  },
+                ],
+              },
+              {
+                address: 'omnipool-error',
+                id: '8',
+                type: 'omnipool',
+                tokens: [
+                  {
+                    symbol: 'H2O',
+                    balance: '1000000000000000000000',
+                    decimals: 18,
+                    id: '0x3333333333333333333333333333333333333333',
+                  },
+                  {
+                    symbol: 'USDC',
+                    balance: '1000000000',
+                    decimals: 6,
+                    id: '0x4444444444444444444444444444444444444444',
+                  },
+                ],
+              },
+              {
+                address: 'invalid-pool-1',
+                id: '4',
+                type: 'invalid',
+                tokens: [
+                  {
+                    symbol: 'H2O',
+                    balance: '1000000000000000000000',
+                    decimals: 18,
+                    id: '0x3333333333333333333333333333333333333333',
+                  },
+                  {
+                    symbol: 'USDC',
+                    balance: '1000000000',
+                    decimals: 6,
+                    id: '0x4444444444444444444444444444444444444444',
+                  },
+                ],
+              },
+            ];
+
+            // Filter by types if specified
+            if (includeOnly.length > 0) {
+              return pools.filter((pool) => includeOnly.includes(pool.type));
+            }
+
+            return pools;
+          });
 
         realInstance.getTokenSymbol = jest
           .fn()
@@ -457,6 +655,67 @@ jest.mock('../../../src/connectors/hydration/hydration', () => {
               return { address: '0x1', decimals: 12, symbol: 'HDX' };
             if (symbol === 'USDT' || symbol === '0x2')
               return { address: '0x2', decimals: 6, symbol: 'USDT' };
+            if (symbol === 'H2O')
+              return {
+                address: '0x5555555555555555555555555555555555555555',
+                decimals: 18,
+                symbol: 'H2O',
+              };
+            if (symbol === 'USDC')
+              return {
+                address: '0x6666666666666666666666666666666666666666',
+                decimals: 6,
+                symbol: 'USDC',
+              };
+            // Handle token addresses directly
+            if (symbol === '0x5555555555555555555555555555555555555555')
+              return {
+                address: '0x5555555555555555555555555555555555555555',
+                decimals: 18,
+                symbol: 'H2O',
+              };
+            if (symbol === '0x6666666666666666666666666666666666666666')
+              return {
+                address: '0x6666666666666666666666666666666666666666',
+                decimals: 6,
+                symbol: 'USDC',
+              };
+            if (symbol === '0x1234567890123456789012345678901234567890')
+              return {
+                address: '0x1234567890123456789012345678901234567890',
+                decimals: 6,
+                symbol: 'USDC',
+              };
+            if (symbol === '0x0987654321098765432109876543210987654321')
+              return {
+                address: '0x0987654321098765432109876543210987654321',
+                decimals: 6,
+                symbol: 'USDT',
+              };
+            if (symbol === '0x1111111111111111111111111111111111111111')
+              return {
+                address: '0x1111111111111111111111111111111111111111',
+                decimals: 18,
+                symbol: 'H2O',
+              };
+            if (symbol === '0x2222222222222222222222222222222222222222')
+              return {
+                address: '0x2222222222222222222222222222222222222222',
+                decimals: 6,
+                symbol: 'USDC',
+              };
+            if (symbol === '0x3333333333333333333333333333333333333333')
+              return {
+                address: '0x3333333333333333333333333333333333333333',
+                decimals: 18,
+                symbol: 'H2O',
+              };
+            if (symbol === '0x4444444444444444444444444444444444444444')
+              return {
+                address: '0x4444444444444444444444444444444444444444',
+                decimals: 6,
+                symbol: 'USDC',
+              };
             return null;
           }),
           getFeePaymentToken: jest.fn().mockReturnValue({ decimals: 12 }),
@@ -525,21 +784,72 @@ jest.mock('../../../src/connectors/hydration/hydration', () => {
           .fn()
           .mockImplementation(originalGetTokenSymbol);
 
-        realInstance.getPoolDetails = jest.fn().mockResolvedValue({
-          address: 'pool-1',
-          baseTokenAddress: '0x1',
-          quoteTokenAddress: '0x2',
-          feePct: 0.05,
-          price: 10,
-          baseTokenAmount: 1000000000000,
-          quoteTokenAmount: 10000000000,
-          poolType: 'XYK',
-          lpMint: {
-            address: '0x1234567890abcdef',
-            decimals: 18,
-          },
-          tokens: ['HDX', 'USDT'],
-        });
+        // realInstance.getP voolDetails = jest
+        //   .fn()
+        //   .mockImplementation((poolAddress) => {
+        //     // Return different pool types based on the address
+        //     if (poolAddress === 'stableswap-pool-1') {
+        //       return {
+        //         address: 'stableswap-pool-1',
+        //         id: '2',
+        //         type: 'stableswap',
+        //         baseToken: 'USDC',
+        //         quoteToken: 'USDT',
+        //         baseTokenAddress: '0x1234567890123456789012345678901234567890',
+        //         quoteTokenAddress: '0x0987654321098765432109876543210987654321',
+        //         baseTokenAmount: 1000,
+        //         quoteTokenAmount: 1000,
+        //         feePct: 0.05,
+        //         price: 1.0,
+        //         poolType: 'stableswap',
+        //         lpMint: {
+        //           address: '0x1234567890abcdef',
+        //           decimals: 18,
+        //         },
+        //       };
+        //     } else if (poolAddress === 'omnipool-1') {
+        //       return {
+        //         address: 'omnipool-1',
+        //         id: '5',
+        //         type: 'omnipool',
+        //         baseToken: 'H2O',
+        //         quoteToken: 'USDC',
+        //         baseTokenAddress: '0x1111111111111111111111111111111111111111',
+        //         quoteTokenAddress: '0x2222222222222222222222222222222222222222',
+        //         baseTokenAmount: 1000,
+        //         quoteTokenAmount: 1000,
+        //         feePct: 0.05,
+        //         price: 1.0,
+        //         poolType: 'omnipool',
+        //         lpMint: {
+        //           address: '0x1234567890abcdef',
+        //           decimals: 18,
+        //         },
+        //       };
+        //     }
+        //     {
+        //       // Default pool
+        //       return {
+        //         address: 'pool-1',
+        //         id: '1',
+        //         type: 'xyk',
+        //         baseToken: 'H2O',
+        //         quoteToken: 'USDC',
+        //         baseTokenAddress: '0x5555555555555555555555555555555555555555',
+        //         quoteTokenAddress: '0x6666666666666666666666666666666666666666',
+        //         baseTokenAmount: 1000,
+        //         quoteTokenAmount: 1000,
+        //         feePct: 0.05,
+        //         price: 1.0,
+        //         poolType: 'xyk',
+        //         lpMint: {
+        //           address: '0x1234567890abcdef',
+        //           decimals: 18,
+        //         },
+        //         tokens: ['H2O', 'USDC'],
+        //       };
+        //     }
+        //   });
 
         return realInstance;
       }),
@@ -551,12 +861,6 @@ const mockReadPassphrase = () => {
   jest
     .spyOn(ConfigManagerCertPassphrase, 'readPassphrase')
     .mockReturnValue('test-passphrase');
-};
-//
-const mockApiPromiseCreate = () => {
-  jest
-    .spyOn(Polkadot.prototype, 'apiPromiseCreate')
-    .mockResolvedValue(_MOCK_API as unknown as any);
 };
 
 beforeAll(async () => {
@@ -570,10 +874,6 @@ beforeAll(async () => {
       code: error.code,
       statusCode: error.statusCode,
     });
-
-    // Log the full error object
-    console.error('Full error object:', error);
-
     reply.status(500).send({
       error: error.message,
       stack: error.stack,
@@ -599,6 +899,7 @@ beforeAll(async () => {
   await app.register(positionsOwnedRoute);
   await app.ready();
 }, 30000);
+
 let app;
 afterAll(async () => {
   await app.close();
@@ -612,7 +913,7 @@ describe('Hydration Router Tests', () => {
   });
 
   describe('POST /add-liquidity', () => {
-    it('should successfully add liquidity', async () => {
+    it('should successfully add liquidity to XYK pool', async () => {
       const result = await app.inject({
         method: 'POST',
         url: '/add-liquidity',
@@ -636,10 +937,50 @@ describe('Hydration Router Tests', () => {
       });
       expect(result).toBeDefined();
     });
+
+    it('should successfully add liquidity to STABLESWAP pool', async () => {
+      const result = await app.inject({
+        method: 'POST',
+        url: '/add-liquidity',
+        payload: {
+          poolAddress: 'stableswap',
+          network: CHAIN_NETWORK,
+          walletAddress: MOCK_ADDRESS_WALLET,
+          baseTokenAmount: 0.1,
+          quoteTokenAmount: 0.01,
+          slippagePct: 1,
+          baseToken: 'HDX',
+          quoteToken: 'USDT',
+        },
+      });
+      console.log('[addLiquidityRoute STABLESWAP] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      expect(result).toBeDefined();
+    });
+
+    it('should successfully add liquidity to OMNIPOOL', async () => {
+      const result = await app.inject({
+        method: 'POST',
+        url: '/add-liquidity',
+        payload: {
+          poolAddress: 'omnipool',
+          network: CHAIN_NETWORK,
+          walletAddress: MOCK_ADDRESS_WALLET,
+          baseTokenAmount: 0.1,
+          quoteTokenAmount: 0,
+          slippagePct: 1,
+          baseToken: 'HDX',
+          quoteToken: 'USDT',
+        },
+      });
+      console.log('[addLiquidityRoute OMNIPOOL base] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      expect(result).toBeDefined();
+    });
   });
 
   describe('POST /execute-swap', () => {
-    it('should successfully execute swap', async () => {
+    it('should successfully execute swap BUY', async () => {
       mockReadPassphrase();
       const result = await app.inject({
         method: 'POST',
@@ -659,10 +1000,30 @@ describe('Hydration Router Tests', () => {
       expect(result.statusCode).toBe(200);
       expect(result).toBeDefined();
     });
+    it('should successfully execute swap SELL', async () => {
+      mockReadPassphrase();
+      const result = await app.inject({
+        method: 'POST',
+        url: '/execute-swap',
+        payload: {
+          network: CHAIN_NETWORK,
+          walletAddress: MOCK_ADDRESS_WALLET,
+          baseToken: 'HDX',
+          quoteToken: 'USDT',
+          amount: 0.1,
+          side: 'SELL',
+          poolAddress: 'xyk',
+          slippagePct: 1,
+        },
+      });
+      console.log('[executeSwapRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      expect(result).toBeDefined();
+    });
   });
 
   describe('GET /list-pools', () => {
-    it('should successfully list pools', async () => {
+    it('should successfully list pools XYK', async () => {
       const result = await app.inject({
         method: 'GET',
         url: '/list-pools',
@@ -676,10 +1037,38 @@ describe('Hydration Router Tests', () => {
       expect(result.statusCode).toBe(200);
       expect(result).toBeDefined();
     });
+    it('should successfully list pools Stableswap', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/list-pools',
+        payload: {
+          network: CHAIN_NETWORK,
+          types: 'stableswap',
+          tokenSymbols: 'HDX,USDT',
+        },
+      });
+      console.log('[listPoolsRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      expect(result).toBeDefined();
+    });
+    it('should successfully list pools Omnipool', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/list-pools',
+        payload: {
+          network: CHAIN_NETWORK,
+          types: 'omnipool',
+          tokenSymbols: 'HDX,USDT',
+        },
+      });
+      console.log('[listPoolsRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      expect(result).toBeDefined();
+    });
   });
 
   describe('GET /pool-info', () => {
-    it('should successfully get pool info', async () => {
+    it('should successfully get pool info XYK', async () => {
       const result = await app.inject({
         method: 'GET',
         url: '/pool-info?network=mainnet&poolAddress=pool-1',
@@ -688,18 +1077,66 @@ describe('Hydration Router Tests', () => {
       expect(result.statusCode).toBe(200);
       expect(JSON.parse(result.body)).toEqual({
         address: 'pool-1',
-        baseTokenAddress: '0x1',
-        quoteTokenAddress: '0x2',
+        baseTokenAddress: '0x5555555555555555555555555555555555555555',
+        quoteTokenAddress: '0x6666666666666666666666666666666666666666',
         feePct: 0.05,
-        price: 10,
-        baseTokenAmount: 1000000000000,
-        quoteTokenAmount: 10000000000,
-        poolType: 'XYK',
+        price: 1.0,
+        baseTokenAmount: 1000,
+        quoteTokenAmount: 1000,
+        poolType: 'xyk',
         lpMint: {
           address: '0x1234567890abcdef',
+          decimals: 0,
+        },
+        tokens: ['H2O', 'USDC'],
+      });
+      expect(result).toBeDefined();
+    });
+    it('should successfully get pool info Stableswap', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/pool-info?network=mainnet&poolAddress=stableswap',
+      });
+      console.log('[poolInfoRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      expect(JSON.parse(result.body)).toEqual({
+        address: 'stableswap',
+        baseTokenAddress: '0x6666666666666666666666666666666666666666',
+        quoteTokenAddress: '0x2',
+        feePct: 0.05,
+        price: 1.0,
+        baseTokenAmount: 1000,
+        quoteTokenAmount: 1000,
+        poolType: 'stableswap',
+        lpMint: {
+          address: '2',
           decimals: 18,
         },
-        tokens: ['HDX', 'USDT'],
+        tokens: ['USDC', 'USDT'],
+      });
+      expect(result).toBeDefined();
+    });
+    it('should successfully get pool info Omnipool', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/pool-info?network=mainnet&poolAddress=omnipool',
+      });
+      console.log('[poolInfoRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      expect(JSON.parse(result.body)).toEqual({
+        address: 'omnipool',
+        baseTokenAddress: '0x5555555555555555555555555555555555555555',
+        quoteTokenAddress: '0x5555555555555555555555555555555555555555',
+        feePct: 0.05,
+        price: 1.0,
+        baseTokenAmount: 0,
+        quoteTokenAmount: 0,
+        poolType: 'omnipool',
+        lpMint: {
+          address: '0x5555555555555555555555555555555555555555',
+          decimals: 18,
+        },
+        tokens: ['H2O', 'USDC'],
       });
       expect(result).toBeDefined();
     });
@@ -714,24 +1151,97 @@ describe('Hydration Router Tests', () => {
       console.log('[quoteLiquidityRoute] res:', result.body);
       expect(result.statusCode).toBe(200);
       const response = JSON.parse(result.body);
-      expect(typeof response.baseTokenAmount).toBe('number');
-      expect(typeof response.quoteTokenAmount).toBe('number');
+      expect(response).toEqual({
+        baseLimited: false,
+        baseTokenAmount: 100,
+        quoteTokenAmount: 100,
+        baseTokenAmountMax: 101,
+        quoteTokenAmountMax: 101,
+      });
+    });
+    it('should successfully get liquidity quote Stableswap', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/quote-liquidity?network=mainnet&poolAddress=stableswap&baseTokenAmount=100&quoteTokenAmount=100&slippagePct=1',
+      });
+      console.log('[quoteLiquidityRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      const response = JSON.parse(result.body);
+      expect(response).toEqual({
+        baseLimited: false,
+        baseTokenAmount: 100,
+        quoteTokenAmount: 100,
+        baseTokenAmountMax: 101,
+        quoteTokenAmountMax: 101,
+      });
+    });
+    it('should successfully get liquidity quote Omnipool', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/quote-liquidity?network=mainnet&poolAddress=omnipool&baseTokenAmount=100&quoteTokenAmount=100&slippagePct=1',
+      });
+      console.log('[quoteLiquidityRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      const response = JSON.parse(result.body);
+      expect(response).toEqual({
+        baseLimited: false,
+        baseTokenAmount: 120,
+        quoteTokenAmount: 100,
+        baseTokenAmountMax: 121.2,
+        quoteTokenAmountMax: 101,
+      });
     });
   });
 
   describe('GET /quote-swap', () => {
-    it('should successfully get swap quote', async () => {
+    it('should successfully get swap quote BUY', async () => {
       const result = await app.inject({
         method: 'GET',
-        url: '/quote-swap?network=mainnet&baseToken=HDX&quoteToken=USDT&amount=100&side=BUY',
+        url: '/quote-swap?network=mainnet&baseToken=USDC&quoteToken=USDT&amount=100&side=BUY',
       });
       console.log('[quoteSwapRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      const response = JSON.parse(result.body);
+      expect(response).toEqual({
+        estimatedAmountIn: 0.1,
+        estimatedAmountOut: 0.099,
+        minAmountOut: 0.099,
+        maxAmountIn: 0.101,
+        baseTokenBalanceChange: 0.099,
+        quoteTokenBalanceChange: -0.1,
+        price: 1.010101010101,
+        gasPrice: 0.00000177,
+        gasLimit: 338667,
+        gasCost: 0.6,
+      });
+      expect(result).toBeDefined();
+    });
+    it('should successfully get swap quote SELL', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/quote-swap?network=mainnet&baseToken=HDX&quoteToken=USDT&amount=100&side=SELL',
+      });
+      console.log('[quoteSwapRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      const response = JSON.parse(result.body);
+      expect(response).toEqual({
+        estimatedAmountIn: 0.1,
+        estimatedAmountOut: 0.099,
+        maxAmountIn: 0.1,
+        minAmountOut: 0.09801,
+        baseTokenBalanceChange: -0.1,
+        quoteTokenBalanceChange: 0.099,
+        price: 0.99,
+        gasPrice: 0.00000177,
+        gasLimit: 338667,
+        gasCost: 0.6,
+      });
       expect(result).toBeDefined();
     });
   });
 
   describe('POST /remove-liquidity', () => {
-    it('should successfully remove liquidity', async () => {
+    it('should successfully remove liquidity XYK', async () => {
       const result = await app.inject({
         method: 'POST',
         url: '/remove-liquidity',
@@ -740,7 +1250,7 @@ describe('Hydration Router Tests', () => {
           walletAddress: MOCK_ADDRESS_WALLET,
           poolAddress: 'pool-1',
           percentageToRemove: 1,
-          tokenId: '31',
+          tokenId: '0x1234567890abcdef',
         },
       });
       console.log('[removeLiquidityRoute] res:', result.body);
@@ -748,47 +1258,95 @@ describe('Hydration Router Tests', () => {
       expect(JSON.parse(result.body)).toEqual({
         signature: '0x1234567890abcdef',
         fee: 1e-7,
-        baseTokenAmountRemoved: 0.000123456789,
-        quoteTokenAmountRemoved: 1.234567,
+        baseTokenAmountRemoved: 0.01,
+        quoteTokenAmountRemoved: 0.01,
         sharesPercentageRemoved: 1,
-        sharesAmountRemoved: 123456.789,
+        sharesAmountRemoved: 0.01,
+      });
+      expect(result).toBeDefined();
+    });
+    it('should successfully remove liquidity Stableswap', async () => {
+      const result = await app.inject({
+        method: 'POST',
+        url: '/remove-liquidity',
+        payload: {
+          network: CHAIN_NETWORK,
+          walletAddress: MOCK_ADDRESS_WALLET,
+          poolAddress: 'stableswap',
+          percentageToRemove: 1,
+          tokenId: '2',
+        },
+      });
+      console.log('[removeLiquidityRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      expect(JSON.parse(result.body)).toEqual({
+        signature: '0x1234567890abcdef',
+        fee: 1e-7,
+        baseTokenAmountRemoved: 0.01,
+        quoteTokenAmountRemoved: 0.01,
+        sharesPercentageRemoved: 1,
+        sharesAmountRemoved: 0.01,
+      });
+      expect(result).toBeDefined();
+    });
+    it('should successfully remove liquidity Omnipool', async () => {
+      const result = await app.inject({
+        method: 'POST',
+        url: '/remove-liquidity',
+        payload: {
+          network: CHAIN_NETWORK,
+          walletAddress: MOCK_ADDRESS_WALLET,
+          poolAddress: 'omnipool',
+          percentageToRemove: 1,
+          tokenId: '5',
+        },
+      });
+      console.log('[removeLiquidityRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      expect(JSON.parse(result.body)).toEqual({
+        signature: '0x1234567890abcdef',
+        fee: 1e-7,
+        baseTokenAmountRemoved: 0.01,
+        quoteTokenAmountRemoved: 0.01,
+        sharesPercentageRemoved: 1,
+        sharesAmountRemoved: 0.01,
       });
       expect(result).toBeDefined();
     });
   });
 
-  //   describe('GET /position-info', () => {
-  //     it('should successfully get position info', async () => {
-  //       console.log('Starting position-info test...');
-  //       const result = await app.inject({
-  //         method: 'GET',
-  //         url: '/position-info?network=mainnet&walletAddress=0x360CC4D00B4cbfCB854367D6Dd30C6aFBe74697a&poolAddress=pool-1&baseToken=HDX&quoteToken=USDT',
-  //       });
-  //       console.log('[positionInfoRoute] res:', result.body);
-  //       console.log('[positionInfoRoute] status:', result.statusCode);
-  //       expect(result.statusCode).toBe(200);
-  //       expect(JSON.parse(result.body)).toEqual({
-  //         poolAddress: 'pool-1',
-  //         walletAddress: 'mocked-address',
-  //         baseTokenAddress: '0x1',
-  //         quoteTokenAddress: '0x2',
-  //         lpTokenAmount: 12.3456789,
-  //         baseTokenAmount: 1234567890,
-  //         quoteTokenAmount: 12345678.9,
-  //         price: 10,
-  //       });
-  //       expect(result).toBeDefined();
-  //     });
-  //   });
-  //
-  //   describe('GET /positions-owned', () => {
-  //     it('should successfully get positions owned', async () => {
-  //       const result = await app.inject({
-  //         method: 'GET',
-  //         url: '/positions-owned?network=mainnet&walletAddress=7FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty&tokenId=31',
-  //       });
-  //       console.log('[positionsOwnedRoute] res:', result.body);
-  //       expect(result).toBeDefined();
-  //     });
-  //   });
+  describe('GET /position-info', () => {
+    it('should successfully get position info', async () => {
+      console.log('Starting position-info test...');
+      const result = await app.inject({
+        method: 'GET',
+        url: '/position-info?network=mainnet&walletAddress=0x360CC4D00B4cbfCB854367D6Dd30C6aFBe74697a&poolAddress=pool-1&baseToken=HDX&quoteToken=USDT',
+      });
+      console.log('[positionInfoRoute] res:', result.body);
+      console.log('[positionInfoRoute] status:', result.statusCode);
+      expect(result.statusCode).toBe(200);
+      expect(JSON.parse(result.body)).toEqual({
+        poolAddress: 'pool-1',
+        walletAddress: 'mocked-address',
+        baseTokenAddress: '0x5555555555555555555555555555555555555555',
+        quoteTokenAddress: '0x6666666666666666666666666666666666666666',
+        lpTokenAmount: 1,
+        baseTokenAmount: 0.1,
+        quoteTokenAmount: 0.1,
+        price: 1,
+      });
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('GET /positions-owned', () => {
+    it('should successfully get positions owned', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/positions-owned?network=mainnet&walletAddress=7FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty&tokenId=31',
+      });
+      console.log('[positionsOwnedRoute] res:', result.body);
+      expect(result).toBeDefined();
+    });
+  });
 });

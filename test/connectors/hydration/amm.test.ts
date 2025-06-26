@@ -454,13 +454,13 @@ jest.mock('../../../src/connectors/hydration/hydration', () => {
                     symbol: 'USDC',
                     balance: '1000000000',
                     decimals: 6,
-                    id: '0x1234567890123456789012345678901234567890',
+                    id: '0x6666666666666666666666666666666666666666',
                   },
                   {
                     symbol: 'USDT',
                     balance: '1000000000',
                     decimals: 6,
-                    id: '0x0987654321098765432109876543210987654321',
+                    id: '0x2',
                   },
                 ],
               },
@@ -1004,7 +1004,7 @@ describe('Hydration Router Tests', () => {
       console.log('[removeLiquidityRoute] res:', result.body);
       expect(result.statusCode).toBe(200);
       expect(JSON.parse(result.body)).toEqual({
-        signature: '0x2234567890abcdef',
+        signature: '0x1234567890abcdef',
         fee: 1e-7,
         baseTokenAmountRemoved: 0.01,
         quoteTokenAmountRemoved: 0.01,

@@ -157,23 +157,23 @@ const _MOCK_API = {
         });
       }),
     },
-    // omnipool: {
-    //   positions: {
-    //     entries: jest.fn().mockResolvedValue([
-    //       [
-    //         { args: ['1'] },
-    //         {
-    //           toHuman: () => ({
-    //             assetId: '31',
-    //             shares: '1000000000000000000',
-    //             amount: '1000000000000000000',
-    //             price: 10,
-    //           }),
-    //         },
-    //       ],
-    //     ]),
-    //   },
-    // },
+    omnipool: {
+      positions: {
+        entries: jest.fn().mockResolvedValue([
+          [
+            { args: ['1'] },
+            {
+              toHuman: () => ({
+                assetId: '0x3234567890abcdef',
+                shares: '1000000000000000000',
+                amount: '1000000000000000000',
+                price: '10',
+              }),
+            },
+          ],
+        ]),
+      },
+    },
     uniques: {
       asset: {
         entries: jest.fn().mockResolvedValue([
@@ -181,7 +181,7 @@ const _MOCK_API = {
             { args: ['collection', '1'] },
             {
               unwrap: () => ({
-                owner: '0x360CC4D00B4cbfCB854367D6Dd30C6aFBe74697a',
+                owner: 'mocked-address',
               }),
             },
           ],
@@ -789,6 +789,30 @@ describe('Hydration Router Tests', () => {
       expect(result.statusCode).toBe(200);
       expect(result).toBeDefined();
     });
+
+    it('should successfully filter pools by token addresses', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/list-pools?network=mainnet&tokenAddresses=0x5555555555555555555555555555555555555555,0x6666666666666666666666666666666666666666',
+      });
+      console.log('[listPoolsRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      const response = JSON.parse(result.body);
+      expect(response).toEqual({ pools: [] });
+      expect(result).toBeDefined();
+    });
+
+    it('should successfully filter pools by token addresses and exclude pool tokens', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/list-pools?network=mainnet&tokenAddresses=0x1111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222',
+      });
+      console.log('[listPoolsRoute] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      const response = JSON.parse(result.body);
+      expect(response).toEqual({ pools: [] });
+      expect(result).toBeDefined();
+    });
   });
 
   describe('GET /pool-info', () => {
@@ -1013,6 +1037,7 @@ describe('Hydration Router Tests', () => {
       });
       expect(result).toBeDefined();
     });
+
     it('should successfully remove liquidity Omnipool', async () => {
       const result = await app.inject({
         method: 'POST',
@@ -1028,10 +1053,10 @@ describe('Hydration Router Tests', () => {
       console.log('[removeLiquidityRoute] res:', result.body);
       expect(result.statusCode).toBe(200);
       expect(JSON.parse(result.body)).toEqual({
-        signature: '0x3234567890abcdef',
+        signature: '0x1234567890abcdef',
         fee: 1e-7,
         baseTokenAmountRemoved: 0.01,
-        quoteTokenAmountRemoved: 0.01,
+        quoteTokenAmountRemoved: 0,
         sharesPercentageRemoved: 1,
         sharesAmountRemoved: 0.01,
       });

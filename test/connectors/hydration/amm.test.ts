@@ -976,6 +976,44 @@ describe('Hydration Router Tests', () => {
       expect(response.baseTokenAmount).toBe(100);
       expect(response.quoteTokenAmount).toBe(100);
     });
+
+    it('should successfully get liquidity quote with quote token amount', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/quote-liquidity?network=mainnet&poolAddress=pool-1&quoteTokenAmount=100&baseTokenAmount=0&strategyType=BaseHeavy&slippagePct=1',
+      });
+      console.log('[quoteLiquidityRoute quote amount] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      const response = JSON.parse(result.body);
+      expect(response.baseTokenAmount).toBe(100);
+      expect(response.quoteTokenAmount).toBe(100);
+    });
+
+    it('should test getLiquidityQuote with BaseHeavy strategy for quote amount', async () => {
+      // Get Hydration instance directly to test the specific method
+      const hydration =
+        await require('../../../src/connectors/hydration/hydration').Hydration.getInstance(
+          'mainnet',
+        );
+
+      // Test the specific method that contains the switch statement
+      const quote = await hydration.getLiquidityQuote(
+        'pool-1', // poolAddress
+        9.5, // lowerPrice
+        10.5, // upperPrice
+        100, // amount (quoteTokenAmount)
+        'quote', // amountType
+        require('../../../src/connectors/hydration/hydration.types')
+          .PositionStrategyType.BaseHeavy, // strategyType
+      );
+
+      console.log('[getLiquidityQuote BaseHeavy quote] res:', quote);
+
+      // Verify the BaseHeavy strategy calculation: baseTokenAmount = quoteTokenAmount / currentPrice * 2
+      // With quoteTokenAmount = 100, currentPrice = 1, expected baseTokenAmount = 200
+      expect(quote.baseTokenAmount).toBe(200);
+      expect(quote.quoteTokenAmount).toBe(100);
+    });
   });
 
   describe('GET /quote-swap', () => {
@@ -1145,7 +1183,6 @@ describe('Hydration Router Tests', () => {
       expect(result.statusCode).toBe(200);
 
       const response = JSON.parse(result.body);
-      // Verify that the response contains positions and they all have valid shares
       expect(Array.isArray(response)).toBe(true);
       if (response && response.length > 0) {
         response.forEach((position) => {

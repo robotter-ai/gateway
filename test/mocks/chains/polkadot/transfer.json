@@ -1,9 +1,0 @@
-{
-  "network": "polkadot",
-  "hash": "0x456...",
-  "from": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
-  "to": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-  "value": "1000000000000",
-  "nonce": 43,
-  "status": "pending"
-} 

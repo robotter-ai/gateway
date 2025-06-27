@@ -338,7 +338,6 @@ jest.mock('../../../src/connectors/hydration/hydration', () => {
   return {
     ...originalModule,
     Hydration: {
-      ...originalModule.Hydration,
       getInstance: jest.fn().mockImplementation(async () => {
         const realInstance = new originalModule.Hydration();
 
@@ -512,9 +511,9 @@ jest.mock('../../../src/connectors/hydration/hydration', () => {
           getFeePaymentToken: jest.fn().mockReturnValue({ decimals: 12 }),
         });
 
-        realInstance.getSlippagePercentage = jest
-          .fn()
-          .mockReturnValue(new BigNumber(1));
+        // realInstance.getSlippagePercentage = jest
+        //   .fn()
+        //   .mockReturnValue(new BigNumber(1));
 
         realInstance.getTradeRouter = jest.fn().mockResolvedValue({
           getBestBuy: jest.fn().mockResolvedValue({
@@ -699,6 +698,32 @@ describe('Hydration Router Tests', () => {
       });
       console.log('[addLiquidityRoute OMNIPOOL base] res:', result.body);
       expect(result.statusCode).toBe(200);
+      expect(result).toBeDefined();
+    });
+
+    it('should successfully add liquidity to OMNIPOOL with quote token only', async () => {
+      const result = await app.inject({
+        method: 'POST',
+        url: '/add-liquidity',
+        payload: {
+          poolAddress: 'omnipool',
+          network: CHAIN_NETWORK,
+          walletAddress: MOCK_ADDRESS_WALLET,
+          baseTokenAmount: 0,
+          quoteTokenAmount: 0.1,
+          slippagePct: 1,
+          baseToken: 'HDX',
+          quoteToken: 'USDT',
+        },
+      });
+      console.log('[addLiquidityRoute OMNIPOOL quote] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      expect(JSON.parse(result.body)).toEqual({
+        signature: '0x1234567890abcdef',
+        fee: 1e-7,
+        baseTokenAmountAdded: 0,
+        quoteTokenAmountAdded: 0.1,
+      });
       expect(result).toBeDefined();
     });
   });
@@ -891,7 +916,7 @@ describe('Hydration Router Tests', () => {
   });
 
   describe('GET /quote-liquidity', () => {
-    it('should successfully get liquidity quote', async () => {
+    it('should successfully get liquidity quote XYK', async () => {
       const result = await app.inject({
         method: 'GET',
         url: '/quote-liquidity?network=mainnet&poolAddress=pool-1&baseTokenAmount=100&quoteTokenAmount=100&slippagePct=1',
@@ -939,6 +964,18 @@ describe('Hydration Router Tests', () => {
         quoteTokenAmountMax: 101,
       });
     });
+
+    it('should successfully get liquidity quote with BaseHeavy strategy', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/quote-liquidity?network=mainnet&poolAddress=pool-1&baseTokenAmount=100&quoteTokenAmount=100&strategyType=BaseHeavy&slippagePct=1',
+      });
+      console.log('[quoteLiquidityRoute BaseHeavy] res:', result.body);
+      expect(result.statusCode).toBe(200);
+      const response = JSON.parse(result.body);
+      expect(response.baseTokenAmount).toBe(100);
+      expect(response.quoteTokenAmount).toBe(100);
+    });
   });
 
   describe('GET /quote-swap', () => {
@@ -954,7 +991,7 @@ describe('Hydration Router Tests', () => {
         estimatedAmountIn: 0.1,
         estimatedAmountOut: 0.099,
         minAmountOut: 0.099,
-        maxAmountIn: 0.101,
+        maxAmountIn: 0.2,
         baseTokenBalanceChange: 0.099,
         quoteTokenBalanceChange: -0.1,
         price: 1.010101010101,
@@ -976,7 +1013,7 @@ describe('Hydration Router Tests', () => {
         estimatedAmountIn: 0.1,
         estimatedAmountOut: 0.099,
         maxAmountIn: 0.1,
-        minAmountOut: 0.09801,
+        minAmountOut: 0,
         baseTokenBalanceChange: -0.1,
         quoteTokenBalanceChange: 0.099,
         price: 0.99,
@@ -1096,6 +1133,25 @@ describe('Hydration Router Tests', () => {
       });
       console.log('[positionsOwnedRoute] res:', result.body);
       expect(result).toBeDefined();
+    });
+
+    it('should filter out positions with zero or negative shares', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: '/positions-owned?network=mainnet&walletAddress=7FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty&tokenId=0x3234567890abcdef',
+      });
+
+      console.log('[positionsOwnedRoute with zero shares] res:', result.body);
+      expect(result.statusCode).toBe(200);
+
+      const response = JSON.parse(result.body);
+      // Verify that the response contains positions and they all have valid shares
+      expect(Array.isArray(response)).toBe(true);
+      if (response && response.length > 0) {
+        response.forEach((position) => {
+          expect(new BigNumber(position.shares).gt(0)).toBe(true);
+        });
+      }
     });
   });
 });

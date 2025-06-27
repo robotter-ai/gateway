@@ -1,8 +1,0 @@
-{
-  "signature": "0x456def...",
-  "fee": 0.001,
-  "baseTokenAmountRemoved": 1000000000000,
-  "quoteTokenAmountRemoved": 1000000000,
-  "sharesPercentageRemoved": 50,
-  "sharesAmountRemoved": 500000000
-}

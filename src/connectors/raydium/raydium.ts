@@ -12,7 +12,8 @@ import {
   ClmmRpcData,
   TxVersion,
   AmmV4Keys,
-  AmmV5Keys, PoolFetchType,
+  AmmV5Keys,
+  PoolFetchType,
 } from '@raydium-io/raydium-sdk-v2';
 import { Keypair, PublicKey } from '@solana/web3.js';
 
@@ -410,12 +411,14 @@ export class Raydium {
     return pools[pairKey] || pools[reversePairKey] || null;
   }
 
-  async listAllPools(maxPages = 3): Promise<
-      Array<
-          ApiV3PoolInfoConcentratedItem |
-          ApiV3PoolInfoStandardItem |
-          ApiV3PoolInfoStandardItemCpmm
-      >
+  async listAllPools(
+    maxPages = 3,
+  ): Promise<
+    Array<
+      | ApiV3PoolInfoConcentratedItem
+      | ApiV3PoolInfoStandardItem
+      | ApiV3PoolInfoStandardItemCpmm
+    >
   > {
     try {
       let allPools = [];
@@ -436,7 +439,9 @@ export class Raydium {
 
         if (poolListResponse.data && poolListResponse.data.length > 0) {
           allPools = [...allPools, ...poolListResponse.data];
-          logger.info(`Retrieved ${poolListResponse.data.length} pools from page ${currentPage}. Total pools: ${allPools.length}`);
+          logger.info(
+            `Retrieved ${poolListResponse.data.length} pools from page ${currentPage}. Total pools: ${allPools.length}`,
+          );
 
           // Check if we received a full page of results
           hasMoreData = poolListResponse.data.length === 1000;
@@ -448,7 +453,7 @@ export class Raydium {
 
         // Add a small delay to avoid rate limiting
         if (hasMoreData && currentPage <= maxPages) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
 
@@ -460,12 +465,14 @@ export class Raydium {
     }
   }
 
-  async getAllPoolsFromAPI(maxPages = 3): Promise<
-      Array<
-          ApiV3PoolInfoConcentratedItem |
-          ApiV3PoolInfoStandardItem |
-          ApiV3PoolInfoStandardItemCpmm
-      >
+  async getAllPoolsFromAPI(
+    maxPages = 3,
+  ): Promise<
+    Array<
+      | ApiV3PoolInfoConcentratedItem
+      | ApiV3PoolInfoStandardItem
+      | ApiV3PoolInfoStandardItemCpmm
+    >
   > {
     return this.listAllPools(maxPages);
   }

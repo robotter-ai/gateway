@@ -2,9 +2,9 @@ import sensible from '@fastify/sensible';
 import type { FastifyPluginAsync } from 'fastify';
 
 // CLMM routes
-import { listPoolsRoute as ammListPoolsRoute } from './amm-routes/listPools';
 import { addLiquidityRoute as ammAddLiquidityRoute } from './amm-routes/addLiquidity';
 import { executeSwapRoute as ammExecuteSwapRoute } from './amm-routes/executeSwap';
+import { listPoolsRoute as ammListPoolsRoute } from './amm-routes/listPools';
 import { poolInfoRoute as ammPoolInfoRoute } from './amm-routes/poolInfo';
 import { positionInfoRoute as ammPositionInfoRoute } from './amm-routes/positionInfo';
 import { quoteLiquidityRoute } from './amm-routes/quoteLiquidity';

@@ -1,5 +1,5 @@
-import {TokenListType} from '../../services/base';
-import {ConfigManagerV2} from '../../services/config-manager-v2';
+import { TokenListType } from '../../services/base';
+import { ConfigManagerV2 } from '../../services/config-manager-v2';
 
 /**
  * Configuration for a Polkadot network
@@ -29,14 +29,14 @@ export interface Config {
 
 /**
  * Retrieves the configuration for a specified Polkadot network
- * 
+ *
  * @param chainName The name of the chain (e.g., 'polkadot')
  * @param networkName The name of the network (e.g., 'mainnet', 'westend')
  * @returns Configuration object for the specified network
  */
 export function getPolkadotConfig(
   chainName: string,
-  networkName: string
+  networkName: string,
 ): Config {
   const configManager = ConfigManagerV2.getInstance();
   const prefix = `${chainName}.networks.${networkName}`;
@@ -48,8 +48,9 @@ export function getPolkadotConfig(
       tokenListType: configManager.get(`${prefix}.tokenListType`),
       tokenListSource: configManager.get(`${prefix}.tokenListSource`),
       nativeCurrencySymbol: configManager.get(`${prefix}.nativeCurrencySymbol`),
-      feePaymentCurrencySymbol: configManager.get(`${prefix}.feePaymentCurrencySymbol`),
-    }
+      feePaymentCurrencySymbol: configManager.get(
+        `${prefix}.feePaymentCurrencySymbol`,
+      ),
+    },
   };
 }
-

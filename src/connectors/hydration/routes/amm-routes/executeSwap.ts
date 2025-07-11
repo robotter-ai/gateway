@@ -1,17 +1,18 @@
-import {FastifyInstance, FastifyPluginAsync} from 'fastify';
-import {Hydration} from '../../hydration';
-import {logger} from '../../../../services/logger';
+import { FastifyInstance, FastifyPluginAsync } from 'fastify';
+
+import { validatePolkadotAddress } from '../../../../chains/polkadot/polkadot.validators';
+import { logger } from '../../../../services/logger';
+import { Hydration } from '../../hydration';
 import {
   HydrationExecuteSwapRequest,
   HydrationExecuteSwapRequestSchema,
   HydrationExecuteSwapResponse,
-  HydrationExecuteSwapResponseSchema
+  HydrationExecuteSwapResponseSchema,
 } from '../../hydration.types';
-import {validatePolkadotAddress} from '../../../../chains/polkadot/polkadot.validators';
 
 /**
  * Executes a token swap on the Hydration protocol.
- * 
+ *
  * @param fastify - Fastify instance
  * @param network - The blockchain network (e.g., 'mainnet')
  * @param walletAddress - The user's wallet address
@@ -32,41 +33,45 @@ export async function executeSwapOnHydration(
   amount: number,
   side: 'BUY' | 'SELL',
   poolAddress?: string,
-  slippagePct?: number
+  slippagePct?: number,
 ): Promise<HydrationExecuteSwapResponse> {
   // Validate required parameters
   if (!baseToken) {
     throw fastify.httpErrors.badRequest('Base token parameter is required');
   }
-  
+
   if (!quoteToken) {
     throw fastify.httpErrors.badRequest('Quote token parameter is required');
   }
-  
+
   if (!amount || amount <= 0) {
     throw fastify.httpErrors.badRequest('Amount must be a positive number');
   }
-  
+
   if (side !== 'BUY' && side !== 'SELL') {
     throw fastify.httpErrors.badRequest('Side must be "BUY" or "SELL"');
   }
-  
+
   // Validate wallet address
   try {
     validatePolkadotAddress(walletAddress);
   } catch (error) {
     throw fastify.httpErrors.badRequest('Invalid Polkadot address');
   }
-  
+
   // Get Hydration instance
   const hydration = await Hydration.getInstance(network);
   if (!hydration) {
-    throw fastify.httpErrors.serviceUnavailable('Hydration service unavailable');
+    throw fastify.httpErrors.serviceUnavailable(
+      'Hydration service unavailable',
+    );
   }
 
   // Log request parameters
   logger.info(`Executing swap for ${baseToken}-${quoteToken} on ${network}`);
-  logger.info(`Amount: ${amount}, Side: ${side}, Pool: ${poolAddress || 'default'}`);
+  logger.info(
+    `Amount: ${amount}, Side: ${side}, Pool: ${poolAddress || 'default'}`,
+  );
 
   try {
     const result = await hydration.executeSwapWithWalletAddress(
@@ -77,7 +82,7 @@ export async function executeSwapOnHydration(
       amount,
       side,
       poolAddress,
-      slippagePct
+      slippagePct,
     );
 
     // Log successful execution
@@ -88,15 +93,18 @@ export async function executeSwapOnHydration(
   } catch (error) {
     // Log error details
     logger.error(`Error executing swap: ${error.message}`);
-    
-    if (error.message?.includes('not found') || error.message?.includes('Pool not found')) {
+
+    if (
+      error.message?.includes('not found') ||
+      error.message?.includes('Pool not found')
+    ) {
       throw fastify.httpErrors.notFound(error.message);
     }
-    
+
     if (error.message?.includes('Insufficient')) {
       throw fastify.httpErrors.badRequest(error.message);
     }
-    
+
     throw fastify.httpErrors.internalServerError('Failed to execute swap');
   }
 }
@@ -120,20 +128,20 @@ export const executeSwapRoute: FastifyPluginAsync = async (fastify) => {
           200: HydrationExecuteSwapResponseSchema,
           400: { type: 'object', properties: { error: { type: 'string' } } },
           404: { type: 'object', properties: { error: { type: 'string' } } },
-          500: { type: 'object', properties: { error: { type: 'string' } } }
-        }
-      }
+          500: { type: 'object', properties: { error: { type: 'string' } } },
+        },
+      },
     },
     async (request, _reply) => {
       try {
-        const { 
-          walletAddress, 
-          baseToken, 
-          quoteToken, 
-          amount, 
-          side, 
-          poolAddress, 
-          slippagePct 
+        const {
+          walletAddress,
+          baseToken,
+          quoteToken,
+          amount,
+          side,
+          poolAddress,
+          slippagePct,
         } = request.body;
         const network = request.body.network || 'mainnet';
 
@@ -146,7 +154,7 @@ export const executeSwapRoute: FastifyPluginAsync = async (fastify) => {
           amount,
           side as 'BUY' | 'SELL',
           poolAddress,
-          slippagePct
+          slippagePct,
         );
 
         return result;
@@ -154,9 +162,8 @@ export const executeSwapRoute: FastifyPluginAsync = async (fastify) => {
         // Error handling is done in executeSwapOnHydration
         throw error;
       }
-    }
+    },
   );
 };
 
 export default executeSwapRoute;
-

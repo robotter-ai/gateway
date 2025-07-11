@@ -1,7 +1,17 @@
 /* eslint-disable prettier/prettier */
-import {Polkadot} from '../../chains/polkadot/polkadot';
-import {logger} from '../../services/logger';
-import {HydrationConfig} from './hydration.config';
+import { createSdkContext, BigNumber, PoolType } from "@galacticcouncil/sdk";
+import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
+import { KeyringPair } from '@polkadot/keyring/types';
+import { encodeAddress, decodeAddress, cryptoWaitReady } from '@polkadot/util-crypto';
+
+import { Polkadot } from '../../chains/polkadot/polkadot';
+import { runWithRetryAndTimeout } from "../../chains/polkadot/polkadot.utils";
+import { validatePolkadotAddress } from '../../chains/polkadot/polkadot.validators';
+import { PoolItem } from '../../schemas/trading-types/amm-schema';
+import { percentRegexp } from '../../services/config-manager-v2';
+import { logger } from '../../services/logger';
+
+import { HydrationConfig } from './hydration.config';
 import {
   ExternalPoolInfo,
   HydrationAddLiquidityResponse,
@@ -16,16 +26,6 @@ import {
   SwapQuote,
   SwapRoute
 } from './hydration.types';
-import {KeyringPair} from '@polkadot/keyring/types';
-import {ApiPromise, HttpProvider, WsProvider} from '@polkadot/api';
-import {cryptoWaitReady} from '@polkadot/util-crypto';
-import {encodeAddress, decodeAddress} from '@polkadot/util-crypto';
-import {runWithRetryAndTimeout} from "../../chains/polkadot/polkadot.utils";
-import {PoolBase, Trade} from '@galacticcouncil/sdk/build/types/types';
-import {BigNumber, PoolService, PoolType, TradeRouter, TradeType} from "@galacticcouncil/sdk";
-import {PoolItem} from '../../schemas/trading-types/amm-schema';
-import { percentRegexp } from '../../services/config-manager-v2';
-import { validatePolkadotAddress } from '../../chains/polkadot/polkadot.validators';
 
 // Pool types
 const POOL_TYPE = {
@@ -49,15 +49,9 @@ export class Hydration {
   public polkadot: Polkadot;
   public config: HydrationConfig.NetworkConfig;
   // noinspection JSUnusedLocalSymbols
-  private httpProvider: HttpProvider;
-  // noinspection JSUnusedLocalSymbols
-  private wsProvider: WsProvider;
-  // noinspection JSUnusedLocalSymbols
   private apiPromise: ApiPromise;
   // noinspection JSUnusedLocalSymbols
-  private poolService: PoolService;
-  // noinspection JSUnusedLocalSymbols
-  private _ready: boolean = false;
+  private sdkContext: any;
 
   /**
    * Private constructor - use getInstance instead
@@ -88,48 +82,10 @@ export class Hydration {
     logger.info(`Initializing Hydration for network: ${network}`);
     this.polkadot = await Polkadot.getInstance(network);
     await this.cryptoWaitReady();
-    await this.getPoolService();
-    this._ready = true;
+    await this.getSdkContext();
     logger.info(`Hydration initialized for network: ${network}`);
   }
 
-  /**
-   * Calculate trade limit based on slippage tolerance
-   * @param trade The trade to calculate limits for
-   * @param slippagePercentage Slippage percentage as a BigNumber
-   * @param side The trade type (buy or sell)
-   * @returns A BigNumber representing the trade limit
-   */
-  private calculateTradeLimit(
-    trade: Trade,
-    slippagePercentage: BigNumber,
-    side: TradeType,
-  ): BigNumber {
-    const ONE_HUNDRED = BigNumber('100');
-    let amount: BigNumber;
-    let slippage: BigNumber;
-    let tradeLimit: BigNumber;
-
-    if (side === TradeType.Buy) {
-      amount = trade.amountIn;
-      slippage = amount
-        .div(ONE_HUNDRED)
-        .multipliedBy(slippagePercentage)
-        .decimalPlaces(0, 1);
-      tradeLimit = amount.plus(slippage);
-    } else if (side === TradeType.Sell) {
-      amount = trade.amountOut;
-      slippage = amount
-        .div(ONE_HUNDRED)
-        .multipliedBy(slippagePercentage)
-        .decimalPlaces(0, 1);
-      tradeLimit = amount.minus(slippage);
-    } else {
-      throw new Error('Invalid trade side');
-    }
-
-    return tradeLimit;
-  }
 
   /**
    * Get all supported tokens
@@ -146,8 +102,8 @@ export class Hydration {
    */
   async getPoolInfo(poolAddress: string): Promise<ExternalPoolInfo | null> {
     try {
-      const poolService = await this.getPoolService();
-      const pools = await this.poolServiceGetPools(poolService, []);
+      const sdkContext = await this.getSdkContext();
+      const pools = await this.sdkContextGetPools(sdkContext, []);
       const poolData = pools.find(pool => pool.address === poolAddress || pool.id === poolAddress);
 
       if (!poolData) {
@@ -170,7 +126,7 @@ export class Hydration {
           address: poolData.address,
           baseTokenAddress: hubAsset.address,
           quoteTokenAddress: hubAsset.address,
-          feePct: 500/10000, // Default fee for omnipool
+          feePct: 500 / 10000, // Default fee for omnipool
           price: 1, // Default price for omnipool
           baseTokenAmount: 0,
           quoteTokenAmount: 0,
@@ -200,18 +156,18 @@ export class Hydration {
 
       let poolPrice = 1;
       try {
-        const tradeRouter = await this.getTradeRouter();
+        const sdkContext = await this.getSdkContext();
         const amountBN = BigNumber('1');
 
-        const buyQuote = await this.tradeRouterGetBestBuy(
-          tradeRouter,
+        const buyQuote = await this.sdkContextGetBestBuy(
+          sdkContext,
           quoteToken.address,
           baseToken.address,
           amountBN
         );
 
-        const sellQuote = await this.tradeRouterGetBestSell(
-          tradeRouter,
+        const sellQuote = await this.sdkContextGetBestSell(
+          sdkContext,
           baseToken.address,
           quoteToken.address,
           amountBN
@@ -234,7 +190,7 @@ export class Hydration {
         address: poolData.address,
         baseTokenAddress: baseToken.address,
         quoteTokenAddress: quoteToken.address,
-        feePct: 500/10000,
+        feePct: 500 / 10000,
         price: poolPrice,
         baseTokenAmount,
         quoteTokenAmount,
@@ -266,7 +222,7 @@ export class Hydration {
     _poolAddress?: string,
     slippagePct?: number
   ): Promise<SwapQuote> {
-    const tradeRouter = await this.getTradeRouter();
+    const sdkContext = await this.getSdkContext();
 
     // Get token info
     const baseToken = this.polkadot.getToken(baseTokenSymbol);
@@ -284,18 +240,18 @@ export class Hydration {
     }
 
     const amountBN = BigNumber(amount.toString());
-    let trade: Trade;
+    let trade: any;
 
     if (side === 'BUY') {
-      trade = await this.tradeRouterGetBestBuy(
-        tradeRouter,
+      trade = await this.sdkContextGetBestBuy(
+        sdkContext,
         quoteTokenId,
         baseTokenId,
         amountBN
       );
     } else {
-      trade = await this.tradeRouterGetBestSell(
-        tradeRouter,
+      trade = await this.sdkContextGetBestSell(
+        sdkContext,
         baseTokenId,
         quoteTokenId,
         amountBN
@@ -399,7 +355,7 @@ export class Hydration {
     _poolAddress: string,
     slippagePct?: number
   ): Promise<any> {
-    const tradeRouter = await this.getTradeRouter();
+    const sdkContext = await this.getSdkContext();
 
     const baseToken = this.polkadot.getToken(baseTokenSymbol);
     const quoteToken = this.polkadot.getToken(quoteTokenSymbol);
@@ -409,18 +365,18 @@ export class Hydration {
     }
 
     const amountBN = BigNumber(amount.toString());
-    let trade: Trade;
+    let trade: any;
 
     if (side === 'BUY') {
-      trade = await this.tradeRouterGetBestBuy(
-        tradeRouter,
+      trade = await this.sdkContextGetBestBuy(
+        sdkContext,
         quoteToken.address,
         baseToken.address,
         amountBN
       );
     } else {
-      trade = await this.tradeRouterGetBestSell(
-        tradeRouter,
+      trade = await this.sdkContextGetBestSell(
+        sdkContext,
         baseToken.address,
         quoteToken.address,
         amountBN
@@ -432,22 +388,26 @@ export class Hydration {
     }
 
     const effectiveSlippage = this.getSlippagePercentage(slippagePct);
-    const tradeLimit = this.calculateTradeLimit(
-      trade,
-      effectiveSlippage,
-      side === 'BUY' ? TradeType.Buy : TradeType.Sell
-    );
-
-    const tx = trade.toTx(tradeLimit).get();
-    const apiPromise = await this.getApiPromise();
     
-    const {txHash, transaction} = await this.submitTransaction(apiPromise, tx, wallet);
+    // Use the new SDK TxBuilderFactory to create transaction
+    const slippagePercentage = effectiveSlippage.dividedBy(100).toNumber(); // Convert to decimal
+    
+    const builtTx = await sdkContext.tx.trade(trade)
+      .withBeneficiary(wallet.address)
+      .withSlippage(slippagePercentage)
+      .build();
+    
+    // Get the actual submittable transaction from the SDK
+    const tx = builtTx.get();
+    const apiPromise = await this.getApiPromise();
+
+    const { txHash, transaction } = await this.submitTransaction(apiPromise, tx, wallet);
 
     const feePaymentToken = this.polkadot.getFeePaymentToken();
 
     let fee: BigNumber;
     try {
-      fee = new BigNumber(transaction.events.map((it) => it.toHuman()).filter((it) => it.event.method == 'TransactionFeePaid')[0].event.data.actualFee.toString().replaceAll(',', '')).dividedBy(Math.pow(10, feePaymentToken.decimals));
+      fee = new BigNumber(transaction.events.map((it: any) => it.toHuman()).filter((it: any) => it.event.method == 'TransactionFeePaid')[0].event.data.actualFee.toString().replaceAll(',', '')).dividedBy(Math.pow(10, feePaymentToken.decimals));
     } catch (error) {
       logger.error(`It was not possible to extract the fee from the transaction:`, error);
       fee = new BigNumber(Number.NaN);
@@ -473,7 +433,7 @@ export class Hydration {
   getSlippagePercentage(slippagePercentage: number | string | BigNumber): BigNumber {
     let actualSlippagePercentage: string;
 
-    if (!slippagePercentage) {
+    if (slippagePercentage === null || slippagePercentage === undefined) {
       actualSlippagePercentage = this.config.allowedSlippage;
     } else {
       actualSlippagePercentage = new BigNumber(slippagePercentage.toString()).dividedBy(new BigNumber(100)).toString();
@@ -484,7 +444,7 @@ export class Hydration {
 
       actualSlippagePercentage = new BigNumber(match[1]).dividedBy(BigNumber(match[2])).toString();
     } else {
-      actualSlippagePercentage = actualSlippagePercentage.toString()
+      actualSlippagePercentage = actualSlippagePercentage.toString();
     }
 
     return new BigNumber(actualSlippagePercentage).multipliedBy(new BigNumber(100));
@@ -548,11 +508,12 @@ export class Hydration {
             case PositionStrategyType.Balanced:
               quoteTokenAmount = baseTokenAmount * currentPrice;
               break;
-            case PositionStrategyType.Imbalanced:
+            case PositionStrategyType.Imbalanced: {
               const midPrice = (lowerPrice + upperPrice) / 2;
               quoteTokenAmount = baseTokenAmount * currentPrice *
                 (currentPrice < midPrice ? 0.7 : 1.3);
               break;
+            }
             default:
               quoteTokenAmount = baseTokenAmount * currentPrice;
           }
@@ -568,11 +529,12 @@ export class Hydration {
             case PositionStrategyType.Balanced:
               baseTokenAmount = quoteTokenAmount / currentPrice;
               break;
-            case PositionStrategyType.Imbalanced:
+            case PositionStrategyType.Imbalanced: {
               const midPrice = (lowerPrice + upperPrice) / 2;
               baseTokenAmount = quoteTokenAmount / currentPrice *
                 (currentPrice < midPrice ? 1.3 : 0.7);
               break;
+            }
             default:
               baseTokenAmount = quoteTokenAmount / currentPrice;
           }
@@ -602,11 +564,12 @@ export class Hydration {
             case PositionStrategyType.Balanced:
               quoteTokenAmount = baseTokenAmount * currentPrice;
               break;
-            case PositionStrategyType.Imbalanced:
+            case PositionStrategyType.Imbalanced: {
               const midPrice = (lowerPrice + upperPrice) / 2;
               quoteTokenAmount = baseTokenAmount * currentPrice *
                 (currentPrice < midPrice ? 0.7 : 1.3);
               break;
+            }
             default:
               quoteTokenAmount = baseTokenAmount * currentPrice;
           }
@@ -622,11 +585,12 @@ export class Hydration {
             case PositionStrategyType.Balanced:
               baseTokenAmount = quoteTokenAmount / currentPrice;
               break;
-            case PositionStrategyType.Imbalanced:
+            case PositionStrategyType.Imbalanced: {
               const midPrice = (lowerPrice + upperPrice) / 2;
               baseTokenAmount = quoteTokenAmount / currentPrice *
                 (currentPrice < midPrice ? 1.3 : 0.7);
               break;
+            }
             default:
               baseTokenAmount = quoteTokenAmount / currentPrice;
           }
@@ -666,7 +630,7 @@ export class Hydration {
       };
     }
   }
-  
+
   /**
    * Get token symbol from address
    * @param tokenAddress Token address
@@ -738,43 +702,38 @@ export class Hydration {
   }
 
   /**
-   * Get PoolService instance
+   * Get SDK Context instance
    */
-  public async getPoolService(): Promise<PoolService> {
-    const poolService = new PoolService(await this.getApiPromise());
-    await this.poolServiceSyncRegistry(poolService);
-    return poolService;
+  public async getSdkContext(): Promise<any> {
+    if (!this.sdkContext) {
+      const api = await this.getApiPromise();
+      this.sdkContext = await this.sdkContextCreate(api);
+    }
+    return this.sdkContext;
   }
 
   /**
-   * Get TradeRouter instance
-   */
-  public async getTradeRouter(): Promise<TradeRouter> {
-    return new TradeRouter(await this.getPoolService());
-  }
-
-  /**
-   * Get pools from the pool service with retry capability
+   * Get pools from the SDK context with retry capability
    */
   @runWithRetryAndTimeout()
-  public async poolServiceGetPools(target: PoolService, includeOnly: PoolType[]): Promise<PoolBase[]> {
-    return await target.getPools(includeOnly);
+  public async sdkContextGetPools(target: any, includeOnly: PoolType[]): Promise<any[]> {
+    return await target.ctx.pool.getPools(includeOnly);
   }
 
   /**
    * Get best sell trade with retry capability
    */
   @runWithRetryAndTimeout()
-  public async tradeRouterGetBestSell(target: TradeRouter, assetIn: string, assetOut: string, amountIn: BigNumber | string | number): Promise<Trade> {
-    return await target.getBestSell(assetIn, assetOut, amountIn);
+  public async sdkContextGetBestSell(target: any, assetIn: string, assetOut: string, amountIn: BigNumber | string | number): Promise<any> {
+    return await target.api.router.getBestSell(assetIn, assetOut, amountIn);
   }
 
   /**
    * Get best buy trade with retry capability
    */
   @runWithRetryAndTimeout()
-  public async tradeRouterGetBestBuy(target: TradeRouter, assetIn: string, assetOut: string, amountOut: BigNumber | string | number): Promise<Trade> {
-    return await target.getBestBuy(assetIn, assetOut, amountOut);
+  public async sdkContextGetBestBuy(target: any, assetIn: string, assetOut: string, amountOut: BigNumber | string | number): Promise<any> {
+    return await target.api.router.getBestBuy(assetIn, assetOut, amountOut);
   }
 
   /**
@@ -807,11 +766,25 @@ export class Hydration {
   }
 
   /**
-   * Sync pool service registry with retry capability
+   * Create SDK context with retry capability
    */
   @runWithRetryAndTimeout()
-  public async poolServiceSyncRegistry(target: PoolService): Promise<void> {
-    return await target.syncRegistry();
+  public async sdkContextCreate(api: ApiPromise): Promise<any> {
+    return await createSdkContext(api);
+  }
+
+  /**
+   * Clean up SDK context resources
+   */
+  public async cleanup(): Promise<void> {
+    if (this.sdkContext) {
+      await this.sdkContext.destroy();
+      this.sdkContext = undefined;
+    }
+    if (this.apiPromise) {
+      await this.apiPromise.disconnect();
+      this.apiPromise = undefined;
+    }
   }
 
   /**
@@ -836,7 +809,7 @@ export class Hydration {
   ): Promise<HydrationAddLiquidityResponse> {
     // Get wallet
     const wallet = await this.polkadot.getWallet(walletAddress);
-    
+
     // Get pool info
     const pool = await this.getPoolInfo(poolId);
     if (!pool) {
@@ -897,14 +870,14 @@ export class Hydration {
 
     // Using the GalacticCouncil SDK to prepare the transaction
     const apiPromise = await this.getApiPromise();
-    
+
     let addLiquidityTx;
     const poolType = pool.poolType?.toLowerCase() || POOL_TYPE.XYK;
 
     logger.info(`Adding liquidity to ${poolType} pool (${poolId})`);
 
     switch (poolType) {
-      case POOL_TYPE.XYK:
+      case POOL_TYPE.XYK: {
         const quoteAmountMaxLimit = this.calculateMaxAmountIn(quoteAmountBN, effectiveSlippage);
         addLiquidityTx = apiPromise.tx.xyk.addLiquidity(
           baseToken.address,
@@ -913,8 +886,9 @@ export class Hydration {
           quoteAmountMaxLimit.toString()
         );
         break;
+      }
 
-      case POOL_TYPE.STABLESWAP:
+      case POOL_TYPE.STABLESWAP: {
         const assets = [
           { assetId: baseToken.address, amount: baseAmountBN.toString() },
           { assetId: quoteToken.address, amount: quoteAmountBN.toString() }
@@ -926,12 +900,13 @@ export class Hydration {
         }
 
         addLiquidityTx = apiPromise.tx.stableswap.addLiquidity(
-            numericPoolId,
-            assets
+          numericPoolId,
+          assets
         );
         break;
+      }
 
-      case POOL_TYPE.OMNIPOOL:
+      case POOL_TYPE.OMNIPOOL: {
         if (baseTokenAmount > 0) {
           const minSharesLimit = this.calculateMinSharesLimit(baseAmountBN, effectiveSlippage);
           addLiquidityTx = apiPromise.tx.omnipool.addLiquidityWithLimit(
@@ -955,12 +930,13 @@ export class Hydration {
         }
 
         break;
+      }
 
       default:
         throw new Error(`Unsupported pool type: ${poolType}`);
     }
 
-    const {txHash, transaction} = await this.submitTransaction(apiPromise, addLiquidityTx, wallet, poolType);
+    const { txHash, transaction } = await this.submitTransaction(apiPromise, addLiquidityTx, wallet, poolType);
 
     const feePaymentToken = this.polkadot.getFeePaymentToken();
 
@@ -1011,21 +987,22 @@ export class Hydration {
    * @returns Transaction hash if successful
    * @throws Error if transaction fails
    */
-  private async submitTransaction(api: any, tx: any, wallet: any, poolType?: string): Promise<{txHash: string, transaction: any}> {
-    return new Promise<{txHash: string, transaction: any}>(async (resolve, reject) => {
+  private async submitTransaction(api: any, tx: any, wallet: any, poolType?: string): Promise<{ txHash: string, transaction: any }> {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    return new Promise<{ txHash: string, transaction: any }>(async (resolve, reject) => {
       let unsub: () => void;
-      
-      const txId = tx.hash.toHex();
+
+      const txId = tx.hex || tx.hash?.toHex?.() || 'unknown';
       logger.debug(`Transaction created with ID: ${txId}`);
-      
+
       const statusHandler = async (result: any) => {
         try {
           const txHash = result.txHash.toString();
-          
+
           if (result.status.isInBlock || result.status.isFinalized) {
             const blockHash = result.status.isInBlock ? result.status.asInBlock : result.status.asFinalized;
             logger.debug(`Transaction ${txHash} ${result.status.isInBlock ? 'in block' : 'finalized'}: ${blockHash.toString()}`);
-            
+
             if (result.dispatchError) {
               const errorMessage = await this.extractErrorMessage(api, result.dispatchError);
               logger.error(`Transaction ${txHash} failed with dispatch error: ${errorMessage}`);
@@ -1033,7 +1010,7 @@ export class Hydration {
               reject(new Error(`Transaction ${txHash} failed: ${errorMessage}`));
               return;
             }
-            
+
             if (await this.hasFailedEvent(api, result.events)) {
               const errorMessage = await this.extractEventErrorMessage(api, result.events);
               logger.error(`Transaction ${txHash} failed with event error: ${errorMessage}`);
@@ -1041,21 +1018,21 @@ export class Hydration {
               reject(new Error(`Transaction ${txHash} failed: ${errorMessage}`));
               return;
             }
-            
+
             if (await this.hasSuccessEvent(api, result.events, poolType)) {
               logger.info(`Transaction ${txHash} succeeded in block ${blockHash.toString()}`);
               unsub();
-              resolve({txHash: txHash, transaction: result});
+              resolve({ txHash: txHash, transaction: result });
               return;
             }
-            
+
             if (result.status.isFinalized) {
               logger.warn(`Transaction ${txHash} finalized with no specific success/failure event. Assuming success.`);
               unsub();
-              resolve({txHash: txHash, transaction: result});
+              resolve({ txHash: txHash, transaction: result });
               return;
             }
-          } 
+          }
           else if (result.status.isDropped || result.status.isInvalid || result.status.isUsurped) {
             const statusType = result.status.type;
             const statusValue = result.status.value.toString();
@@ -1066,18 +1043,18 @@ export class Hydration {
             return;
           }
         } catch (error) {
-          const fallbackHash = tx.hash.toString();
+          const fallbackHash = tx.hex || tx.hash?.toHex?.() || 'unknown';
           logger.error(`Error processing transaction status: ${error.message}`);
           unsub();
           reject(new Error(`Transaction ${fallbackHash} processing failed: ${error.message}`));
         }
       };
-      
+
       try {
         logger.info(`Submitting transaction...`);
         unsub = await tx.signAndSend(wallet, statusHandler);
       } catch (error) {
-        const fallbackHash = tx.hash.toString();
+        const fallbackHash = tx.hex || tx.hash?.toHex?.() || 'unknown';
         logger.error(`Exception during transaction submission: ${error.message}`);
         reject(new Error(`Transaction ${fallbackHash} submission failed: ${error.message}`));
       }
@@ -1110,14 +1087,14 @@ export class Hydration {
    * @returns Error message
    */
   private async extractEventErrorMessage(api: any, events: any[]): Promise<string> {
-    const failureEvent = events.find(({ event }) => 
+    const failureEvent = events.find(({ event }) =>
       api.events.system.ExtrinsicFailed.is(event)
     );
-    
+
     if (!failureEvent) return 'Unknown transaction failure';
-    
+
     const { event: { data: [error] } } = failureEvent;
-    
+
     if (error.isModule) {
       try {
         const { docs, name, section } = api.registry.findMetaError(error.asModule);
@@ -1137,7 +1114,7 @@ export class Hydration {
    * @returns True if failure event exists
    */
   private async hasFailedEvent(api: any, events: any[]): Promise<boolean> {
-    return events.some(({ event }) => 
+    return events.some(({ event }) =>
       api.events.system.ExtrinsicFailed.is(event)
     );
   }
@@ -1150,8 +1127,8 @@ export class Hydration {
    * @returns True if success event exists
    */
   private async hasSuccessEvent(api: any, events: any[], poolType?: string): Promise<boolean> {
-    return events.some(({ event }) => 
-      api.events.system.ExtrinsicSuccess.is(event) || 
+    return events.some(({ event }) =>
+      api.events.system.ExtrinsicSuccess.is(event) ||
       (poolType === POOL_TYPE.XYK && api.events.xyk.LiquidityAdded?.is(event)) ||
       (poolType === POOL_TYPE.LBP && api.events.lbp.LiquidityAdded?.is(event)) ||
       (poolType === POOL_TYPE.OMNIPOOL && api.events.omnipool.LiquidityAdded?.is(event)) ||
@@ -1180,9 +1157,9 @@ export class Hydration {
       .sort((a, b) => a.localeCompare(b));
 
     // Get all pools and token mappings
-    const poolService = await this.getPoolService();
-    const pools = await this.poolServiceGetPools(poolService, []);
-    
+    const sdkContext = await this.getSdkContext();
+    const pools = await this.sdkContextGetPools(sdkContext, []);
+
     const filteredPools = pools.filter(pool => {
       // Filter by pool type
       if (types.length > 0) {
@@ -1192,7 +1169,7 @@ export class Hydration {
       }
 
       // If no token filters, return true
-      if (!(allTokenAddresses.length > 0)){
+      if (!(allTokenAddresses.length > 0)) {
         return true;
       }
 
@@ -1259,14 +1236,14 @@ export class Hydration {
     }
 
     logger.info(`Preparing liquidity quote for ${baseTokenSymbol}/${quoteTokenSymbol} pool`);
-    
+
     // Determine price range based on pool type
     const currentPrice = poolInfo.price || 10;
     let priceRange = 0.05; // Default 5%
-    
+
     // Safely get pool type with fallback
     const poolType = (poolInfo.poolType || '').toLowerCase();
-    
+
     // Adjust price range based on pool type
     if (poolType.includes('stable')) {
       priceRange = 0.005; // 0.5% for stable pools
@@ -1275,7 +1252,7 @@ export class Hydration {
     } else if (poolType.includes('omni')) {
       priceRange = 0.15; // 15% for Omnipool (wider range)
     }
-    
+
     const lowerPrice = currentPrice * (1 - priceRange);
     const upperPrice = currentPrice * (1 + priceRange);
 
@@ -1291,7 +1268,7 @@ export class Hydration {
       } else {
         const baseValue = baseTokenAmount * currentPrice;
         const quoteValue = quoteTokenAmount;
-        
+
         if (baseValue > quoteValue) {
           amount = baseTokenAmount;
           amountType = 'base';
@@ -1307,15 +1284,15 @@ export class Hydration {
 
     // Choose strategy based on pool type and price position
     let positionStrategy = PositionStrategyType.Balanced;
-    
+
     if (poolInfo.poolType?.toLowerCase().includes('stable')) {
       positionStrategy = PositionStrategyType.Balanced;
-    } 
-    else if (poolInfo.poolType?.toLowerCase().includes('xyk') || 
-            poolInfo.poolType?.toLowerCase().includes('constantproduct')) {
+    }
+    else if (poolInfo.poolType?.toLowerCase().includes('xyk') ||
+      poolInfo.poolType?.toLowerCase().includes('constantproduct')) {
       if (currentPrice < currentPrice * (1 - priceRange * 0.5)) {
         positionStrategy = PositionStrategyType.BaseHeavy;
-      } 
+      }
       else if (currentPrice > currentPrice * (1 + priceRange * 0.5)) {
         positionStrategy = PositionStrategyType.QuoteHeavy;
       }
@@ -1424,7 +1401,7 @@ export class Hydration {
    */
   async getPoolDetails(poolAddress: string): Promise<HydrationPoolInfo | null> {
     const poolInfo = await this.getPoolInfo(poolAddress);
-    
+
     if (!poolInfo) {
       return null;
     }
@@ -1468,7 +1445,7 @@ export class Hydration {
         logger.warn(`Unknown pool type "${poolType}" for pool ${poolAddress}`);
         break;
     }
-    
+
     // For other pool types, return standard response
     const result = {
       address: poolInfo.address,
@@ -1510,7 +1487,7 @@ export class Hydration {
 
     // Get wallet
     const wallet = await this.polkadot.getWallet(walletAddress);
-    
+
     // Get pool info
     const pool = await this.getPoolInfo(poolAddress);
     if (!pool) {
@@ -1523,7 +1500,7 @@ export class Hydration {
     let userSharesToRemove: BigNumber;
     let totalUserSharesInThePool: BigNumber;
     let shareTokenDecimals: number;
-    
+
     let baseTokenAmountRemoved: BigNumber = new BigNumber(0);
     let quoteTokenAmountRemoved: BigNumber = new BigNumber(0);
 
@@ -1532,32 +1509,32 @@ export class Hydration {
         const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
         const baseToken = this.polkadot.getToken(pool.baseTokenAddress);
         const quoteToken = this.polkadot.getToken(pool.quoteTokenAddress);
-        
+
         if (!baseToken || !quoteToken) {
           throw new Error(`Token not found: ${!baseToken ? pool.baseTokenAddress : pool.quoteTokenAddress}`);
         }
-        
+
         shareTokenDecimals = baseToken.decimals;
-        
+
         const rawBalance = await apiPromise.query.tokens.accounts(walletAddress, shareTokenId);
         const freeBalance = rawBalance.free.toString();
-        
+
         if (new BigNumber(freeBalance).lte(0)) {
           throw new Error(`User has no liquidity in this pool.`);
         }
-        
+
         totalUserSharesInThePool = new BigNumber(freeBalance);
         const percentageToRemoveBN = BigNumber(percentageToRemove.toString());
         userSharesToRemove = percentageToRemoveBN.multipliedBy(totalUserSharesInThePool).dividedBy(100).integerValue(BigNumber.ROUND_DOWN);
-        
+
         if (userSharesToRemove.lte(0)) {
           throw new Error(`Calculated liquidity to remove is zero.`);
         }
 
-        const poolService = await this.getPoolService();
-        const pools = await this.poolServiceGetPools(poolService, []);
+        const sdkContext = await this.getSdkContext();
+        const pools = await this.sdkContextGetPools(sdkContext, []);
         const poolData = pools.find(p => p.address === poolAddress || p.id === poolAddress);
-        
+
         if (!poolData) {
           throw new Error(`Could not find pool data for ${poolAddress}`);
         }
@@ -1565,32 +1542,32 @@ export class Hydration {
         const [token0, token1] = poolData.tokens;
         const baseTokenReserve = new BigNumber(token0.balance.toString());
         const quoteTokenReserve = new BigNumber(token1.balance.toString());
-        
+
         const poolTotalSupply = await apiPromise.query.tokens.totalIssuance(shareTokenId);
         const totalSupply = new BigNumber(poolTotalSupply.toString());
-        
+
         const expectedBaseTokenAmount = baseTokenReserve
           .multipliedBy(userSharesToRemove)
           .dividedBy(totalSupply)
           .integerValue(BigNumber.ROUND_DOWN);
-        
+
         const expectedQuoteTokenAmount = quoteTokenReserve
           .multipliedBy(userSharesToRemove)
           .dividedBy(totalSupply)
           .integerValue(BigNumber.ROUND_DOWN);
-        
+
         const baseTokenAmountCalc = expectedBaseTokenAmount.dividedBy(Math.pow(10, baseToken.decimals));
         const quoteTokenAmountCalc = expectedQuoteTokenAmount.dividedBy(Math.pow(10, quoteToken.decimals));
-        
+
         removeLiquidityTx = apiPromise.tx.xyk.removeLiquidity(
           token0.id.toString(),
           token1.id.toString(),
           userSharesToRemove.toString()
         );
-        
+
         baseTokenAmountRemoved = baseTokenAmountCalc;
         quoteTokenAmountRemoved = quoteTokenAmountCalc;
-        
+
         break;
       }
 
@@ -1598,66 +1575,66 @@ export class Hydration {
         if (!pool.id) {
           throw new Error('Invalid stableswap pool ID');
         }
-        
+
         shareTokenDecimals = 18; // Stableswap uses 18 decimals for LP tokens
         const shareTokenId = pool.id;
-        
+
         const rawBalance = await apiPromise.query.tokens.accounts(walletAddress, shareTokenId);
         const freeBalance = rawBalance.free.toString();
-        
+
         if (new BigNumber(freeBalance).lte(0)) {
           throw new Error(`User has no liquidity in this stableswap pool.`);
         }
-        
+
         totalUserSharesInThePool = new BigNumber(freeBalance);
         const percentageToRemoveBN = BigNumber(percentageToRemove.toString());
         userSharesToRemove = percentageToRemoveBN.multipliedBy(totalUserSharesInThePool).dividedBy(100).integerValue(BigNumber.ROUND_DOWN);
-        
+
         if (userSharesToRemove.lte(0)) {
           throw new Error(`Calculated liquidity to remove is zero.`);
         }
-        
-        const poolService = await this.getPoolService();
-        const pools = await this.poolServiceGetPools(poolService, []);
+
+        const sdkContext = await this.getSdkContext();
+        const pools = await this.sdkContextGetPools(sdkContext, []);
         const poolData = pools.find(p => p.id === shareTokenId);
-        
+
         if (!poolData) {
           throw new Error(`Could not find pool data for ${shareTokenId}`);
         }
-        
+
         const baseToken = this.polkadot.getToken(pool.baseTokenAddress);
         const quoteToken = this.polkadot.getToken(pool.quoteTokenAddress);
-        
+
         if (!baseToken || !quoteToken) {
           throw new Error(`Token not found: ${!baseToken ? pool.baseTokenAddress : pool.quoteTokenAddress}`);
         }
-        
+
         const baseTokenIndex = poolData.tokens.findIndex(t => t.id === pool.baseTokenAddress);
         const quoteTokenIndex = poolData.tokens.findIndex(t => t.id === pool.quoteTokenAddress);
-        
+
         if (baseTokenIndex === -1 || quoteTokenIndex === -1) {
           throw new Error(`Token not found in pool`);
         }
-        
+
         const baseTokenReserve = new BigNumber(poolData.tokens[baseTokenIndex].balance.toString());
         const quoteTokenReserve = new BigNumber(poolData.tokens[quoteTokenIndex].balance.toString());
-        
+
         const poolTotalSupply = await apiPromise.query.tokens.totalIssuance(shareTokenId);
         const totalSupply = new BigNumber(poolTotalSupply.toString());
-        
+
         const expectedBaseTokenAmount = baseTokenReserve
           .multipliedBy(userSharesToRemove)
           .dividedBy(totalSupply)
           .integerValue(BigNumber.ROUND_DOWN);
-        
+
         const expectedQuoteTokenAmount = quoteTokenReserve
           .multipliedBy(userSharesToRemove)
           .dividedBy(totalSupply)
           .integerValue(BigNumber.ROUND_DOWN);
-        
+
         const baseTokenAmountCalc = expectedBaseTokenAmount.dividedBy(Math.pow(10, baseToken.decimals));
         const quoteTokenAmountCalc = expectedQuoteTokenAmount.dividedBy(Math.pow(10, quoteToken.decimals));
-        
+
         removeLiquidityTx = apiPromise.tx.stableswap.removeLiquidity(
           shareTokenId,
           userSharesToRemove.toString(),
@@ -1666,10 +1643,10 @@ export class Hydration {
             { assetId: pool.quoteTokenAddress, amount: "0" }
           ]
         );
-        
+
         baseTokenAmountRemoved = baseTokenAmountCalc;
         quoteTokenAmountRemoved = quoteTokenAmountCalc;
-        
+
         break;
       }
 
@@ -1681,11 +1658,11 @@ export class Hydration {
 
           // Get user positions
           const userPositions = await this.getPositionsOwned(walletAddress, tokenId.toString());
-          
+
           if (userPositions.length === 0) {
             throw new Error(`No positions found for token ${tokenId} owned by ${walletAddress}`);
           }
-          
+
           // Calculate total shares and amount to remove
           const { totalShares, totalAmount, totalSharesToRemove } = userPositions.reduce(
             (acc, pos) => {
@@ -1701,25 +1678,25 @@ export class Hydration {
             },
             { totalShares: new BigNumber(0), totalAmount: new BigNumber(0), totalSharesToRemove: new BigNumber(0) }
           );
-          
+
           userSharesToRemove = totalSharesToRemove.integerValue(BigNumber.ROUND_DOWN);
-          
+
           // Calculate amount to remove based on user's total amount and shares
           const amountToRemove = totalAmount
             .multipliedBy(userSharesToRemove)
             .dividedBy(totalShares)
             .integerValue(BigNumber.ROUND_DOWN);
-          
+
           // Convert to human readable format (divide by 10^18)
           baseTokenAmountRemoved = amountToRemove.dividedBy(Math.pow(10, 18));
           quoteTokenAmountRemoved = new BigNumber(0);
-          
-          const position = userPositions.find(pos => 
+
+          const position = userPositions.find(pos =>
             new BigNumber(pos.shares).gte(userSharesToRemove)
           ) || userPositions[0];
-          
+
           const positionId = BigInt(position.positionId);
-          
+
           if (apiPromise.tx.omnipool.withdraw) {
             removeLiquidityTx = apiPromise.tx.omnipool.withdraw(
               positionId,
@@ -1731,7 +1708,7 @@ export class Hydration {
               userSharesToRemove.toString()
             );
           }
-          
+
           break;
         } catch (error) {
           throw new Error(`Failed to remove liquidity: ${error.message}`);
@@ -1746,7 +1723,7 @@ export class Hydration {
       throw new Error(`Failed to create transaction for pool ${poolAddress}, type ${poolType}`);
     }
 
-    const {txHash, transaction} = await this.submitTransaction(apiPromise, removeLiquidityTx, wallet, poolType);
+    const { txHash, transaction } = await this.submitTransaction(apiPromise, removeLiquidityTx, wallet, poolType);
 
     const feePaymentToken = this.polkadot.getFeePaymentToken();
     let fee: BigNumber;
@@ -1764,8 +1741,8 @@ export class Hydration {
     if (poolType === POOL_TYPE.OMNIPOOL) {
       shareTokenDecimals = 18;
     }
-    
-    let formattedSharesRemoved = userSharesToRemove.dividedBy(Math.pow(10, shareTokenDecimals));
+
+    const formattedSharesRemoved = userSharesToRemove.dividedBy(Math.pow(10, shareTokenDecimals));
 
     return {
       signature: txHash,
@@ -1785,16 +1762,16 @@ export class Hydration {
    */
   async getPositionsOwned(walletAddress: string, tokenId: string): Promise<HydrationPosition[]> {
     const apiPromise = await this.getApiPromise();
-    
+
     try {
       // Convert wallet address to Hydration format
       const hydraWalletAddress = encodeAddress(
         decodeAddress(walletAddress),
         HYDRA_ADDRESS_PREFIX
       );
-      
+
       const collectionId = await apiPromise.consts.omnipool.nftCollectionId;
-      
+
       const [positions, uniques] = await Promise.all([
         apiPromise.query.omnipool.positions.entries(),
         apiPromise.query.uniques.asset.entries(collectionId.toString())
@@ -1807,7 +1784,7 @@ export class Hydration {
           return [itemId.toString(), owner];
         })
       );
-      
+
       // Check alternate format - some Substrate chains have different address format encoding
       const alternateHydraAddresses = [
         hydraWalletAddress,
@@ -1816,25 +1793,25 @@ export class Hydration {
         // Try with SS58 format 0 (Polkadot)
         encodeAddress(decodeAddress(walletAddress), 0)
       ];
-      
+
       const result = positions
         .map(([idRaw, dataRaw]) => {
           const positionId = idRaw.args[0].toString();
           const positionData = dataRaw.toHuman() as Record<string, any>;
           const nftOwner = nftOwners.get(positionId);
-          
+
           const isMatchingToken = positionData?.assetId === tokenId;
           const isMatchingOwner = alternateHydraAddresses.some(addr => nftOwner === addr);
-          
+
           if (!nftOwner || !isMatchingToken || !isMatchingOwner) {
             return null;
           }
-          
+
           const shares = positionData?.shares?.toString().replace(/,/g, '') || '0';
           if (new BigNumber(shares).lte(0)) {
             return null;
           }
-                    
+
           return {
             positionId,
             assetId: positionData.assetId,
@@ -1845,7 +1822,7 @@ export class Hydration {
           };
         })
         .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
-            
+
       return result;
     } catch (error) {
       logger.error(`Error in getPositionsOwned: ${error.message}`);
@@ -1853,15 +1830,15 @@ export class Hydration {
     }
   }
 
-  
-/**
-   * Get information about a user's position in a Hydration pool
-   * @param walletAddress - The user's wallet address
-   * @param poolAddress - Optional pool address for specific pool
-   * @param baseToken - Optional base token symbol
-   * @param quoteToken - Optional quote token symbol
-   * @returns Position information including LP token amount and token amounts
-   */
+
+  /**
+     * Get information about a user's position in a Hydration pool
+     * @param walletAddress - The user's wallet address
+     * @param poolAddress - Optional pool address for specific pool
+     * @param baseToken - Optional base token symbol
+     * @param quoteToken - Optional quote token symbol
+     * @returns Position information including LP token amount and token amounts
+     */
   async getPositionInfo(
     walletAddress: string,
     poolAddress?: string,
@@ -1880,102 +1857,102 @@ export class Hydration {
     );
 
     if (!poolAddress && (!baseToken || !quoteToken)) {
-    throw new Error(
-      'Either poolAddress or both baseToken and quoteToken must be provided',
-    );
-  }
-
-  // Resolve pool address
-  let poolAddressToUse = poolAddress;
-  if (!poolAddressToUse) {
-    const pools = await this.listPools([], [baseToken, quoteToken]);
-    if (pools.length === 0) {
-      throw new Error(`No AMM pool found for pair ${baseToken}-${quoteToken}`);
+      throw new Error(
+        'Either poolAddress or both baseToken and quoteToken must be provided',
+      );
     }
-    poolAddressToUse = pools[0].address;
-  }
 
-  // Fetch pool data
-  const poolService = await this.getPoolService();
-  const allPools = await this.poolServiceGetPools(poolService, []);
-  const poolData = allPools.find(p => p.address === poolAddressToUse);
-  if (!poolData) {
-    throw new Error(`Pool not found: ${poolAddressToUse}`);
-  }
-
-  const poolInfo = await this.getPoolDetails(poolAddressToUse);
-  if (!poolInfo) {
-    throw new Error(`Pool not found: ${poolAddressToUse}`);
-  }
-
-  // Ensure valid quote token
-  if (
-    !poolInfo.quoteTokenAddress ||
-    poolInfo.quoteTokenAddress === this.polkadot.getNativeToken().address
-  ) {
-    if (poolData.tokens.length > 1) {
-      poolInfo.quoteTokenAddress = poolData.tokens[1].id.toString();
-    } else {
-      throw new Error('Invalid pool configuration: missing quote token');
+    // Resolve pool address
+    let poolAddressToUse = poolAddress;
+    if (!poolAddressToUse) {
+      const pools = await this.listPools([], [baseToken, quoteToken]);
+      if (pools.length === 0) {
+        throw new Error(`No AMM pool found for pair ${baseToken}-${quoteToken}`);
+      }
+      poolAddressToUse = pools[0].address;
     }
+
+    // Fetch pool data
+    const sdkContext = await this.getSdkContext();
+    const allPools = await this.sdkContextGetPools(sdkContext, []);
+    const poolData = allPools.find(p => p.address === poolAddressToUse);
+    if (!poolData) {
+      throw new Error(`Pool not found: ${poolAddressToUse}`);
+    }
+
+    const poolInfo = await this.getPoolDetails(poolAddressToUse);
+    if (!poolInfo) {
+      throw new Error(`Pool not found: ${poolAddressToUse}`);
+    }
+
+    // Ensure valid quote token
+    if (
+      !poolInfo.quoteTokenAddress ||
+      poolInfo.quoteTokenAddress === this.polkadot.getNativeToken().address
+    ) {
+      if (poolData.tokens.length > 1) {
+        poolInfo.quoteTokenAddress = poolData.tokens[1].id.toString();
+      } else {
+        throw new Error('Invalid pool configuration: missing quote token');
+      }
+    }
+
+    const api = await this.getApiPromise();
+    let lpTokenAmount = new BigNumber(0);
+    let baseTokenAmount = new BigNumber(0);
+    let quoteTokenAmount = new BigNumber(0);
+
+    // Get LP token balance
+    const lpBalanceRaw = await api.query.tokens.accounts(
+      hydraWalletAddress,
+      poolInfo.lpMint.address
+    );
+    const userLpBalance = new BigNumber(lpBalanceRaw.free.toString());
+    const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolInfo.lpMint.address)).toString());
+
+    if (userLpBalance.gt(0) && totalLpSupply.gt(0)) {
+      // Normalize LP balances to human units
+      const lpDecimals = poolInfo.lpMint.decimals || LP_DECIMALS;
+      const userLpHuman = userLpBalance.dividedBy(
+        new BigNumber(10).pow(lpDecimals)
+      );
+      const totalLpHuman = totalLpSupply.dividedBy(
+        new BigNumber(10).pow(lpDecimals)
+      );
+      const userShareHuman = userLpHuman.dividedBy(totalLpHuman);
+
+      lpTokenAmount = userLpHuman;
+
+      // Pool reserves in human units from poolInfo
+      const poolBaseHuman = new BigNumber(poolInfo.baseTokenAmount);
+      const poolQuoteHuman = new BigNumber(poolInfo.quoteTokenAmount);
+
+      // Calculate user's share of pool reserves
+      const rawBaseHuman = poolBaseHuman.multipliedBy(userShareHuman);
+      const rawQuoteHuman = poolQuoteHuman.multipliedBy(userShareHuman);
+
+      // Round according to token decimals
+      baseTokenAmount = rawBaseHuman.decimalPlaces(
+        poolData.tokens[0].decimals,
+        BigNumber.ROUND_DOWN
+      );
+      quoteTokenAmount = rawQuoteHuman.decimalPlaces(
+        poolData.tokens[1].decimals,
+        BigNumber.ROUND_DOWN
+      );
+    }
+
+    await api.disconnect();
+
+    return {
+      poolAddress: poolAddressToUse,
+      walletAddress: hydraWalletAddress,
+      baseTokenAddress: poolInfo.baseTokenAddress,
+      quoteTokenAddress: poolInfo.quoteTokenAddress,
+      lpTokenAmount: lpTokenAmount.toNumber(),
+      baseTokenAmount: baseTokenAmount.toNumber(),
+      quoteTokenAmount: quoteTokenAmount.toNumber(),
+      price: new BigNumber(poolInfo.price).toNumber(),
+    };
   }
-
-  const api = await this.getApiPromise();
-  let lpTokenAmount = new BigNumber(0);
-  let baseTokenAmount = new BigNumber(0);
-  let quoteTokenAmount = new BigNumber(0);
-
-  // Get LP token balance
-  const lpBalanceRaw = await api.query.tokens.accounts(
-    hydraWalletAddress,
-    poolInfo.lpMint.address
-  );
-  const userLpBalance = new BigNumber(lpBalanceRaw.free.toString());
-  const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolInfo.lpMint.address)).toString());
-
-  if (userLpBalance.gt(0) && totalLpSupply.gt(0)) {
-    // Normalize LP balances to human units
-    const lpDecimals = poolInfo.lpMint.decimals || LP_DECIMALS;
-    const userLpHuman = userLpBalance.dividedBy(
-      new BigNumber(10).pow(lpDecimals)
-    );
-    const totalLpHuman = totalLpSupply.dividedBy(
-      new BigNumber(10).pow(lpDecimals)
-    );
-    const userShareHuman = userLpHuman.dividedBy(totalLpHuman);
-
-    lpTokenAmount = userLpHuman;
-
-    // Pool reserves in human units from poolInfo
-    const poolBaseHuman = new BigNumber(poolInfo.baseTokenAmount);
-    const poolQuoteHuman = new BigNumber(poolInfo.quoteTokenAmount);
-
-    // Calculate user's share of pool reserves
-    const rawBaseHuman = poolBaseHuman.multipliedBy(userShareHuman);
-    const rawQuoteHuman = poolQuoteHuman.multipliedBy(userShareHuman);
-
-    // Round according to token decimals
-    baseTokenAmount = rawBaseHuman.decimalPlaces(
-      poolData.tokens[0].decimals,
-      BigNumber.ROUND_DOWN
-    );
-    quoteTokenAmount = rawQuoteHuman.decimalPlaces(
-      poolData.tokens[1].decimals,
-      BigNumber.ROUND_DOWN
-    );
-  }
-
-  await api.disconnect();
-
-  return {
-    poolAddress: poolAddressToUse,
-    walletAddress: hydraWalletAddress,
-    baseTokenAddress: poolInfo.baseTokenAddress,
-    quoteTokenAddress: poolInfo.quoteTokenAddress,
-    lpTokenAmount: lpTokenAmount.toNumber(),
-    baseTokenAmount: baseTokenAmount.toNumber(),
-    quoteTokenAmount: quoteTokenAmount.toNumber(),
-    price: new BigNumber(poolInfo.price).toNumber(),
-  };
-}
 }

@@ -1,16 +1,17 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import { Hydration } from '../../hydration';
+
 import { logger } from '../../../../services/logger';
+import { Hydration } from '../../hydration';
 import {
   HydrationQuoteLiquidityRequest,
   HydrationQuoteLiquidityRequestSchema,
   HydrationQuoteLiquidityResponse,
-  HydrationQuoteLiquidityResponseSchema
+  HydrationQuoteLiquidityResponseSchema,
 } from '../../hydration.types';
 
 /**
  * Gets a liquidity quote for adding liquidity to a Hydration pool.
- * 
+ *
  * @param fastify - Fastify instance
  * @param network - The blockchain network (e.g., 'mainnet')
  * @param poolAddress - Address of the pool to get quote for
@@ -25,39 +26,45 @@ export async function getHydrationLiquidityQuote(
   poolAddress: string,
   baseTokenAmount?: number,
   quoteTokenAmount?: number,
-  slippagePct: number = 1
+  slippagePct: number = 1,
 ): Promise<HydrationQuoteLiquidityResponse> {
   // Validate required parameters
   if (!network) {
     throw fastify.httpErrors.badRequest('Network parameter is required');
   }
-  
+
   if (!poolAddress) {
     throw fastify.httpErrors.badRequest('Pool address parameter is required');
   }
-  
+
   if (!baseTokenAmount && !quoteTokenAmount) {
-    throw fastify.httpErrors.badRequest('Either baseTokenAmount or quoteTokenAmount must be provided');
+    throw fastify.httpErrors.badRequest(
+      'Either baseTokenAmount or quoteTokenAmount must be provided',
+    );
   }
 
   // Get Hydration instance
   const hydration = await Hydration.getInstance(network);
   if (!hydration) {
-    throw fastify.httpErrors.serviceUnavailable('Hydration service unavailable');
+    throw fastify.httpErrors.serviceUnavailable(
+      'Hydration service unavailable',
+    );
   }
 
   // Log request parameters
   logger.info(`Getting liquidity quote for pool ${poolAddress} on ${network}`);
-  logger.info(`Base amount: ${baseTokenAmount || 'not set'}, Quote amount: ${quoteTokenAmount || 'not set'}, Slippage: ${slippagePct}%`);
+  logger.info(
+    `Base amount: ${baseTokenAmount || 'not set'}, Quote amount: ${quoteTokenAmount || 'not set'}, Slippage: ${slippagePct}%`,
+  );
 
   try {
     const quote = await hydration.quoteLiquidity(
       poolAddress,
       baseTokenAmount,
       quoteTokenAmount,
-      slippagePct
+      slippagePct,
     );
-    
+
     // Log successful execution
     logger.info(`Successfully got liquidity quote for pool ${poolAddress}`);
 
@@ -65,12 +72,14 @@ export async function getHydrationLiquidityQuote(
   } catch (error) {
     // Log error details
     logger.error(`Error getting liquidity quote: ${error.message}`);
-    
+
     if (error.message?.includes('not found')) {
       throw fastify.httpErrors.notFound(error.message);
     }
-    
-    throw fastify.httpErrors.internalServerError('Failed to get liquidity quote');
+
+    throw fastify.httpErrors.internalServerError(
+      'Failed to get liquidity quote',
+    );
   }
 }
 
@@ -93,18 +102,18 @@ export const quoteLiquidityRoute: FastifyPluginAsync = async (fastify) => {
           200: HydrationQuoteLiquidityResponseSchema,
           400: { type: 'object', properties: { error: { type: 'string' } } },
           404: { type: 'object', properties: { error: { type: 'string' } } },
-          500: { type: 'object', properties: { error: { type: 'string' } } }
-        }
-      }
+          500: { type: 'object', properties: { error: { type: 'string' } } },
+        },
+      },
     },
     async (request, _reply) => {
       try {
-        const { 
+        const {
           network = 'mainnet',
           poolAddress,
           baseTokenAmount,
           quoteTokenAmount,
-          slippagePct = 1
+          slippagePct = 1,
         } = request.query;
 
         const result = await getHydrationLiquidityQuote(
@@ -113,7 +122,7 @@ export const quoteLiquidityRoute: FastifyPluginAsync = async (fastify) => {
           poolAddress,
           baseTokenAmount,
           quoteTokenAmount,
-          slippagePct
+          slippagePct,
         );
 
         return result;
@@ -121,9 +130,8 @@ export const quoteLiquidityRoute: FastifyPluginAsync = async (fastify) => {
         // Error handling is done in getHydrationLiquidityQuote
         throw error;
       }
-    }
+    },
   );
 };
 
 export default quoteLiquidityRoute;
-

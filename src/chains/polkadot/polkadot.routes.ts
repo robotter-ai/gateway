@@ -1,13 +1,14 @@
 import { FastifyPluginAsync } from 'fastify';
-import { tokensRoute } from './routes/tokens';
-import { statusRoute } from './routes/status';
+
 import { balancesRoute } from './routes/balances';
-import { pollRoute } from './routes/poll';
 import { estimateGasRoute } from './routes/estimate-gas';
+import { pollRoute } from './routes/poll';
+import { statusRoute } from './routes/status';
+import { tokensRoute } from './routes/tokens';
 
 /**
  * Registers all Polkadot-related routes with the Fastify instance
- * 
+ *
  * This plugin registers the following endpoints:
  * - GET /status - Network status information
  * - GET /tokens - Token list retrieval
@@ -24,4 +25,3 @@ export const polkadotRoutes: FastifyPluginAsync = async (fastify) => {
 };
 
 export default polkadotRoutes;
-

@@ -20,13 +20,13 @@ export namespace HydrationConfig {
   export interface NetworkConfig {
     /** Supported trading types (e.g., AMM) */
     tradingTypes: Array<string>;
-    
+
     /** Available blockchain networks */
     availableNetworks: Array<AvailableNetworks>;
-    
+
     /** Symbol of the currency used for fee payment */
     feePaymentCurrencySymbol: string;
-    
+
     /** Default allowed slippage percentage */
     allowedSlippage: string;
 
@@ -54,7 +54,9 @@ export namespace HydrationConfig {
     priorityLevel: configManager.get('hydration.priorityLevel'),
     tradingTypes: ['amm', 'swap'],
     availableNetworks: [{ chain: 'polkadot', networks: ['mainnet'] }],
-    feePaymentCurrencySymbol: configManager.get('hydration.feePaymentCurrencySymbol'),
+    feePaymentCurrencySymbol: configManager.get(
+      'hydration.feePaymentCurrencySymbol',
+    ),
     gasPrice: 0.00000177,
     gasLimit: 338667,
     gasCost: 0.6, // in HDX
@@ -64,4 +66,3 @@ export namespace HydrationConfig {
   export const chain = 'polkadot';
   export const networks = ['mainnet'];
 }
-

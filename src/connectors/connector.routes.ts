@@ -3,15 +3,15 @@ import { FastifyPluginAsync } from 'fastify';
 
 import { logger } from '../services/logger';
 
+import { HydrationConfig } from './hydration/hydration.config';
 import { JupiterConfig } from './jupiter/jupiter.config';
 import { MeteoraConfig } from './meteora/meteora.config';
 import { RaydiumConfig } from './raydium/raydium.config';
-import { HydrationConfig } from './hydration/hydration.config';
 import {
   UniswapConfig,
   uniswapNetworks,
   uniswapAmmNetworks,
-  uniswapClmmNetworks
+  uniswapClmmNetworks,
 } from './uniswap/uniswap.config';
 
 // Define the schema using Typebox

@@ -131,7 +131,9 @@ export const RemoveLiquidityResponse = Type.Object(
   },
   { $id: 'RemoveLiquidityResponse' },
 );
-export type RemoveLiquidityResponseType = Static<typeof RemoveLiquidityResponse>;
+export type RemoveLiquidityResponseType = Static<
+  typeof RemoveLiquidityResponse
+>;
 
 export const PositionInfoSchema = Type.Object(
   {

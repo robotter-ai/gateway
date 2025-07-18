@@ -1,21 +1,22 @@
-import {FastifyInstance, FastifyPluginAsync} from 'fastify';
-import {Polkadot} from '../polkadot';
+import { FastifyInstance, FastifyPluginAsync } from 'fastify';
+
+import { Polkadot } from '../polkadot';
 import {
   PolkadotEstimateGasRequest,
   PolkadotEstimateGasResponse,
   PolkadotEstimateGasRequestSchema,
-  PolkadotEstimateGasResponseSchema
+  PolkadotEstimateGasResponseSchema,
 } from '../polkadot.types';
 
 /**
  * Estimates gas (fees) for a Polkadot transaction
- * 
+ *
  * For Polkadot networks, this provides fee estimation information including:
  * - Gas price (usually 0 as Polkadot uses weight-based fees)
  * - Gas price token (native currency symbol)
  * - Gas limit (if specified)
  * - Gas cost estimate
- * 
+ *
  * @param fastify Fastify instance
  * @param network Network identifier (e.g., 'mainnet', 'westend')
  * @param gasLimit Optional gas limit for the transaction
@@ -24,12 +25,12 @@ import {
 export async function estimateGasPolkadot(
   _fastify: FastifyInstance,
   network: string,
-  gasLimit?: number
+  gasLimit?: number,
 ): Promise<PolkadotEstimateGasResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
-  
+
   const polkadot = await Polkadot.getInstance(network);
   return await polkadot.estimateTransactionGas(gasLimit);
 }
@@ -51,26 +52,26 @@ export const estimateGasRoute: FastifyPluginAsync = async (fastify) => {
           ...PolkadotEstimateGasRequestSchema,
           properties: {
             ...PolkadotEstimateGasRequestSchema.properties,
-            chain: { type: 'string', enum: ['polkadot'], examples: ['polkadot'] },
+            chain: {
+              type: 'string',
+              enum: ['polkadot'],
+              examples: ['polkadot'],
+            },
             network: { type: 'string', examples: ['mainnet', 'westend'] },
-            gasLimit: { type: 'number', examples: [100000] }
-          }
+            gasLimit: { type: 'number', examples: [100000] },
+          },
         },
         response: {
-          200: PolkadotEstimateGasResponseSchema
-        }
-      }
+          200: PolkadotEstimateGasResponseSchema,
+        },
+      },
     },
     async (request) => {
       const { network, gasLimit } = request.body;
-      
-      return await estimateGasPolkadot(
-        fastify,
-        network,
-        gasLimit
-      );
-    }
+
+      return await estimateGasPolkadot(fastify, network, gasLimit);
+    },
   );
 };
 
-export default estimateGasRoute; 
+export default estimateGasRoute;

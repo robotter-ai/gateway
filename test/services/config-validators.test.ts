@@ -11,7 +11,7 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'req.uniswap.versions.v2.allowedSlippage',
         configValue: '1/100',
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -20,7 +20,7 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'avalanche.allowedSlippage',
         configValue: 0.1,
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -29,7 +29,7 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'req.avalanche.allowedSlippage',
         configValue: '3/10',
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -38,7 +38,7 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'req.avalanche.allowedSlippage',
         configValue: '0.005',
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -47,7 +47,7 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'req.avalanche.allowedSlippage',
         configValue: '0.005',
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -56,7 +56,7 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'avalanche.allowedSlippage',
         configValue: 0.005,
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -65,7 +65,7 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'avalanche.allowedSlippage',
         configValue: 1.005,
-      })
+      }),
     ).toEqual([invalidAllowedSlippage]);
   });
 
@@ -74,7 +74,7 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'avalanche.allowedSlippage',
         configValue: '3/2',
-      })
+      }),
     ).toEqual([invalidAllowedSlippage]);
   });
 
@@ -83,7 +83,7 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'avalanche.allowedSlippage',
         configValue: -1.005,
-      })
+      }),
     ).toEqual([invalidAllowedSlippage]);
   });
 
@@ -92,13 +92,13 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'avalanche.allowedSlippage',
         configValue: '-1/5',
-      })
+      }),
     ).toEqual([invalidAllowedSlippage]);
   });
 
   it('valid when configPath is not allowedSlippage does not exist', () => {
     expect(
-      validateAllowedSlippage({ configPath: 'hello', configValue: 'world' })
+      validateAllowedSlippage({ configPath: 'hello', configValue: 'world' }),
     ).toEqual([]);
   });
 
@@ -107,7 +107,7 @@ describe('validateAllowedSlippage', () => {
       validateAllowedSlippage({
         configPath: 'avalanche.allowedSlippage',
         configValue: 'hello',
-      })
+      }),
     ).toEqual([invalidAllowedSlippage]);
   });
 });

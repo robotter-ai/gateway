@@ -1,7 +1,6 @@
 import { Ethereum } from '../chains/ethereum/ethereum';
+import { Polkadot } from '../chains/polkadot/polkadot';
 import { Solana } from '../chains/solana/solana';
-import { Polkadot } from "../chains/polkadot/polkadot";
-
 
 export interface Chain {
   // TODO: Add shared chain properties (e.g., network, chainId, etc.)

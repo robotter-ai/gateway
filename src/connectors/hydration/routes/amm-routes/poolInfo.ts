@@ -1,16 +1,17 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import { Hydration } from '../../hydration';
+
 import { logger } from '../../../../services/logger';
+import { Hydration } from '../../hydration';
 import {
   HydrationPoolInfo,
   HydrationPoolInfoSchema,
   HydrationGetPoolInfoRequest,
-  HydrationGetPoolInfoRequestSchema
+  HydrationGetPoolInfoRequestSchema,
 } from '../../hydration.types';
 
 /**
  * Retrieves detailed information about a specific Hydration pool.
- * 
+ *
  * @param fastify - Fastify instance
  * @param network - The blockchain network (e.g., 'mainnet')
  * @param poolAddress - Address of the pool to retrieve information for
@@ -19,13 +20,13 @@ import {
 export async function getHydrationPoolInfo(
   fastify: FastifyInstance,
   network: string,
-  poolAddress: string
+  poolAddress: string,
 ): Promise<HydrationPoolInfo> {
   // Validate required parameters
   if (!network) {
     throw fastify.httpErrors.badRequest('Network parameter is required');
   }
-  
+
   if (!poolAddress) {
     throw fastify.httpErrors.badRequest('Pool address parameter is required');
   }
@@ -33,7 +34,9 @@ export async function getHydrationPoolInfo(
   // Get Hydration instance
   const hydration = await Hydration.getInstance(network);
   if (!hydration) {
-    throw fastify.httpErrors.serviceUnavailable('Hydration service unavailable');
+    throw fastify.httpErrors.serviceUnavailable(
+      'Hydration service unavailable',
+    );
   }
 
   // Log request parameters
@@ -53,11 +56,11 @@ export async function getHydrationPoolInfo(
   } catch (error) {
     // Log error details
     logger.error(`Error getting pool info: ${error.message}`);
-    
+
     if (error.message?.includes('not found')) {
       throw fastify.httpErrors.notFound(error.message);
     }
-    
+
     throw fastify.httpErrors.internalServerError('Failed to get pool info');
   }
 }
@@ -81,9 +84,9 @@ export const poolInfoRoute: FastifyPluginAsync = async (fastify) => {
           200: HydrationPoolInfoSchema,
           400: { type: 'object', properties: { error: { type: 'string' } } },
           404: { type: 'object', properties: { error: { type: 'string' } } },
-          500: { type: 'object', properties: { error: { type: 'string' } } }
-        }
-      }
+          500: { type: 'object', properties: { error: { type: 'string' } } },
+        },
+      },
     },
     async (request, _reply) => {
       try {
@@ -93,7 +96,7 @@ export const poolInfoRoute: FastifyPluginAsync = async (fastify) => {
         const result = await getHydrationPoolInfo(
           fastify,
           network,
-          poolAddress
+          poolAddress,
         );
 
         return result;
@@ -101,9 +104,8 @@ export const poolInfoRoute: FastifyPluginAsync = async (fastify) => {
         // Error handling is done in getHydrationPoolInfo
         throw error;
       }
-    }
+    },
   );
 };
 
 export default poolInfoRoute;
-

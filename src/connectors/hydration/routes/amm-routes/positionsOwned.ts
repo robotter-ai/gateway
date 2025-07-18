@@ -1,7 +1,8 @@
-import { FastifyPluginAsync } from 'fastify';
-import { Hydration } from '../../hydration';
-import { logger } from '../../../../services/logger';
 import { Type } from '@sinclair/typebox';
+import { FastifyPluginAsync } from 'fastify';
+
+import { logger } from '../../../../services/logger';
+import { Hydration } from '../../hydration';
 
 // Define request schema
 const PositionsOwnedRequest = Type.Object({

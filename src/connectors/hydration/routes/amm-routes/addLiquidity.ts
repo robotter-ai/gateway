@@ -1,17 +1,18 @@
-import {FastifyInstance, FastifyPluginAsync} from 'fastify';
-import {Hydration} from '../../hydration';
-import {logger} from '../../../../services/logger';
-import {validatePolkadotAddress} from '../../../../chains/polkadot/polkadot.validators';
+import { FastifyInstance, FastifyPluginAsync } from 'fastify';
+
+import { validatePolkadotAddress } from '../../../../chains/polkadot/polkadot.validators';
+import { logger } from '../../../../services/logger';
+import { Hydration } from '../../hydration';
 import {
   HydrationAddLiquidityRequest,
   HydrationAddLiquidityRequestSchema,
   HydrationAddLiquidityResponse,
-  HydrationAddLiquidityResponseSchema
+  HydrationAddLiquidityResponseSchema,
 } from '../../hydration.types';
 
 /**
  * Adds liquidity to a Hydration position.
- * 
+ *
  * @param fastify - Fastify instance
  * @param network - The blockchain network (e.g., 'mainnet')
  * @param walletAddress - The user's wallet address
@@ -32,33 +33,37 @@ export async function addLiquidityToHydration(
   quoteTokenAmount: number,
   slippagePct?: number,
   baseToken?: string,
-  quoteToken?: string
+  quoteToken?: string,
 ): Promise<HydrationAddLiquidityResponse> {
   // Validate required parameters
   if (!network) {
     throw fastify.httpErrors.badRequest('Network parameter is required');
   }
-  
+
   if (!poolId) {
     throw fastify.httpErrors.badRequest('Pool ID parameter is required');
   }
-  
+
   // Validate wallet address
   try {
     validatePolkadotAddress(walletAddress);
   } catch (error) {
     throw fastify.httpErrors.badRequest('Invalid Polkadot address');
   }
-  
+
   // Get Hydration instance
   const hydration = await Hydration.getInstance(network);
   if (!hydration) {
-    throw fastify.httpErrors.serviceUnavailable('Hydration service unavailable');
+    throw fastify.httpErrors.serviceUnavailable(
+      'Hydration service unavailable',
+    );
   }
 
   // Log request parameters
   logger.info(`Adding liquidity to pool ${poolId} on ${network}`);
-  logger.info(`Base amount: ${baseTokenAmount}, Quote amount: ${quoteTokenAmount}`);
+  logger.info(
+    `Base amount: ${baseTokenAmount}, Quote amount: ${quoteTokenAmount}`,
+  );
 
   try {
     const result = await hydration.addLiquidity(
@@ -68,7 +73,7 @@ export async function addLiquidityToHydration(
       quoteTokenAmount,
       slippagePct,
       baseToken,
-      quoteToken
+      quoteToken,
     );
 
     // Log successful execution
@@ -79,17 +84,22 @@ export async function addLiquidityToHydration(
   } catch (error) {
     // Log error details
     logger.error(`Error adding liquidity: ${error.message}`);
-    
-    if (error.message?.includes('not found') || error.message?.includes('Pool not found')) {
+
+    if (
+      error.message?.includes('not found') ||
+      error.message?.includes('Pool not found')
+    ) {
       throw fastify.httpErrors.notFound(error.message);
     }
-    
-    if (error.message?.includes('Insufficient') || 
-        error.message?.includes('Invalid') ||
-        error.message?.includes('You must provide')) {
+
+    if (
+      error.message?.includes('Insufficient') ||
+      error.message?.includes('Invalid') ||
+      error.message?.includes('You must provide')
+    ) {
       throw fastify.httpErrors.badRequest(error.message);
     }
-    
+
     throw fastify.httpErrors.internalServerError('Failed to add liquidity');
   }
 }
@@ -113,9 +123,9 @@ export const addLiquidityRoute: FastifyPluginAsync = async (fastify) => {
           200: HydrationAddLiquidityResponseSchema,
           400: { type: 'object', properties: { error: { type: 'string' } } },
           404: { type: 'object', properties: { error: { type: 'string' } } },
-          500: { type: 'object', properties: { error: { type: 'string' } } }
-        }
-      }
+          500: { type: 'object', properties: { error: { type: 'string' } } },
+        },
+      },
     },
     async (request, _reply) => {
       try {
@@ -126,7 +136,7 @@ export const addLiquidityRoute: FastifyPluginAsync = async (fastify) => {
           quoteTokenAmount,
           slippagePct,
           baseToken,
-          quoteToken
+          quoteToken,
         } = request.body;
         const network = request.body.network || 'mainnet';
 
@@ -139,7 +149,7 @@ export const addLiquidityRoute: FastifyPluginAsync = async (fastify) => {
           quoteTokenAmount,
           slippagePct,
           baseToken,
-          quoteToken
+          quoteToken,
         );
 
         return result;
@@ -147,7 +157,7 @@ export const addLiquidityRoute: FastifyPluginAsync = async (fastify) => {
         // Error handling is done in addLiquidityToHydration
         throw error;
       }
-    }
+    },
   );
 };
 

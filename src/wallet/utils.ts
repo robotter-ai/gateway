@@ -1,6 +1,17 @@
+import { FastifyInstance } from 'fastify';
 import fse from 'fs-extra';
+
+import { Ethereum } from '../chains/ethereum/ethereum';
+import { Polkadot } from '../chains/polkadot/polkadot';
+import { Solana } from '../chains/solana/solana';
 import { ConfigManagerCertPassphrase } from '../services/config-manager-cert-passphrase';
+import {
+  getInitializedChain,
+  UnsupportedChainException,
+  Chain,
+} from '../services/connection-manager';
 import { logger } from '../services/logger';
+
 import {
   AddWalletRequest,
   AddWalletResponse,
@@ -9,15 +20,6 @@ import {
   SignMessageResponse,
   GetWalletResponse,
 } from './schemas';
-import {
-  getInitializedChain,
-  UnsupportedChainException,
-  Chain,
-} from '../services/connection-manager';
-import { Solana } from '../chains/solana/solana';
-import { Ethereum } from '../chains/ethereum/ethereum';
-import { Polkadot } from '../chains/polkadot/polkadot';
-import { FastifyInstance } from 'fastify';
 
 export const walletPath = './conf/wallets';
 
@@ -61,13 +63,13 @@ export async function mkdirIfDoesNotExist(path: string): Promise<void> {
 
 export async function addWallet(
   fastify: FastifyInstance,
-  req: AddWalletRequest
+  req: AddWalletRequest,
 ): Promise<AddWalletResponse> {
   const passphrase = ConfigManagerCertPassphrase.readPassphrase();
   if (!passphrase) {
     throw fastify.httpErrors.internalServerError('No passphrase configured');
   }
-  
+
   // Validate chain name
   if (!validateChainName(req.chain)) {
     throw fastify.httpErrors.badRequest(
@@ -100,7 +102,7 @@ export async function addWallet(
       address = Ethereum.validateAddress(address);
       encryptedPrivateKey = await connection.encrypt(
         req.privateKey,
-        passphrase
+        passphrase,
       );
     } else if (connection instanceof Solana) {
       address = connection
@@ -110,7 +112,7 @@ export async function addWallet(
       address = Solana.validateAddress(address);
       encryptedPrivateKey = await connection.encrypt(
         req.privateKey,
-        passphrase
+        passphrase,
       );
     } else if (connection instanceof Polkadot) {
       address = connection
@@ -118,7 +120,7 @@ export async function addWallet(
         .address.toString();
       encryptedPrivateKey = await connection.encrypt(
         req.privateKey,
-        passphrase
+        passphrase,
       );
     }
 
@@ -127,7 +129,7 @@ export async function addWallet(
     }
   } catch (_e: unknown) {
     throw fastify.httpErrors.badRequest(
-      `Unable to retrieve wallet address for provided private key: ${req.privateKey.substring(0, 5)}...`
+      `Unable to retrieve wallet address for provided private key: ${req.privateKey.substring(0, 5)}...`,
     );
   }
 
@@ -146,7 +148,7 @@ export async function addWallet(
 
 export async function removeWallet(
   fastify: FastifyInstance,
-  req: RemoveWalletRequest
+  req: RemoveWalletRequest,
 ): Promise<void> {
   logger.info(`Removing wallet: ${req.address} from chain: ${req.chain}`);
 
@@ -192,7 +194,7 @@ export async function removeWallet(
 
 export async function signMessage(
   fastify: FastifyInstance,
-  req: SignMessageRequest
+  req: SignMessageRequest,
 ): Promise<SignMessageResponse> {
   logger.info(
     `Signing message for wallet: ${req.address} on chain: ${req.chain}`,
@@ -272,7 +274,7 @@ async function getJsonFiles(source: string): Promise<string[]> {
 }
 
 export async function getWallets(
-  fastify: FastifyInstance
+  fastify: FastifyInstance,
 ): Promise<GetWalletResponse[]> {
   logger.info('Getting all wallets');
   try {

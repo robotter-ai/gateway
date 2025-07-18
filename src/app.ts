@@ -10,24 +10,25 @@ import { Type } from '@sinclair/typebox';
 import Fastify, { FastifyInstance } from 'fastify';
 
 // Internal services
-import { logger } from './services/logger';
-import { getHttpsOptions } from './https';
-import { ConfigManagerV2 } from './services/config-manager-v2';
-import { asciiLogo } from './index';
 
 // Routes
 import { chainRoutes } from './chains/chain.routes';
 import { ethereumRoutes } from './chains/ethereum/ethereum.routes';
-import { solanaRoutes } from './chains/solana/solana.routes';
 import { polkadotRoutes } from './chains/polkadot/polkadot.routes';
+import { solanaRoutes } from './chains/solana/solana.routes';
 import { configRoutes } from './config/config.routes';
 import { connectorsRoutes } from './connectors/connector.routes';
+import { hydrationRoutes } from './connectors/hydration/hydration.routes';
 import { jupiterRoutes } from './connectors/jupiter/jupiter.routes';
 import { meteoraRoutes } from './connectors/meteora/meteora.routes';
 import { raydiumRoutes } from './connectors/raydium/raydium.routes';
 import { uniswapRoutes } from './connectors/uniswap/uniswap.routes';
-import { hydrationRoutes } from './connectors/hydration/hydration.routes';
+import { getHttpsOptions } from './https';
+import { ConfigManagerV2 } from './services/config-manager-v2';
+import { logger } from './services/logger';
 import { walletRoutes } from './wallet/wallet.routes';
+
+import { asciiLogo } from './index';
 
 // Change version for each release
 const GATEWAY_VERSION = 'dev-2.6.0';

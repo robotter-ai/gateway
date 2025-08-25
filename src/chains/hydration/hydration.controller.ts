@@ -1,6 +1,6 @@
 import {
-  validatePolkadotPollRequest,
-  // validatePolkadotAssetsRequest,
+  validateHydrationPollRequest,
+  // validateHydrationAssetsRequest,
 } from './hydration.validators';
 import {
   AssetsRequest,
@@ -9,20 +9,20 @@ import {
   PollRequest,
   PollResponse,
 } from './hydration.requests';
-import { Hydration } from './hydration';
+import { Hydration as HydrationChain } from './hydration';
 import { Asset } from '@galacticcouncil/sdk';
 
 export class hydrationController {
   static async poll(
-    polkadot: Hydration,
+    hydration: HydrationChain,
     req: PollRequest,
   ): Promise<PollResponse> {
-    validatePolkadotPollRequest(req);
-    return polkadot.getTransaction(req.txHash);
+    validateHydrationPollRequest(req);
+    return hydration.getTransaction(req.txHash);
   }
 
-  static async balances(chain: Hydration, request: BalanceRequest) {
-    // validatePolkadotBalanceRequest(request);
+  static async balances(chain: HydrationChain, request: BalanceRequest) {
+    // validateHydrationBalanceRequest(request);
 
     const balances: Record<string, string> = {};
 
@@ -47,15 +47,15 @@ export class hydrationController {
   }
 
   static async getTokens(
-    polkadot: Hydration,
+    hydration: HydrationChain,
     request: AssetsRequest,
   ): Promise<AssetsResponse> {
-    // validateAssetsRequest(request);
+    // validateHydration AssetsRequest(request);
 
     let assets: Asset[] = [];
 
     if (!request.assetSymbols) {
-      assets = polkadot.storedAssetList;
+      assets = hydration.storedAssetList;
     } else {
       let assetSymbols;
       if (typeof request.assetSymbols === 'string') {
@@ -64,7 +64,7 @@ export class hydrationController {
         assetSymbols = request.assetSymbols;
       }
       for (const a of assetSymbols as []) {
-        const asset = polkadot.getAssetForSymbol(a);
+        const asset = hydration.getAssetForSymbol(a);
         if (!asset) {
           throw new Error(`Unsupported symbol: ${a}`);
         }

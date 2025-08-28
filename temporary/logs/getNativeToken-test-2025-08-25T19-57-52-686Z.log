@@ -1,0 +1,186 @@
+[2025-08-25T19:57:52.688Z] [INFO] 🚀 Starting getNativeToken method tests...
+[2025-08-25T19:57:52.690Z] [INFO] 📋 Test 1: Get native token for Polkadot mainnet
+[2025-08-25T19:57:52.692Z] [SUCCESS] Test 1 completed | Data: {
+  "network": "Polkadot Mainnet",
+  "nativeSymbol": "DOT",
+  "nativeTokenFound": true,
+  "nativeTokenSymbol": "DOT",
+  "nativeTokenName": "Polkadot",
+  "nativeTokenDecimals": 10,
+  "nativeTokenAddress": "0",
+  "duration": "1ms"
+}
+[2025-08-25T19:57:52.694Z] [TEST_RESULT] getNativeToken_POLKADOT_MAINNET | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "network": "Polkadot Mainnet",
+    "nativeTokenFound": true,
+    "nativeTokenSymbol": "DOT",
+    "duration": 1
+  }
+}
+[2025-08-25T19:57:52.694Z] [PERFORMANCE] getNativeToken_POLKADOT_MAINNET: 1ms | Data: {
+  "nativeTokenFound": true
+}
+[2025-08-25T19:57:52.695Z] [INFO] 📋 Test 2: Get native token for Kusama
+[2025-08-25T19:57:52.696Z] [SUCCESS] Test 2 completed | Data: {
+  "network": "Kusama",
+  "nativeSymbol": "KSM",
+  "nativeTokenFound": true,
+  "nativeTokenSymbol": "KSM",
+  "nativeTokenName": "Kusama",
+  "nativeTokenDecimals": 12,
+  "nativeTokenAddress": "3",
+  "duration": "0ms"
+}
+[2025-08-25T19:57:52.698Z] [TEST_RESULT] getNativeToken_KUSAMA | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "network": "Kusama",
+    "nativeTokenFound": true,
+    "nativeTokenSymbol": "KSM",
+    "duration": 0
+  }
+}
+[2025-08-25T19:57:52.698Z] [INFO] 📋 Test 3: Get native token for Westend
+[2025-08-25T19:57:52.699Z] [SUCCESS] Test 3 completed | Data: {
+  "network": "Westend",
+  "nativeSymbol": "WND",
+  "nativeTokenFound": true,
+  "nativeTokenSymbol": "WND",
+  "nativeTokenName": "Westend",
+  "nativeTokenDecimals": 12,
+  "nativeTokenAddress": "4",
+  "duration": "0ms"
+}
+[2025-08-25T19:57:52.700Z] [TEST_RESULT] getNativeToken_WESTEND | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "network": "Westend",
+    "nativeTokenFound": true,
+    "nativeTokenSymbol": "WND",
+    "duration": 0
+  }
+}
+[2025-08-25T19:57:52.700Z] [INFO] 📋 Test 4: Get native token for Rococo
+[2025-08-25T19:57:52.700Z] [SUCCESS] Test 4 completed | Data: {
+  "network": "Rococo",
+  "nativeSymbol": "ROC",
+  "nativeTokenFound": true,
+  "nativeTokenSymbol": "ROC",
+  "nativeTokenName": "Rococo",
+  "nativeTokenDecimals": 12,
+  "nativeTokenAddress": "5",
+  "duration": "0ms"
+}
+[2025-08-25T19:57:52.701Z] [TEST_RESULT] getNativeToken_ROCOCO | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "network": "Rococo",
+    "nativeTokenFound": true,
+    "nativeTokenSymbol": "ROC",
+    "duration": 0
+  }
+}
+[2025-08-25T19:57:52.701Z] [INFO] 📋 Test 5: Test error handling for non-existent native token
+[2025-08-25T19:57:52.702Z] [SUCCESS] Test 5 completed - Error properly caught | Data: {
+  "network": "Invalid Network",
+  "nativeSymbol": "INVALID",
+  "errorMessage": "Native token not found for network: Invalid Network",
+  "duration": "0ms"
+}
+[2025-08-25T19:57:52.703Z] [TEST_RESULT] getNativeToken_ERROR_HANDLING | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "errorCaught": true,
+    "errorMessage": "Native token not found for network: Invalid Network",
+    "duration": 0
+  }
+}
+[2025-08-25T19:57:52.703Z] [INFO] 📋 Test 6: Test dynamic network configuration changes
+[2025-08-25T19:57:52.704Z] [SUCCESS] Test 6 completed | Data: {
+  "initialNetwork": "Polkadot Mainnet",
+  "initialNativeSymbol": "DOT",
+  "initialNativeToken": "DOT",
+  "newNetwork": "Kusama",
+  "newNativeSymbol": "KSM",
+  "newNativeToken": "KSM",
+  "duration": "1ms"
+}
+[2025-08-25T19:57:52.704Z] [TEST_RESULT] getNativeToken_DYNAMIC_CONFIG | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "initialNativeToken": "DOT",
+    "newNativeToken": "KSM",
+    "duration": 1
+  }
+}
+[2025-08-25T19:57:52.704Z] [INFO] 📋 Test 7: Performance test with multiple native token retrievals
+[2025-08-25T19:57:52.706Z] [SUCCESS] Test 7 completed | Data: {
+  "totalRetrievals": 100,
+  "successfulRetrievals": 100,
+  "successRate": "100.00%",
+  "duration": "2ms",
+  "averageDuration": "0.02ms"
+}
+[2025-08-25T19:57:52.707Z] [TEST_RESULT] getNativeToken_PERFORMANCE | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "totalRetrievals": 100,
+    "successRate": 1,
+    "duration": 2,
+    "averageDuration": 0.02
+  }
+}
+[2025-08-25T19:57:52.707Z] [PERFORMANCE] getNativeToken_MULTIPLE_RETRIEVALS: 2ms | Data: {
+  "totalRetrievals": 100,
+  "successRate": 1
+}
+[2025-08-25T19:57:52.707Z] [INFO] 📋 Test 9: Comprehensive native token validation
+[2025-08-25T19:57:52.707Z] [SUCCESS] Test 9 completed | Data: {
+  "totalNetworks": 4,
+  "validationSuccessRate": "100.00%",
+  "duration": "0ms"
+}
+[2025-08-25T19:57:52.708Z] [TEST_RESULT] getNativeToken_VALIDATION | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "totalNetworks": 4,
+    "validationSuccessRate": 1,
+    "duration": 0
+  }
+}
+[2025-08-25T19:57:52.708Z] [INFO] 📊 Native token validation results:
+[2025-08-25T19:57:52.708Z] [INFO]   Polkadot Mainnet: ✅ Expected: DOT, Found: DOT
+[2025-08-25T19:57:52.708Z] [INFO]   Kusama: ✅ Expected: KSM, Found: KSM
+[2025-08-25T19:57:52.708Z] [INFO]   Westend: ✅ Expected: WND, Found: WND
+[2025-08-25T19:57:52.709Z] [INFO]   Rococo: ✅ Expected: ROC, Found: ROC
+[2025-08-25T19:57:52.709Z] [INFO] 📋 Test 10: Test edge cases and error scenarios
+[2025-08-25T19:57:52.709Z] [SUCCESS] Test 10.1: Error properly caught for empty token list | Data: {
+  "errorMessage": "Native token not found for network: Empty Network"
+}
+[2025-08-25T19:57:52.709Z] [SUCCESS] Test 10.2: Error properly caught for very long symbol | Data: {
+  "errorMessage": "Native token not found for network: Long Symbol Network"
+}
+[2025-08-25T19:57:52.710Z] [SUCCESS] Test 10.3: Error properly caught for special characters | Data: {
+  "errorMessage": "Native token not found for network: Special Symbol Network"
+}
+[2025-08-25T19:57:52.710Z] [SUCCESS] Test 10 completed | Data: {
+  "edgeCasesTested": 3,
+  "duration": "1ms"
+}
+[2025-08-25T19:57:52.710Z] [TEST_RESULT] getNativeToken_EDGE_CASES | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "edgeCasesTested": 3,
+    "duration": 1
+  }
+}
+[2025-08-25T19:57:52.711Z] [INFO] 📊 Test Summary | Data: {
+  "totalDuration": "25ms",
+  "logFile": "/home/guilherme/code/hummingbot-gateway/temporary/logs/getNativeToken-test-2025-08-25T19-57-52-686Z.log",
+  "totalTests": 10,
+  "testMode": "MOCK_DATA"
+}
+[2025-08-25T19:57:52.711Z] [SUCCESS] 🎉 All getNativeToken tests completed successfully!
+[2025-08-25T19:57:52.711Z] [INFO] 📁 Logs saved to: /home/guilherme/code/hummingbot-gateway/temporary/logs/getNativeToken-test-2025-08-25T19-57-52-686Z.log

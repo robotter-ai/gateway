@@ -1,0 +1,79 @@
+[2025-08-25T20:51:00.249Z] [INFO] 🚀 Starting getWallet method test...
+[2025-08-25T20:51:00.251Z] [INFO] 📋 Test 1: Get wallet for new address
+[2025-08-25T20:51:00.252Z] [INFO] 🔍 Searching for wallet with address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:51:00.252Z] [INFO] 🆕 Creating new wallet for address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:51:00.254Z] [INFO] ✅ New wallet created and configured for address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:51:00.257Z] [SUCCESS] getWallet for new address completed | Data: {
+  "requestedAddress": "5testaddress123456789012345678901234567890123456789",
+  "returnedAddress": "5testaddress123456789012345678901234567890123456789",
+  "publicKeyLength": 32,
+  "hasMnemonic": true,
+  "mnemonicLength": 4
+}
+[2025-08-25T20:51:00.260Z] [INFO] 📋 Test 2: Get wallet for another new address
+[2025-08-25T20:51:00.260Z] [INFO] 🔍 Searching for wallet with address: 5anothertestaddress123456789012345678901234567890
+[2025-08-25T20:51:00.260Z] [INFO] 🆕 Creating new wallet for address: 5anothertestaddress123456789012345678901234567890
+[2025-08-25T20:51:00.261Z] [INFO] ✅ New wallet created and configured for address: 5anothertestaddress123456789012345678901234567890
+[2025-08-25T20:51:00.261Z] [SUCCESS] getWallet for another new address completed | Data: {
+  "requestedAddress": "5anothertestaddress123456789012345678901234567890",
+  "returnedAddress": "5anothertestaddress123456789012345678901234567890",
+  "publicKeyLength": 32,
+  "hasMnemonic": true,
+  "mnemonicLength": 4
+}
+[2025-08-25T20:51:00.262Z] [INFO] 📋 Test 3: Get wallet for same address again (should return existing)
+[2025-08-25T20:51:00.262Z] [INFO] 🔍 Searching for wallet with address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:51:00.262Z] [INFO] ✅ Found existing wallet for address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:51:00.263Z] [SUCCESS] getWallet for same address again completed | Data: {
+  "requestedAddress": "5testaddress123456789012345678901234567890123456789",
+  "returnedAddress": "5testaddress123456789012345678901234567890123456789",
+  "publicKeyLength": 32,
+  "hasMnemonic": true,
+  "mnemonicLength": 4
+}
+[2025-08-25T20:51:00.263Z] [INFO] 📋 Test 4: Get wallet for third address
+[2025-08-25T20:51:00.263Z] [INFO] 🔍 Searching for wallet with address: 5thirdtestaddress123456789012345678901234567890
+[2025-08-25T20:51:00.263Z] [INFO] 🆕 Creating new wallet for address: 5thirdtestaddress123456789012345678901234567890
+[2025-08-25T20:51:00.264Z] [INFO] ✅ New wallet created and configured for address: 5thirdtestaddress123456789012345678901234567890
+[2025-08-25T20:51:00.264Z] [SUCCESS] getWallet for third address completed | Data: {
+  "requestedAddress": "5thirdtestaddress123456789012345678901234567890",
+  "returnedAddress": "5thirdtestaddress123456789012345678901234567890",
+  "publicKeyLength": 32,
+  "hasMnemonic": true,
+  "mnemonicLength": 4
+}
+[2025-08-25T20:51:00.264Z] [INFO] 📊 Keyring state after all getWallet tests:
+[2025-08-25T20:51:00.264Z] [SUCCESS] Keyring summary | Data: {
+  "totalPairs": 3,
+  "addresses": [
+    "5testaddress123456789012345678901234567890123456789",
+    "5anothertestaddress123456789012345678901234567890",
+    "5thirdtestaddress123456789012345678901234567890"
+  ],
+  "pairDetails": [
+    {
+      "address": "5testaddress123456789012345678901234567890123456789",
+      "publicKeyLength": 32,
+      "hasMnemonic": true,
+      "mnemonicLength": 4
+    },
+    {
+      "address": "5anothertestaddress123456789012345678901234567890",
+      "publicKeyLength": 32,
+      "hasMnemonic": true,
+      "mnemonicLength": 4
+    },
+    {
+      "address": "5thirdtestaddress123456789012345678901234567890",
+      "publicKeyLength": 32,
+      "hasMnemonic": true,
+      "mnemonicLength": 4
+    }
+  ]
+}
+[2025-08-25T20:51:00.265Z] [INFO] 📊 Test Summary | Data: {
+  "totalTests": 4,
+  "logFile": "/home/guilherme/code/hummingbot-gateway/temporary/logs/getWallet-only-test-2025-08-25T20-51-00-248Z.log"
+}
+[2025-08-25T20:51:00.266Z] [SUCCESS] 🎉 All getWallet tests completed successfully!
+[2025-08-25T20:51:00.266Z] [INFO] 📁 Logs saved to: /home/guilherme/code/hummingbot-gateway/temporary/logs/getWallet-only-test-2025-08-25T20-51-00-248Z.log

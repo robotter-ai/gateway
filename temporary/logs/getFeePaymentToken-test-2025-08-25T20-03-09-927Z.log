@@ -1,0 +1,188 @@
+[2025-08-25T20:03:09.929Z] [INFO] 🚀 Starting getFeePaymentToken method tests...
+[2025-08-25T20:03:09.933Z] [INFO] 📋 Test 1: Get fee payment token for Polkadot mainnet (DOT)
+[2025-08-25T20:03:09.934Z] [SUCCESS] Test 1 completed | Data: {
+  "network": "Polkadot Mainnet",
+  "feeSymbol": "DOT",
+  "feeTokenFound": true,
+  "feeTokenSymbol": "DOT",
+  "feeTokenName": "Polkadot",
+  "feeTokenDecimals": 10,
+  "feeTokenAddress": "0",
+  "duration": "1ms"
+}
+[2025-08-25T20:03:09.941Z] [TEST_RESULT] getFeePaymentToken_POLKADOT_MAINNET_DOT | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "network": "Polkadot Mainnet",
+    "feeTokenFound": true,
+    "feeTokenSymbol": "DOT",
+    "duration": 1
+  }
+}
+[2025-08-25T20:03:09.941Z] [PERFORMANCE] getFeePaymentToken_POLKADOT_MAINNET_DOT: 1ms | Data: {
+  "feeTokenFound": true
+}
+[2025-08-25T20:03:09.944Z] [INFO] 📋 Test 2: Get fee payment token for Polkadot mainnet (USDC)
+[2025-08-25T20:03:09.944Z] [SUCCESS] Test 2 completed | Data: {
+  "network": "Polkadot Mainnet (USDC)",
+  "feeSymbol": "USDC",
+  "feeTokenFound": true,
+  "feeTokenSymbol": "USDC",
+  "feeTokenName": "USD Coin",
+  "feeTokenDecimals": 6,
+  "feeTokenAddress": "6",
+  "duration": "0ms"
+}
+[2025-08-25T20:03:09.948Z] [TEST_RESULT] getFeePaymentToken_POLKADOT_MAINNET_USDC | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "network": "Polkadot Mainnet (USDC)",
+    "feeTokenFound": true,
+    "feeTokenSymbol": "USDC",
+    "duration": 0
+  }
+}
+[2025-08-25T20:03:09.948Z] [INFO] 📋 Test 3: Get fee payment token for Kusama
+[2025-08-25T20:03:09.949Z] [SUCCESS] Test 3 completed | Data: {
+  "network": "Kusama",
+  "feeSymbol": "KSM",
+  "feeTokenFound": true,
+  "feeTokenSymbol": "KSM",
+  "feeTokenName": "Kusama",
+  "feeTokenDecimals": 12,
+  "feeTokenAddress": "3",
+  "duration": "0ms"
+}
+[2025-08-25T20:03:09.950Z] [TEST_RESULT] getFeePaymentToken_KUSAMA | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "network": "Kusama",
+    "feeTokenFound": true,
+    "feeTokenSymbol": "KSM",
+    "duration": 0
+  }
+}
+[2025-08-25T20:03:09.950Z] [INFO] 📋 Test 4: Get fee payment token for Westend
+[2025-08-25T20:03:09.951Z] [SUCCESS] Test 4 completed | Data: {
+  "network": "Westend",
+  "feeSymbol": "WND",
+  "feeTokenFound": true,
+  "feeTokenSymbol": "WND",
+  "feeTokenName": "Westend",
+  "feeTokenDecimals": 12,
+  "feeTokenAddress": "4",
+  "duration": "0ms"
+}
+[2025-08-25T20:03:09.951Z] [TEST_RESULT] getFeePaymentToken_WESTEND | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "network": "Westend",
+    "feeTokenFound": true,
+    "feeTokenSymbol": "WND",
+    "duration": 0
+  }
+}
+[2025-08-25T20:03:09.952Z] [INFO] 📋 Test 5: Test error handling for non-existent fee payment token
+[2025-08-25T20:03:09.952Z] [SUCCESS] Test 5 completed - Error properly caught | Data: {
+  "network": "Invalid Network",
+  "feeSymbol": "INVALID",
+  "errorMessage": "Fee payment token not found for network: Invalid Network",
+  "duration": "0ms"
+}
+[2025-08-25T20:03:09.952Z] [TEST_RESULT] getFeePaymentToken_ERROR_HANDLING | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "errorCaught": true,
+    "errorMessage": "Fee payment token not found for network: Invalid Network",
+    "duration": 0
+  }
+}
+[2025-08-25T20:03:09.952Z] [INFO] 📋 Test 6: Test dynamic network configuration changes
+[2025-08-25T20:03:09.953Z] [SUCCESS] Test 6 completed | Data: {
+  "initialNetwork": "Polkadot Mainnet",
+  "initialFeeSymbol": "DOT",
+  "initialFeeToken": "DOT",
+  "newNetwork": "Polkadot Mainnet (USDC)",
+  "newFeeSymbol": "USDC",
+  "newFeeToken": "USDC",
+  "duration": "0ms"
+}
+[2025-08-25T20:03:09.953Z] [TEST_RESULT] getFeePaymentToken_DYNAMIC_CONFIG | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "initialFeeToken": "DOT",
+    "newFeeToken": "USDC",
+    "duration": 0
+  }
+}
+[2025-08-25T20:03:09.953Z] [INFO] 📋 Test 7: Performance test with multiple fee payment token retrievals
+[2025-08-25T20:03:09.954Z] [SUCCESS] Test 7 completed | Data: {
+  "totalRetrievals": 100,
+  "successfulRetrievals": 100,
+  "successRate": "100.00%",
+  "duration": "1ms",
+  "averageDuration": "0.01ms"
+}
+[2025-08-25T20:03:09.955Z] [TEST_RESULT] getFeePaymentToken_PERFORMANCE | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "totalRetrievals": 100,
+    "successRate": 1,
+    "duration": 1,
+    "averageDuration": 0.01
+  }
+}
+[2025-08-25T20:03:09.955Z] [PERFORMANCE] getFeePaymentToken_MULTIPLE_RETRIEVALS: 1ms | Data: {
+  "totalRetrievals": 100,
+  "successRate": 1
+}
+[2025-08-25T20:03:09.955Z] [INFO] 📋 Test 9: Comprehensive fee payment token validation
+[2025-08-25T20:03:09.956Z] [SUCCESS] Test 9 completed | Data: {
+  "totalNetworks": 6,
+  "validationSuccessRate": "100.00%",
+  "duration": "1ms"
+}
+[2025-08-25T20:03:09.956Z] [TEST_RESULT] getFeePaymentToken_VALIDATION | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "totalNetworks": 6,
+    "validationSuccessRate": 1,
+    "duration": 1
+  }
+}
+[2025-08-25T20:03:09.956Z] [INFO] 📊 Fee payment token validation results:
+[2025-08-25T20:03:09.956Z] [INFO]   Polkadot Mainnet: ✅ Expected: DOT, Found: DOT
+[2025-08-25T20:03:09.956Z] [INFO]   Kusama: ✅ Expected: KSM, Found: KSM
+[2025-08-25T20:03:09.957Z] [INFO]   Westend: ✅ Expected: WND, Found: WND
+[2025-08-25T20:03:09.957Z] [INFO]   Rococo: ✅ Expected: ROC, Found: ROC
+[2025-08-25T20:03:09.957Z] [INFO]   Polkadot USDC: ✅ Expected: USDC, Found: USDC
+[2025-08-25T20:03:09.957Z] [INFO]   Polkadot DAI: ✅ Expected: DAI, Found: DAI
+[2025-08-25T20:03:09.957Z] [INFO] 📋 Test 10: Test edge cases and error scenarios
+[2025-08-25T20:03:09.957Z] [SUCCESS] Test 10.1: Error properly caught for empty token list | Data: {
+  "errorMessage": "Fee payment token not found for network: Empty Network"
+}
+[2025-08-25T20:03:09.958Z] [SUCCESS] Test 10.2: Error properly caught for very long symbol | Data: {
+  "errorMessage": "Fee payment token not found for network: Long Symbol Network"
+}
+[2025-08-25T20:03:09.958Z] [SUCCESS] Test 10.3: Error properly caught for special characters | Data: {
+  "errorMessage": "Fee payment token not found for network: Special Symbol Network"
+}
+[2025-08-25T20:03:09.958Z] [SUCCESS] Test 10 completed | Data: {
+  "edgeCasesTested": 3,
+  "duration": "1ms"
+}
+[2025-08-25T20:03:09.959Z] [TEST_RESULT] getFeePaymentToken_EDGE_CASES | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "edgeCasesTested": 3,
+    "duration": 1
+  }
+}
+[2025-08-25T20:03:09.959Z] [INFO] 📊 Test Summary | Data: {
+  "totalDuration": "32ms",
+  "logFile": "/home/guilherme/code/hummingbot-gateway/temporary/logs/getFeePaymentToken-test-2025-08-25T20-03-09-927Z.log",
+  "totalTests": 10,
+  "testMode": "MOCK_DATA"
+}
+[2025-08-25T20:03:09.959Z] [SUCCESS] 🎉 All getFeePaymentToken tests completed successfully!
+[2025-08-25T20:03:09.959Z] [INFO] 📁 Logs saved to: /home/guilherme/code/hummingbot-gateway/temporary/logs/getFeePaymentToken-test-2025-08-25T20-03-09-927Z.log

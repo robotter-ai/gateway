@@ -1,0 +1,9 @@
+{
+  "connector": "hydration",
+  "chain": "polkadot",
+  "network": "mainnet",
+  "quote": "USDT",
+  "base": "HDX",
+  "amount": "1",
+  "side": "BUY"
+}

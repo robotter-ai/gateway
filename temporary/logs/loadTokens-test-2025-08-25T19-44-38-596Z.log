@@ -1,0 +1,233 @@
+[2025-08-25T19:44:38.597Z] [INFO] 🚀 Starting loadTokens method tests...
+[2025-08-25T19:44:38.598Z] [INFO] 📋 Test 1: Load tokens from FILE source
+[2025-08-25T19:44:38.599Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.599Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.600Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.601Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.601Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.601Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.602Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.602Z] [SUCCESS] Test 1 completed | Data: {
+  "tokenCount": 3,
+  "firstToken": {
+    "symbol": "HDX",
+    "name": "HydraDX",
+    "decimals": 12,
+    "address": "0",
+    "chainId": 0
+  },
+  "duration": "3ms",
+  "tokenMapSize": 6
+}
+[2025-08-25T19:44:38.603Z] [TEST_RESULT] loadTokens_FILE | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "tokenCount": 3,
+    "duration": 3
+  }
+}
+[2025-08-25T19:44:38.604Z] [PERFORMANCE] loadTokens_FILE: 3ms | Data: {
+  "tokenCount": 3
+}
+[2025-08-25T19:44:38.604Z] [INFO] 📋 Test 2: Load tokens from URL source
+[2025-08-25T19:44:38.604Z] [INFO] Loading tokens from https://api.example.com/valid-tokens (URL)
+[2025-08-25T19:44:38.604Z] [INFO] Mock axios GET request to: https://api.example.com/valid-tokens
+[2025-08-25T19:44:38.605Z] [INFO] Loaded 3 tokens from URL
+[2025-08-25T19:44:38.605Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.605Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.605Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.605Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.605Z] [SUCCESS] Test 2 completed | Data: {
+  "tokenCount": 3,
+  "firstToken": {
+    "symbol": "HDX",
+    "name": "HydraDX",
+    "decimals": 12,
+    "address": "0",
+    "chainId": 0
+  },
+  "duration": "1ms",
+  "tokenMapSize": 6
+}
+[2025-08-25T19:44:38.605Z] [TEST_RESULT] loadTokens_URL | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "tokenCount": 3,
+    "duration": 1
+  }
+}
+[2025-08-25T19:44:38.606Z] [PERFORMANCE] loadTokens_URL: 1ms | Data: {
+  "tokenCount": 3
+}
+[2025-08-25T19:44:38.606Z] [INFO] 📋 Test 3: Load empty token list
+[2025-08-25T19:44:38.606Z] [INFO] Loading tokens from empty-tokens.json (FILE)
+[2025-08-25T19:44:38.606Z] [INFO] Mock reading file: empty-tokens.json
+[2025-08-25T19:44:38.606Z] [INFO] Loaded 0 tokens from file
+[2025-08-25T19:44:38.606Z] [INFO] Loaded 0 tokens for network: test-network
+[2025-08-25T19:44:38.606Z] [SUCCESS] Test 3 completed | Data: {
+  "tokenCount": 0,
+  "duration": "0ms",
+  "tokenMapSize": 0
+}
+[2025-08-25T19:44:38.606Z] [TEST_RESULT] loadTokens_EMPTY | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "tokenCount": 0,
+    "duration": 0
+  }
+}
+[2025-08-25T19:44:38.606Z] [INFO] 📋 Test 4: Handle malformed token data
+[2025-08-25T19:44:38.607Z] [INFO] Loading tokens from malformed-tokens.json (FILE)
+[2025-08-25T19:44:38.607Z] [INFO] Mock reading file: malformed-tokens.json
+[2025-08-25T19:44:38.607Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.607Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.607Z] [WARNING] Failed to process token: {"symbol":"DOT","name":"Polkadot","decimals":10} | Data: {}
+[2025-08-25T19:44:38.621Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.621Z] [INFO] Loaded 2 tokens for network: test-network
+[2025-08-25T19:44:38.621Z] [SUCCESS] Test 4 completed | Data: {
+  "tokenCount": 2,
+  "duration": "14ms",
+  "tokenMapSize": 4
+}
+[2025-08-25T19:44:38.621Z] [TEST_RESULT] loadTokens_MALFORMED | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "tokenCount": 2,
+    "duration": 14
+  }
+}
+[2025-08-25T19:44:38.621Z] [INFO] 📋 Test 5: Test token map functionality
+[2025-08-25T19:44:38.622Z] [SUCCESS] Test 5 completed | Data: {
+  "hdxToken": "HDX",
+  "dotToken": "NOT_FOUND",
+  "hdxByAddress": "HDX",
+  "tokenMapSize": 4
+}
+[2025-08-25T19:44:38.622Z] [TEST_RESULT] tokenMap_functionality | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "hdxFound": true,
+    "dotFound": false,
+    "hdxByAddressFound": true
+  }
+}
+[2025-08-25T19:44:38.622Z] [INFO] 📋 Test 6: Performance test with multiple loads
+[2025-08-25T19:44:38.622Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.622Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.622Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.623Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.623Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.623Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.623Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.623Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.623Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.623Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.623Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.624Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.624Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.624Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.624Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.624Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.624Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.624Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.624Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.624Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.624Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.625Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.625Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.625Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.625Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.625Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.625Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.625Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.625Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.625Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.625Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.626Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.626Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.626Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.626Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.626Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.626Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.626Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.626Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.626Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.626Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.626Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.626Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.626Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.627Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.627Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.627Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.627Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.627Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.627Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.627Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.627Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.627Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.627Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.628Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.628Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.628Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.628Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.628Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.628Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.628Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.628Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.628Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.628Z] [INFO] Loading tokens from valid-tokens.json (FILE)
+[2025-08-25T19:44:38.628Z] [INFO] Mock reading file: valid-tokens.json
+[2025-08-25T19:44:38.629Z] [INFO] Loaded 3 tokens from file
+[2025-08-25T19:44:38.629Z] [INFO] Processed token: HDX (HydraDX)
+[2025-08-25T19:44:38.629Z] [INFO] Processed token: DOT (Polkadot)
+[2025-08-25T19:44:38.629Z] [INFO] Processed token: WETH (Wrapped Ethereum)
+[2025-08-25T19:44:38.629Z] [INFO] Loaded 3 tokens for network: test-network
+[2025-08-25T19:44:38.629Z] [SUCCESS] Test 6 completed | Data: {
+  "iterations": 10,
+  "totalDuration": "7ms",
+  "averageDuration": "0.7ms"
+}
+[2025-08-25T19:44:38.630Z] [TEST_RESULT] loadTokens_PERFORMANCE | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "iterations": 10,
+    "totalDuration": 7,
+    "averageDuration": 0.7
+  }
+}
+[2025-08-25T19:44:38.630Z] [PERFORMANCE] loadTokens_MULTIPLE_LOADS: 7ms | Data: {
+  "iterations": 10,
+  "averageDuration": 0.7
+}
+[2025-08-25T19:44:38.630Z] [INFO] 📋 Test 7: Error handling for invalid file
+[2025-08-25T19:44:38.630Z] [INFO] Loading tokens from nonexistent-file.json (FILE)
+[2025-08-25T19:44:38.630Z] [INFO] Mock reading file: nonexistent-file.json
+[2025-08-25T19:44:38.630Z] [SUCCESS] Test 7 completed - Error properly caught | Data: {
+  "errorMessage": "File not found"
+}
+[2025-08-25T19:44:38.631Z] [TEST_RESULT] loadTokens_ERROR_HANDLING | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "errorCaught": true,
+    "errorMessage": "File not found"
+  }
+}
+[2025-08-25T19:44:38.631Z] [INFO] 📋 Test 8: Error handling for invalid URL
+[2025-08-25T19:44:38.631Z] [INFO] Loading tokens from https://api.example.com/invalid-endpoint (URL)
+[2025-08-25T19:44:38.631Z] [INFO] Mock axios GET request to: https://api.example.com/invalid-endpoint
+[2025-08-25T19:44:38.631Z] [SUCCESS] Test 8 completed - Error properly caught | Data: {
+  "errorMessage": "Network error"
+}
+[2025-08-25T19:44:38.631Z] [TEST_RESULT] loadTokens_URL_ERROR_HANDLING | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "errorCaught": true,
+    "errorMessage": "Network error"
+  }
+}
+[2025-08-25T19:44:38.631Z] [INFO] 📊 Test Summary | Data: {
+  "totalDuration": "35ms",
+  "logFile": "/home/guilherme/code/hummingbot-gateway/temporary/logs/loadTokens-test-2025-08-25T19-44-38-596Z.log"
+}
+[2025-08-25T19:44:38.632Z] [SUCCESS] 🎉 All loadTokens tests completed successfully!
+[2025-08-25T19:44:38.632Z] [INFO] 📁 Logs saved to: /home/guilherme/code/hummingbot-gateway/temporary/logs/loadTokens-test-2025-08-25T19-44-38-596Z.log

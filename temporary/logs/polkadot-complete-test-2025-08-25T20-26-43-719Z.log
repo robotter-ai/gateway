@@ -1,0 +1,92 @@
+[2025-08-25T20:26:43.720Z] [INFO] 🚀 Starting comprehensive Polkadot class method tests...
+[2025-08-25T20:26:43.723Z] [INFO] 📋 Test 1: getTokenList method
+[2025-08-25T20:26:43.725Z] [SUCCESS] getTokenList completed | Data: {
+  "tokenCount": 2
+}
+[2025-08-25T20:26:43.727Z] [INFO] 📋 Test 2: loadTokens method
+[2025-08-25T20:26:43.728Z] [INFO] loadTokens method called
+[2025-08-25T20:26:43.732Z] [SUCCESS] loadTokens completed
+[2025-08-25T20:26:43.732Z] [INFO] 📋 Test 3: getToken method
+[2025-08-25T20:26:43.733Z] [SUCCESS] getToken completed | Data: {
+  "token": "DOT"
+}
+[2025-08-25T20:26:43.734Z] [INFO] 📋 Test 4: getNativeToken method
+[2025-08-25T20:26:43.737Z] [SUCCESS] getNativeToken completed | Data: {
+  "symbol": "DOT"
+}
+[2025-08-25T20:26:43.738Z] [INFO] 📋 Test 5: getFeePaymentToken method
+[2025-08-25T20:26:43.738Z] [SUCCESS] getFeePaymentToken completed | Data: {
+  "symbol": "DOT"
+}
+[2025-08-25T20:26:43.739Z] [INFO] 📋 Test 6: createAccount method
+[2025-08-25T20:26:43.739Z] [SUCCESS] createAccount completed | Data: {
+  "address": "5328d88c3"
+}
+[2025-08-25T20:26:43.740Z] [INFO] 📋 Test 7: getKeyringPairFromMnemonic method
+[2025-08-25T20:26:43.740Z] [SUCCESS] getKeyringPairFromMnemonic completed | Data: {
+  "address": "51e9e3770"
+}
+[2025-08-25T20:26:43.740Z] [INFO] 📋 Test 8: getWallet method
+[2025-08-25T20:26:43.741Z] [ERROR] getWallet failed | Error: {}
+[2025-08-25T20:26:43.758Z] [INFO] 📋 Test 9: encrypt/decrypt methods
+[2025-08-25T20:26:43.758Z] [SUCCESS] encrypt/decrypt completed | Data: {
+  "original": "test secret",
+  "decrypted": "test secret"
+}
+[2025-08-25T20:26:43.758Z] [INFO] 📋 Test 10: getBalance method
+[2025-08-25T20:26:43.759Z] [SUCCESS] getBalance completed | Data: {
+  "balanceCount": 2
+}
+[2025-08-25T20:26:43.759Z] [INFO] 📋 Test 11: getTransaction method
+[2025-08-25T20:26:43.760Z] [SUCCESS] getTransaction completed | Data: {
+  "txHash": "0xtesthash"
+}
+[2025-08-25T20:26:43.760Z] [INFO] 📋 Test 12: getCurrentBlockNumber method
+[2025-08-25T20:26:43.760Z] [SUCCESS] getCurrentBlockNumber completed | Data: {
+  "blockNumber": 1664911
+}
+[2025-08-25T20:26:43.760Z] [INFO] 📋 Test 13: validatePolkadotAddress method
+[2025-08-25T20:26:43.761Z] [SUCCESS] validatePolkadotAddress completed | Data: {
+  "isValid": true
+}
+[2025-08-25T20:26:43.761Z] [INFO] 📋 Test 14: getFirstWalletAddress method
+[2025-08-25T20:26:43.761Z] [SUCCESS] getFirstWalletAddress completed | Data: {
+  "address": "5328d88c3"
+}
+[2025-08-25T20:26:43.762Z] [INFO] 📋 Test 15: getTokensWithSymbols method
+[2025-08-25T20:26:43.762Z] [SUCCESS] getTokensWithSymbols completed | Data: {
+  "tokenCount": 2
+}
+[2025-08-25T20:26:43.762Z] [INFO] 📋 Test 16: getAddressBalances method
+[2025-08-25T20:26:43.763Z] [ERROR] getAddressBalances failed | Error: {}
+[2025-08-25T20:26:43.764Z] [INFO] 📋 Test 17: estimateTransactionGas method
+[2025-08-25T20:26:43.764Z] [SUCCESS] estimateTransactionGas completed | Data: {
+  "gasLimit": 1000000
+}
+[2025-08-25T20:26:43.764Z] [INFO] 📋 Test 18: pollTransaction method
+[2025-08-25T20:26:43.765Z] [SUCCESS] pollTransaction completed | Data: {
+  "txHash": "0xtesthash"
+}
+[2025-08-25T20:26:43.765Z] [INFO] 📋 Test 19: getNetworkStatus method
+[2025-08-25T20:26:43.766Z] [SUCCESS] getNetworkStatus completed | Data: {
+  "network": "testnet"
+}
+[2025-08-25T20:26:43.766Z] [INFO] 📋 Test 20: Provider methods
+[2025-08-25T20:26:43.766Z] [SUCCESS] Provider methods completed | Data: {
+  "httpType": "http",
+  "wsType": "ws",
+  "providerType": "ws"
+}
+[2025-08-25T20:26:43.766Z] [INFO] 📋 Test 21: getApiPromise method
+[2025-08-25T20:26:43.767Z] [SUCCESS] getApiPromise completed | Data: {
+  "isReady": true
+}
+[2025-08-25T20:26:43.767Z] [INFO] 📊 Test Summary | Data: {
+  "totalTests": 21,
+  "successfulTests": 19,
+  "failedTests": 2,
+  "successRate": "90.5%",
+  "logFile": "/home/guilherme/code/hummingbot-gateway/temporary/logs/polkadot-complete-test-2025-08-25T20-26-43-719Z.log"
+}
+[2025-08-25T20:26:43.768Z] [ERROR] ⚠️ 2 tests failed out of 21
+[2025-08-25T20:26:43.768Z] [INFO] 📁 Logs saved to: /home/guilherme/code/hummingbot-gateway/temporary/logs/polkadot-complete-test-2025-08-25T20-26-43-719Z.log

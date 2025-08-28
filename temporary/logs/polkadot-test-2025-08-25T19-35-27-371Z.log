@@ -1,0 +1,4767 @@
+[2025-08-25T19:35:27.371Z] [INFO] 🚀 Starting Polkadot getTokenList method tests...
+[2025-08-25T19:35:27.373Z] [INFO] 📊 Test Mode: REAL DATA
+[2025-08-25T19:35:27.373Z] [INFO] 🧪 Testing Polkadot getTokenList method...
+[2025-08-25T19:35:27.373Z] [INFO] 📋 Test 1: Get token list with default configuration
+[2025-08-25T19:35:27.374Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.374Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.375Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.375Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.375Z] [SUCCESS] Test 1 completed | Data: {
+  "tokenCount": 3,
+  "firstToken": {
+    "symbol": "HDX",
+    "name": "HydraDX",
+    "decimals": 12,
+    "address": "0",
+    "chainId": 0
+  },
+  "duration": "1ms",
+  "dataSource": "REAL"
+}
+[2025-08-25T19:35:27.377Z] [PERFORMANCE] Default configuration test: 1ms | Data: {
+  "tokenCount": 3,
+  "config": {
+    "tokenListSource": "test-token-list.json",
+    "tokenListType": "FILE",
+    "nativeCurrencySymbol": "HDX",
+    "feePaymentCurrencySymbol": "HDX",
+    "nodeURL": "ws://localhost:9944",
+    "transactionURL": "https://test.api.subscan.io/api/scan/extrinsic"
+  }
+}
+[2025-08-25T19:35:27.377Z] [INFO] 📋 Test 2: Get token list with real Polkadot token list
+[2025-08-25T19:35:27.378Z] [INFO] Loading tokens from ../../src/templates/lists/polkadot_tokens_mainnet.json (FILE)
+[2025-08-25T19:35:27.379Z] [INFO] Loaded 34 real tokens from ../../src/templates/lists/polkadot_tokens_mainnet.json
+[2025-08-25T19:35:27.380Z] [SUCCESS] Loaded 34 tokens
+[2025-08-25T19:35:27.380Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "../../src/templates/lists/polkadot_tokens_mainnet.json",
+    "type": "FILE",
+    "tokenCount": 34,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "Hydration",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "5",
+        "chainId": 0
+      },
+      {
+        "symbol": "CRU",
+        "name": "Crust",
+        "decimals": 12,
+        "address": "27",
+        "chainId": 0
+      },
+      {
+        "symbol": "NODL",
+        "name": "Nodle",
+        "decimals": 11,
+        "address": "26",
+        "chainId": 0
+      },
+      {
+        "symbol": "USDT",
+        "name": "USDT (Polkadot Asset Hub)",
+        "decimals": 6,
+        "address": "10",
+        "chainId": 0
+      },
+      {
+        "symbol": "UNQ",
+        "name": "Unique network",
+        "decimals": 18,
+        "address": "25",
+        "chainId": 0
+      },
+      {
+        "symbol": "GLMR",
+        "name": "Glimmer",
+        "decimals": 18,
+        "address": "16",
+        "chainId": 0
+      },
+      {
+        "symbol": "MYTH",
+        "name": "Mythos",
+        "decimals": 18,
+        "address": "30",
+        "chainId": 0
+      },
+      {
+        "symbol": "PEN",
+        "name": "Pendulum",
+        "decimals": 12,
+        "address": "1000081",
+        "chainId": 0
+      },
+      {
+        "symbol": "WUD",
+        "name": "Gavun Wud",
+        "decimals": 10,
+        "address": "1000085",
+        "chainId": 0
+      },
+      {
+        "symbol": "vDOT",
+        "name": "Bifrost Voucher DOT",
+        "decimals": 10,
+        "address": "15",
+        "chainId": 0
+      },
+      {
+        "symbol": "HDXb",
+        "name": "HDX Bond 24/10/2024",
+        "decimals": 12,
+        "address": "1000010",
+        "chainId": 0
+      },
+      {
+        "symbol": "SUB",
+        "name": "Subsocial",
+        "decimals": 10,
+        "address": "24",
+        "chainId": 0
+      },
+      {
+        "symbol": "AJUN",
+        "name": "Ajuna Network",
+        "decimals": 12,
+        "address": "32",
+        "chainId": 0
+      },
+      {
+        "symbol": "HDXb",
+        "name": "HDX Bond 03/01/2025",
+        "decimals": 12,
+        "address": "1000013",
+        "chainId": 0
+      },
+      {
+        "symbol": "INTR",
+        "name": "Interlay",
+        "decimals": 10,
+        "address": "17",
+        "chainId": 0
+      },
+      {
+        "symbol": "4-Pool",
+        "name": "USDT, DAI, USDC, USDT",
+        "decimals": 18,
+        "address": "100",
+        "chainId": 0
+      },
+      {
+        "symbol": "KILT",
+        "name": "KILT",
+        "decimals": 15,
+        "address": "28",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Ethereum (Moonbeam Wormhole)",
+        "decimals": 18,
+        "address": "20",
+        "chainId": 0
+      },
+      {
+        "symbol": "2-Pool",
+        "name": "iBTC, WBTC",
+        "decimals": 18,
+        "address": "101",
+        "chainId": 0
+      },
+      {
+        "symbol": "BNC",
+        "name": "Bifrost Native Coin",
+        "decimals": 12,
+        "address": "14",
+        "chainId": 0
+      },
+      {
+        "symbol": "RING",
+        "name": "Darwinia Network RING",
+        "decimals": 18,
+        "address": "31",
+        "chainId": 0
+      },
+      {
+        "symbol": "vASTR",
+        "name": "Voucher ASTR",
+        "decimals": 18,
+        "address": "33",
+        "chainId": 0
+      },
+      {
+        "symbol": "CFG",
+        "name": "Centrifuge",
+        "decimals": 18,
+        "address": "13",
+        "chainId": 0
+      },
+      {
+        "symbol": "2-Pool",
+        "name": "USDT, USDC",
+        "decimals": 18,
+        "address": "102",
+        "chainId": 0
+      },
+      {
+        "symbol": "PHA",
+        "name": "Phala",
+        "decimals": 12,
+        "address": "8",
+        "chainId": 0
+      },
+      {
+        "symbol": "ZTG",
+        "name": "Zeitgeist",
+        "decimals": 10,
+        "address": "12",
+        "chainId": 0
+      },
+      {
+        "symbol": "ASTR",
+        "name": "Astar",
+        "decimals": 18,
+        "address": "9",
+        "chainId": 0
+      },
+      {
+        "symbol": "H2O",
+        "name": "H2O",
+        "decimals": 12,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "DAI",
+        "name": "DAI (Moonbeam Wormhole)",
+        "decimals": 18,
+        "address": "18",
+        "chainId": 0
+      },
+      {
+        "symbol": "USDC",
+        "name": "USD Coin (Moonbeam Wormhole)",
+        "decimals": 6,
+        "address": "21",
+        "chainId": 0
+      },
+      {
+        "symbol": "iBTC",
+        "name": "interBTC",
+        "decimals": 8,
+        "address": "11",
+        "chainId": 0
+      },
+      {
+        "symbol": "WBTC",
+        "name": "Bitcoin (Moonbeam Wormhole)",
+        "decimals": 8,
+        "address": "19",
+        "chainId": 0
+      },
+      {
+        "symbol": "USDC",
+        "name": "USDC (Polkadot Asset Hub)",
+        "decimals": 6,
+        "address": "22",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.380Z] [SUCCESS] Test 2 completed | Data: {
+  "tokenCount": 34,
+  "realSource": "../../src/templates/lists/polkadot_tokens_mainnet.json",
+  "realType": "FILE",
+  "duration": "2ms",
+  "dataSource": "REAL"
+}
+[2025-08-25T19:35:27.380Z] [INFO] 📋 Test 3: Get token list with real Hydration token list
+[2025-08-25T19:35:27.380Z] [INFO] Loading tokens from ../../src/templates/lists/hydration.json (FILE)
+[2025-08-25T19:35:27.381Z] [ERROR] Failed to load real token list from ../../src/templates/lists/hydration.json | Data: {}
+[2025-08-25T19:35:27.394Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.395Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "../../src/templates/lists/hydration.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.395Z] [SUCCESS] Test 3 completed | Data: {
+  "tokenCount": 3,
+  "hydrationSource": "../../src/templates/lists/hydration.json",
+  "hydrationType": "FILE",
+  "duration": "15ms",
+  "dataSource": "REAL"
+}
+[2025-08-25T19:35:27.395Z] [INFO] 📋 Test 4: Get token list with URL source (mock)
+[2025-08-25T19:35:27.395Z] [INFO] Loading tokens from https://api.example.com/tokens.json (URL)
+[2025-08-25T19:35:27.396Z] [INFO] Mock HTTP GET: https://api.example.com/tokens.json
+[2025-08-25T19:35:27.396Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.396Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "https://api.example.com/tokens.json",
+    "type": "URL",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.396Z] [SUCCESS] Test 4 completed | Data: {
+  "tokenCount": 3,
+  "urlSource": "https://api.example.com/tokens.json",
+  "urlType": "URL",
+  "duration": "1ms",
+  "dataSource": "MOCK"
+}
+[2025-08-25T19:35:27.396Z] [INFO] 📋 Test 5: Verify token structure
+[2025-08-25T19:35:27.396Z] [SUCCESS] Token structure validation completed | Data: {
+  "hasAllFields": true,
+  "tokenStructure": {
+    "symbol": "string",
+    "name": "string",
+    "decimals": "number",
+    "address": "string",
+    "chainId": "number"
+  },
+  "sampleToken": {
+    "symbol": "HDX",
+    "name": "HydraDX",
+    "decimals": 12,
+    "address": "0",
+    "chainId": 0
+  }
+}
+[2025-08-25T19:35:27.397Z] [SUCCESS] All getTokenList tests completed successfully!
+[2025-08-25T19:35:27.398Z] [TEST_RESULT] getTokenListScenarios | Data: {
+  "result": {
+    "test1": {
+      "result": [
+        {
+          "symbol": "HDX",
+          "name": "HydraDX",
+          "decimals": 12,
+          "address": "0",
+          "chainId": 0
+        },
+        {
+          "symbol": "DOT",
+          "name": "Polkadot",
+          "decimals": 10,
+          "address": "1",
+          "chainId": 0
+        },
+        {
+          "symbol": "WETH",
+          "name": "Wrapped Ethereum",
+          "decimals": 18,
+          "address": "2",
+          "chainId": 0
+        }
+      ],
+      "duration": 1,
+      "dataSource": "REAL"
+    },
+    "test2": {
+      "result": [
+        {
+          "symbol": "HDX",
+          "name": "Hydration",
+          "decimals": 12,
+          "address": "0",
+          "chainId": 0
+        },
+        {
+          "symbol": "DOT",
+          "name": "Polkadot",
+          "decimals": 10,
+          "address": "5",
+          "chainId": 0
+        },
+        {
+          "symbol": "CRU",
+          "name": "Crust",
+          "decimals": 12,
+          "address": "27",
+          "chainId": 0
+        },
+        {
+          "symbol": "NODL",
+          "name": "Nodle",
+          "decimals": 11,
+          "address": "26",
+          "chainId": 0
+        },
+        {
+          "symbol": "USDT",
+          "name": "USDT (Polkadot Asset Hub)",
+          "decimals": 6,
+          "address": "10",
+          "chainId": 0
+        },
+        {
+          "symbol": "UNQ",
+          "name": "Unique network",
+          "decimals": 18,
+          "address": "25",
+          "chainId": 0
+        },
+        {
+          "symbol": "GLMR",
+          "name": "Glimmer",
+          "decimals": 18,
+          "address": "16",
+          "chainId": 0
+        },
+        {
+          "symbol": "MYTH",
+          "name": "Mythos",
+          "decimals": 18,
+          "address": "30",
+          "chainId": 0
+        },
+        {
+          "symbol": "PEN",
+          "name": "Pendulum",
+          "decimals": 12,
+          "address": "1000081",
+          "chainId": 0
+        },
+        {
+          "symbol": "WUD",
+          "name": "Gavun Wud",
+          "decimals": 10,
+          "address": "1000085",
+          "chainId": 0
+        },
+        {
+          "symbol": "vDOT",
+          "name": "Bifrost Voucher DOT",
+          "decimals": 10,
+          "address": "15",
+          "chainId": 0
+        },
+        {
+          "symbol": "HDXb",
+          "name": "HDX Bond 24/10/2024",
+          "decimals": 12,
+          "address": "1000010",
+          "chainId": 0
+        },
+        {
+          "symbol": "SUB",
+          "name": "Subsocial",
+          "decimals": 10,
+          "address": "24",
+          "chainId": 0
+        },
+        {
+          "symbol": "AJUN",
+          "name": "Ajuna Network",
+          "decimals": 12,
+          "address": "32",
+          "chainId": 0
+        },
+        {
+          "symbol": "HDXb",
+          "name": "HDX Bond 03/01/2025",
+          "decimals": 12,
+          "address": "1000013",
+          "chainId": 0
+        },
+        {
+          "symbol": "INTR",
+          "name": "Interlay",
+          "decimals": 10,
+          "address": "17",
+          "chainId": 0
+        },
+        {
+          "symbol": "4-Pool",
+          "name": "USDT, DAI, USDC, USDT",
+          "decimals": 18,
+          "address": "100",
+          "chainId": 0
+        },
+        {
+          "symbol": "KILT",
+          "name": "KILT",
+          "decimals": 15,
+          "address": "28",
+          "chainId": 0
+        },
+        {
+          "symbol": "WETH",
+          "name": "Ethereum (Moonbeam Wormhole)",
+          "decimals": 18,
+          "address": "20",
+          "chainId": 0
+        },
+        {
+          "symbol": "2-Pool",
+          "name": "iBTC, WBTC",
+          "decimals": 18,
+          "address": "101",
+          "chainId": 0
+        },
+        {
+          "symbol": "BNC",
+          "name": "Bifrost Native Coin",
+          "decimals": 12,
+          "address": "14",
+          "chainId": 0
+        },
+        {
+          "symbol": "RING",
+          "name": "Darwinia Network RING",
+          "decimals": 18,
+          "address": "31",
+          "chainId": 0
+        },
+        {
+          "symbol": "vASTR",
+          "name": "Voucher ASTR",
+          "decimals": 18,
+          "address": "33",
+          "chainId": 0
+        },
+        {
+          "symbol": "CFG",
+          "name": "Centrifuge",
+          "decimals": 18,
+          "address": "13",
+          "chainId": 0
+        },
+        {
+          "symbol": "2-Pool",
+          "name": "USDT, USDC",
+          "decimals": 18,
+          "address": "102",
+          "chainId": 0
+        },
+        {
+          "symbol": "PHA",
+          "name": "Phala",
+          "decimals": 12,
+          "address": "8",
+          "chainId": 0
+        },
+        {
+          "symbol": "ZTG",
+          "name": "Zeitgeist",
+          "decimals": 10,
+          "address": "12",
+          "chainId": 0
+        },
+        {
+          "symbol": "ASTR",
+          "name": "Astar",
+          "decimals": 18,
+          "address": "9",
+          "chainId": 0
+        },
+        {
+          "symbol": "H2O",
+          "name": "H2O",
+          "decimals": 12,
+          "address": "1",
+          "chainId": 0
+        },
+        {
+          "symbol": "DAI",
+          "name": "DAI (Moonbeam Wormhole)",
+          "decimals": 18,
+          "address": "18",
+          "chainId": 0
+        },
+        {
+          "symbol": "USDC",
+          "name": "USD Coin (Moonbeam Wormhole)",
+          "decimals": 6,
+          "address": "21",
+          "chainId": 0
+        },
+        {
+          "symbol": "iBTC",
+          "name": "interBTC",
+          "decimals": 8,
+          "address": "11",
+          "chainId": 0
+        },
+        {
+          "symbol": "WBTC",
+          "name": "Bitcoin (Moonbeam Wormhole)",
+          "decimals": 8,
+          "address": "19",
+          "chainId": 0
+        },
+        {
+          "symbol": "USDC",
+          "name": "USDC (Polkadot Asset Hub)",
+          "decimals": 6,
+          "address": "22",
+          "chainId": 0
+        }
+      ],
+      "duration": 2,
+      "dataSource": "REAL"
+    },
+    "test3": {
+      "result": [
+        {
+          "symbol": "HDX",
+          "name": "HydraDX",
+          "decimals": 12,
+          "address": "0",
+          "chainId": 0
+        },
+        {
+          "symbol": "DOT",
+          "name": "Polkadot",
+          "decimals": 10,
+          "address": "1",
+          "chainId": 0
+        },
+        {
+          "symbol": "WETH",
+          "name": "Wrapped Ethereum",
+          "decimals": 18,
+          "address": "2",
+          "chainId": 0
+        }
+      ],
+      "duration": 15,
+      "dataSource": "REAL"
+    },
+    "test4": {
+      "result": [
+        {
+          "symbol": "HDX",
+          "name": "HydraDX",
+          "decimals": 12,
+          "address": "0",
+          "chainId": 0
+        },
+        {
+          "symbol": "DOT",
+          "name": "Polkadot",
+          "decimals": 10,
+          "address": "1",
+          "chainId": 0
+        },
+        {
+          "symbol": "WETH",
+          "name": "Wrapped Ethereum",
+          "decimals": 18,
+          "address": "2",
+          "chainId": 0
+        }
+      ],
+      "duration": 1,
+      "dataSource": "MOCK"
+    },
+    "test5": {
+      "tokenCount": 3,
+      "hasValidStructure": true
+    }
+  }
+}
+[2025-08-25T19:35:27.398Z] [INFO] 🔍 Testing token map functionality...
+[2025-08-25T19:35:27.399Z] [INFO] Loading tokens from ../../src/templates/lists/polkadot_tokens_mainnet.json (FILE)
+[2025-08-25T19:35:27.399Z] [INFO] Loaded 34 real tokens from ../../src/templates/lists/polkadot_tokens_mainnet.json
+[2025-08-25T19:35:27.401Z] [SUCCESS] Loaded 34 tokens
+[2025-08-25T19:35:27.401Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "../../src/templates/lists/polkadot_tokens_mainnet.json",
+    "type": "FILE",
+    "tokenCount": 34,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "Hydration",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "5",
+        "chainId": 0
+      },
+      {
+        "symbol": "CRU",
+        "name": "Crust",
+        "decimals": 12,
+        "address": "27",
+        "chainId": 0
+      },
+      {
+        "symbol": "NODL",
+        "name": "Nodle",
+        "decimals": 11,
+        "address": "26",
+        "chainId": 0
+      },
+      {
+        "symbol": "USDT",
+        "name": "USDT (Polkadot Asset Hub)",
+        "decimals": 6,
+        "address": "10",
+        "chainId": 0
+      },
+      {
+        "symbol": "UNQ",
+        "name": "Unique network",
+        "decimals": 18,
+        "address": "25",
+        "chainId": 0
+      },
+      {
+        "symbol": "GLMR",
+        "name": "Glimmer",
+        "decimals": 18,
+        "address": "16",
+        "chainId": 0
+      },
+      {
+        "symbol": "MYTH",
+        "name": "Mythos",
+        "decimals": 18,
+        "address": "30",
+        "chainId": 0
+      },
+      {
+        "symbol": "PEN",
+        "name": "Pendulum",
+        "decimals": 12,
+        "address": "1000081",
+        "chainId": 0
+      },
+      {
+        "symbol": "WUD",
+        "name": "Gavun Wud",
+        "decimals": 10,
+        "address": "1000085",
+        "chainId": 0
+      },
+      {
+        "symbol": "vDOT",
+        "name": "Bifrost Voucher DOT",
+        "decimals": 10,
+        "address": "15",
+        "chainId": 0
+      },
+      {
+        "symbol": "HDXb",
+        "name": "HDX Bond 24/10/2024",
+        "decimals": 12,
+        "address": "1000010",
+        "chainId": 0
+      },
+      {
+        "symbol": "SUB",
+        "name": "Subsocial",
+        "decimals": 10,
+        "address": "24",
+        "chainId": 0
+      },
+      {
+        "symbol": "AJUN",
+        "name": "Ajuna Network",
+        "decimals": 12,
+        "address": "32",
+        "chainId": 0
+      },
+      {
+        "symbol": "HDXb",
+        "name": "HDX Bond 03/01/2025",
+        "decimals": 12,
+        "address": "1000013",
+        "chainId": 0
+      },
+      {
+        "symbol": "INTR",
+        "name": "Interlay",
+        "decimals": 10,
+        "address": "17",
+        "chainId": 0
+      },
+      {
+        "symbol": "4-Pool",
+        "name": "USDT, DAI, USDC, USDT",
+        "decimals": 18,
+        "address": "100",
+        "chainId": 0
+      },
+      {
+        "symbol": "KILT",
+        "name": "KILT",
+        "decimals": 15,
+        "address": "28",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Ethereum (Moonbeam Wormhole)",
+        "decimals": 18,
+        "address": "20",
+        "chainId": 0
+      },
+      {
+        "symbol": "2-Pool",
+        "name": "iBTC, WBTC",
+        "decimals": 18,
+        "address": "101",
+        "chainId": 0
+      },
+      {
+        "symbol": "BNC",
+        "name": "Bifrost Native Coin",
+        "decimals": 12,
+        "address": "14",
+        "chainId": 0
+      },
+      {
+        "symbol": "RING",
+        "name": "Darwinia Network RING",
+        "decimals": 18,
+        "address": "31",
+        "chainId": 0
+      },
+      {
+        "symbol": "vASTR",
+        "name": "Voucher ASTR",
+        "decimals": 18,
+        "address": "33",
+        "chainId": 0
+      },
+      {
+        "symbol": "CFG",
+        "name": "Centrifuge",
+        "decimals": 18,
+        "address": "13",
+        "chainId": 0
+      },
+      {
+        "symbol": "2-Pool",
+        "name": "USDT, USDC",
+        "decimals": 18,
+        "address": "102",
+        "chainId": 0
+      },
+      {
+        "symbol": "PHA",
+        "name": "Phala",
+        "decimals": 12,
+        "address": "8",
+        "chainId": 0
+      },
+      {
+        "symbol": "ZTG",
+        "name": "Zeitgeist",
+        "decimals": 10,
+        "address": "12",
+        "chainId": 0
+      },
+      {
+        "symbol": "ASTR",
+        "name": "Astar",
+        "decimals": 18,
+        "address": "9",
+        "chainId": 0
+      },
+      {
+        "symbol": "H2O",
+        "name": "H2O",
+        "decimals": 12,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "DAI",
+        "name": "DAI (Moonbeam Wormhole)",
+        "decimals": 18,
+        "address": "18",
+        "chainId": 0
+      },
+      {
+        "symbol": "USDC",
+        "name": "USD Coin (Moonbeam Wormhole)",
+        "decimals": 6,
+        "address": "21",
+        "chainId": 0
+      },
+      {
+        "symbol": "iBTC",
+        "name": "interBTC",
+        "decimals": 8,
+        "address": "11",
+        "chainId": 0
+      },
+      {
+        "symbol": "WBTC",
+        "name": "Bitcoin (Moonbeam Wormhole)",
+        "decimals": 8,
+        "address": "19",
+        "chainId": 0
+      },
+      {
+        "symbol": "USDC",
+        "name": "USDC (Polkadot Asset Hub)",
+        "decimals": 6,
+        "address": "22",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.401Z] [INFO] 📋 Test: Token lookup by symbol
+[2025-08-25T19:35:27.401Z] [SUCCESS] HDX token lookup test completed | Data: {
+  "found": true,
+  "tokenDetails": {
+    "symbol": "HDX",
+    "name": "Hydration",
+    "decimals": 12,
+    "address": "0",
+    "chainId": 0
+  }
+}
+[2025-08-25T19:35:27.402Z] [INFO] 📋 Test: Token lookup by address
+[2025-08-25T19:35:27.402Z] [SUCCESS] Address lookup test completed | Data: {
+  "found": true,
+  "tokenDetails": {
+    "symbol": "HDX",
+    "name": "Hydration",
+    "decimals": 12,
+    "address": "0",
+    "chainId": 0
+  }
+}
+[2025-08-25T19:35:27.402Z] [INFO] 📋 Test: Case-insensitive lookup
+[2025-08-25T19:35:27.402Z] [SUCCESS] Case-insensitive lookup test completed | Data: {
+  "lowercase": true,
+  "uppercase": true,
+  "bothSuccessful": true
+}
+[2025-08-25T19:35:27.403Z] [SUCCESS] Token map tests completed successfully!
+[2025-08-25T19:35:27.403Z] [TEST_RESULT] tokenMapFunctionality | Data: {
+  "result": {
+    "symbolLookup": {
+      "hdx": {
+        "symbol": "HDX",
+        "name": "Hydration",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      }
+    },
+    "addressLookup": {
+      "0": {
+        "symbol": "HDX",
+        "name": "Hydration",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      }
+    },
+    "caseInsensitive": {
+      "lowercase": true,
+      "uppercase": true,
+      "bothSuccessful": true
+    }
+  }
+}
+[2025-08-25T19:35:27.403Z] [INFO] ⚡ Testing performance...
+[2025-08-25T19:35:27.403Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.404Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.404Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.404Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.404Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.404Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.404Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.404Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.404Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.404Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.404Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.405Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.405Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.405Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.405Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.405Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.405Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.405Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.405Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.405Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.406Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.406Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.406Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.406Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.406Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.406Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.406Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.406Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.406Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.406Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.407Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.407Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.407Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.407Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.407Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.407Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.407Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.407Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.407Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.407Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.407Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.408Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.408Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.408Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.408Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.408Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.408Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.408Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.408Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.408Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.408Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.408Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.408Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.408Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.409Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.409Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.409Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.409Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.409Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.409Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.409Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.409Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.410Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.410Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.410Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.410Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.410Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.410Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.410Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.410Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.410Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.410Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.410Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.410Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.411Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.411Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.411Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.411Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.411Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.411Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.411Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.411Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.411Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.411Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.411Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.412Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.412Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.412Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.412Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.412Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.412Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.412Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.412Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.412Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.412Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.412Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.412Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.413Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.413Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.413Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.413Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.413Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.413Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.413Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.413Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.413Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.413Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.413Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.413Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.414Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.414Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.414Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.414Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.414Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.414Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.414Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.414Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.414Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.414Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.414Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.414Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.415Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.415Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.415Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.415Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.415Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.415Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.415Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.415Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.415Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.415Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.415Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.416Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.416Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.416Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.416Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.416Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.416Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.416Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.417Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.417Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.417Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.417Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.417Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.417Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.417Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.417Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.418Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.418Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.418Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.418Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.418Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.418Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.419Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.419Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.419Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.419Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.419Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.419Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.419Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.419Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.419Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.419Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.419Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.419Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.420Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.420Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.420Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.420Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.420Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.420Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.421Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.421Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.421Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.421Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.421Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.421Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.421Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.421Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.421Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.421Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.421Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.422Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.422Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.422Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.422Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.423Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.423Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.423Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.423Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.423Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.423Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.423Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.423Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.423Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.423Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.423Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.423Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.424Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.424Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.424Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.424Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.424Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.424Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.424Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.424Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.424Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.425Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.425Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.425Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.425Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.425Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.425Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.425Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.425Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.425Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.425Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.425Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.426Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.426Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.426Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.426Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.426Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.426Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.426Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.426Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.426Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.426Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.426Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.426Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.426Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.427Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.427Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.427Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.427Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.427Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.427Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.427Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.427Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.427Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.427Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.427Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.427Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.428Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.428Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.428Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.428Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.428Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.428Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.428Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.428Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.428Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.428Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.428Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.428Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.428Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.428Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.429Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.429Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.429Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.429Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.429Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.429Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.429Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.429Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.429Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.430Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.430Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.430Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.430Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.431Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.431Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.432Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.432Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.432Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.432Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.432Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.432Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.432Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.432Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.432Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.432Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.433Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.433Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.433Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.433Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.433Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.433Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.433Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.433Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.433Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.433Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.433Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.433Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.434Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.434Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.434Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.434Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.434Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.434Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.434Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.434Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.434Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.434Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.434Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.434Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.435Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.435Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.435Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.435Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.435Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.435Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.435Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.435Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.435Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.435Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.435Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.436Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.436Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.436Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.436Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.436Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.436Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.436Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.436Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.436Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.437Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.437Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.437Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.437Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.437Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.437Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.438Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.438Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.438Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.438Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.438Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.438Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.438Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.438Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.438Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.438Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.439Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.439Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.439Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.439Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.440Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.440Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.440Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.440Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.440Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.440Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.440Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.440Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.440Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.440Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.441Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.441Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.441Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.441Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.441Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.441Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.441Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.441Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.441Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.441Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.442Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.442Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.442Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.442Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.442Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.442Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.442Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.443Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.443Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.443Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.443Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.443Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.443Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.443Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.443Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.444Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.444Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.444Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.444Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.444Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.444Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.444Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.444Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.444Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.445Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.445Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.445Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.445Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.445Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.445Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.445Z] [INFO] Loading tokens from test-token-list.json (FILE)
+[2025-08-25T19:35:27.445Z] [INFO] Mock reading file: test-token-list.json
+[2025-08-25T19:35:27.445Z] [SUCCESS] Loaded 3 tokens
+[2025-08-25T19:35:27.446Z] [TEST_RESULT] loadTokens | Data: {
+  "result": {
+    "source": "test-token-list.json",
+    "type": "FILE",
+    "tokenCount": 3,
+    "tokens": [
+      {
+        "symbol": "HDX",
+        "name": "HydraDX",
+        "decimals": 12,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "decimals": 10,
+        "address": "1",
+        "chainId": 0
+      },
+      {
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "2",
+        "chainId": 0
+      }
+    ],
+    "dataSource": "REAL"
+  }
+}
+[2025-08-25T19:35:27.446Z] [SUCCESS] Performance test completed | Data: {
+  "iterations": 100,
+  "totalTime": "43ms",
+  "averageTime": "0.43ms",
+  "minTime": "0ms",
+  "maxTime": "2ms",
+  "medianTime": "0ms"
+}
+[2025-08-25T19:35:27.446Z] [PERFORMANCE] Performance test: 43ms | Data: {
+  "iterations": 100,
+  "averageTime": 0.43,
+  "minTime": 0,
+  "maxTime": 2,
+  "medianTime": 0,
+  "durations": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2
+  ]
+}
+[2025-08-25T19:35:27.447Z] [TEST_RESULT] performance | Data: {
+  "result": {
+    "iterations": 100,
+    "totalTime": 43,
+    "averageTime": 0.43,
+    "minTime": 0,
+    "maxTime": 2,
+    "medianTime": 0,
+    "durations": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      2
+    ]
+  }
+}
+[2025-08-25T19:35:27.447Z] [INFO] 🚨 Testing error handling...
+[2025-08-25T19:35:27.447Z] [INFO] 📋 Test: Invalid token data handling
+[2025-08-25T19:35:27.447Z] [INFO] Loading tokens from test-token-list.json (FILE) with invalid data
+[2025-08-25T19:35:27.448Z] [SUCCESS] Loaded 2 valid tokens (skipped 0 invalid ones)
+[2025-08-25T19:35:27.448Z] [SUCCESS] Error handling test completed | Data: {
+  "resultCount": 2,
+  "result": [
+    {
+      "symbol": "INVALID",
+      "name": "Unknown Token",
+      "decimals": 0,
+      "address": "0",
+      "chainId": 0
+    },
+    {
+      "symbol": "VALID",
+      "name": "Valid Token",
+      "decimals": 18,
+      "address": "123",
+      "chainId": 0
+    }
+  ]
+}
+[2025-08-25T19:35:27.449Z] [TEST_RESULT] errorHandling | Data: {
+  "result": {
+    "result": [
+      {
+        "symbol": "INVALID",
+        "name": "Unknown Token",
+        "decimals": 0,
+        "address": "0",
+        "chainId": 0
+      },
+      {
+        "symbol": "VALID",
+        "name": "Valid Token",
+        "decimals": 18,
+        "address": "123",
+        "chainId": 0
+      }
+    ],
+    "resultCount": 2,
+    "testType": "invalidDataProcessing"
+  }
+}
+[2025-08-25T19:35:27.449Z] [SUCCESS] 🎯 All tests completed successfully! | Data: {
+  "sessionDuration": "76ms",
+  "testResults": {
+    "getTokenListScenarios": "PASSED",
+    "tokenMapFunctionality": "PASSED",
+    "performance": "PASSED",
+    "errorHandling": "PASSED"
+  },
+  "logFile": "/home/guilherme/code/hummingbot-gateway/temporary/logs/polkadot-test-2025-08-25T19-35-27-371Z.log",
+  "testMode": "REAL DATA"
+}
+[2025-08-25T19:35:27.450Z] [TEST_RESULT] sessionSummary | Data: {
+  "result": {
+    "status": "SUCCESS",
+    "sessionDuration": 76,
+    "testResults": {
+      "getTokenListScenarios": "PASSED",
+      "tokenMapFunctionality": "PASSED",
+      "performance": "PASSED",
+      "errorHandling": "PASSED"
+    },
+    "timestamp": "2025-08-25T19:35:27.450Z",
+    "logFile": "/home/guilherme/code/hummingbot-gateway/temporary/logs/polkadot-test-2025-08-25T19-35-27-371Z.log",
+    "testMode": "REAL DATA"
+  }
+}
+[2025-08-25T19:35:27.451Z] [INFO] 📁 Test logs saved to: /home/guilherme/code/hummingbot-gateway/temporary/logs/polkadot-test-2025-08-25T19-35-27-371Z.log
+[2025-08-25T19:35:27.451Z] [INFO] 🔧 To use real data, set TEST_CONFIG.useRealData = true

@@ -1,0 +1,172 @@
+[2025-08-25T20:53:11.696Z] [INFO] 🚀 Starting getAddressBalances method test...
+[2025-08-25T20:53:11.698Z] [INFO] 📋 Test 1: Get balances for all tokens
+[2025-08-25T20:53:11.699Z] [INFO] 💰 Getting balances for address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:53:11.699Z] [INFO] 🌐 Getting balances for all available tokens
+[2025-08-25T20:53:11.699Z] [INFO] 🔍 Searching for wallet with address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:53:11.699Z] [INFO] 🆕 Creating new wallet for address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:53:11.700Z] [INFO] ✅ New wallet created and configured for address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:53:11.702Z] [INFO] ✅ Wallet retrieved for address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:53:11.703Z] [INFO] ✅ Balances retrieved successfully | Data: {
+  "tokenCount": 5,
+  "tokens": [
+    "DOT",
+    "USDC",
+    "WETH",
+    "WBTC",
+    "ADA"
+  ]
+}
+[2025-08-25T20:53:11.705Z] [SUCCESS] getAddressBalances for all tokens completed | Data: {
+  "address": "5testaddress123456789012345678901234567890123456789",
+  "hasBalances": true,
+  "balanceCount": 5,
+  "allBalances": {
+    "DOT": 98.00042530207025,
+    "USDC": 3652.928825109919,
+    "WETH": 5.4051757219913785,
+    "WBTC": 1.924808118244031,
+    "ADA": 1229.804342335994
+  },
+  "totalValue": 4988.063576588219
+}
+[2025-08-25T20:53:11.707Z] [INFO] 📋 Test 2: Get balances for specific tokens (DOT, USDC)
+[2025-08-25T20:53:11.707Z] [INFO] 💰 Getting balances for address: 5anothertestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.707Z] [INFO] 🎯 Filtering by specific tokens: DOT, USDC
+[2025-08-25T20:53:11.708Z] [INFO] 🔍 Searching for wallet with address: 5anothertestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.709Z] [INFO] 🆕 Creating new wallet for address: 5anothertestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.709Z] [INFO] ✅ New wallet created and configured for address: 5anothertestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.709Z] [INFO] ✅ Wallet retrieved for address: 5anothertestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.709Z] [INFO] ✅ Balances retrieved successfully | Data: {
+  "tokenCount": 2,
+  "tokens": [
+    "DOT",
+    "USDC"
+  ]
+}
+[2025-08-25T20:53:11.710Z] [SUCCESS] getAddressBalances for specific tokens completed | Data: {
+  "address": "5anothertestaddress123456789012345678901234567890",
+  "requestedTokens": [
+    "DOT",
+    "USDC"
+  ],
+  "hasBalances": true,
+  "balanceCount": 2,
+  "returnedBalances": {
+    "DOT": 117.47243771925832,
+    "USDC": 3124.8323521960265
+  },
+  "requestedTokenCount": 2,
+  "returnedTokenCount": 2
+}
+[2025-08-25T20:53:11.712Z] [INFO] 📋 Test 3: Get balances for single token (WETH)
+[2025-08-25T20:53:11.712Z] [INFO] 💰 Getting balances for address: 5thirdtestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.712Z] [INFO] 🎯 Filtering by specific tokens: WETH
+[2025-08-25T20:53:11.713Z] [INFO] 🔍 Searching for wallet with address: 5thirdtestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.713Z] [INFO] 🆕 Creating new wallet for address: 5thirdtestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.713Z] [INFO] ✅ New wallet created and configured for address: 5thirdtestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.713Z] [INFO] ✅ Wallet retrieved for address: 5thirdtestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.713Z] [INFO] ✅ Balances retrieved successfully | Data: {
+  "tokenCount": 1,
+  "tokens": [
+    "WETH"
+  ]
+}
+[2025-08-25T20:53:11.714Z] [SUCCESS] getAddressBalances for single token completed | Data: {
+  "address": "5thirdtestaddress123456789012345678901234567890",
+  "requestedToken": "WETH",
+  "hasBalances": true,
+  "balanceCount": 1,
+  "returnedBalance": 8.311570682087126,
+  "tokenSymbol": "WETH"
+}
+[2025-08-25T20:53:11.715Z] [INFO] 📋 Test 4: Get balances for non-existent token
+[2025-08-25T20:53:11.715Z] [INFO] 💰 Getting balances for address: 5fourthtestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.716Z] [INFO] 🎯 Filtering by specific tokens: NONEXISTENT, INVALID
+[2025-08-25T20:53:11.716Z] [INFO] 🔍 Searching for wallet with address: 5fourthtestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.716Z] [INFO] 🆕 Creating new wallet for address: 5fourthtestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.716Z] [INFO] ✅ New wallet created and configured for address: 5fourthtestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.716Z] [INFO] ✅ Wallet retrieved for address: 5fourthtestaddress123456789012345678901234567890
+[2025-08-25T20:53:11.716Z] [INFO] ✅ Balances retrieved successfully | Data: {
+  "tokenCount": 0,
+  "tokens": []
+}
+[2025-08-25T20:53:11.716Z] [SUCCESS] getAddressBalances for non-existent tokens completed | Data: {
+  "address": "5fourthtestaddress123456789012345678901234567890",
+  "requestedTokens": [
+    "NONEXISTENT",
+    "INVALID"
+  ],
+  "hasBalances": true,
+  "balanceCount": 0,
+  "returnedBalances": {}
+}
+[2025-08-25T20:53:11.717Z] [INFO] 📋 Test 5: Get balances for same address again (should reuse wallet)
+[2025-08-25T20:53:11.717Z] [INFO] 💰 Getting balances for address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:53:11.717Z] [INFO] 🌐 Getting balances for all available tokens
+[2025-08-25T20:53:11.718Z] [INFO] 🔍 Searching for wallet with address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:53:11.718Z] [INFO] ✅ Found existing wallet for address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:53:11.718Z] [INFO] ✅ Wallet retrieved for address: 5testaddress123456789012345678901234567890123456789
+[2025-08-25T20:53:11.718Z] [INFO] ✅ Balances retrieved successfully | Data: {
+  "tokenCount": 5,
+  "tokens": [
+    "DOT",
+    "USDC",
+    "WETH",
+    "WBTC",
+    "ADA"
+  ]
+}
+[2025-08-25T20:53:11.718Z] [SUCCESS] getAddressBalances for same address again completed | Data: {
+  "address": "5testaddress123456789012345678901234567890123456789",
+  "hasBalances": true,
+  "balanceCount": 5,
+  "allBalances": {
+    "DOT": 146.60739156644968,
+    "USDC": 3912.937534584743,
+    "WETH": 7.912118156471873,
+    "WBTC": 1.098382242400139,
+    "ADA": 4416.823312617147
+  }
+}
+[2025-08-25T20:53:11.719Z] [INFO] 📊 Keyring state after all getAddressBalances tests:
+[2025-08-25T20:53:11.719Z] [SUCCESS] Keyring summary | Data: {
+  "totalPairs": 4,
+  "addresses": [
+    "5testaddress123456789012345678901234567890123456789",
+    "5anothertestaddress123456789012345678901234567890",
+    "5thirdtestaddress123456789012345678901234567890",
+    "5fourthtestaddress123456789012345678901234567890"
+  ],
+  "pairDetails": [
+    {
+      "address": "5testaddress123456789012345678901234567890123456789",
+      "publicKeyLength": 32,
+      "hasMnemonic": true,
+      "mnemonicLength": 4
+    },
+    {
+      "address": "5anothertestaddress123456789012345678901234567890",
+      "publicKeyLength": 32,
+      "hasMnemonic": true,
+      "mnemonicLength": 4
+    },
+    {
+      "address": "5thirdtestaddress123456789012345678901234567890",
+      "publicKeyLength": 32,
+      "hasMnemonic": true,
+      "mnemonicLength": 4
+    },
+    {
+      "address": "5fourthtestaddress123456789012345678901234567890",
+      "publicKeyLength": 32,
+      "hasMnemonic": true,
+      "mnemonicLength": 4
+    }
+  ]
+}
+[2025-08-25T20:53:11.720Z] [INFO] 📊 Test Summary | Data: {
+  "totalTests": 5,
+  "logFile": "/home/guilherme/code/hummingbot-gateway/temporary/logs/getAddressBalances-only-test-2025-08-25T20-53-11-694Z.log"
+}
+[2025-08-25T20:53:11.723Z] [SUCCESS] 🎉 All getAddressBalances tests completed successfully!
+[2025-08-25T20:53:11.724Z] [INFO] 📁 Logs saved to: /home/guilherme/code/hummingbot-gateway/temporary/logs/getAddressBalances-only-test-2025-08-25T20-53-11-694Z.log

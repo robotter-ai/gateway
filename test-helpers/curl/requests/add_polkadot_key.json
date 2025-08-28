@@ -1,0 +1,5 @@
+{
+  "privateKey": "$POLKADOT_MNEMONIC",
+  "chain": "polkadot",
+  "network": "mainnet"
+}

@@ -1,0 +1,68 @@
+[2025-08-25T20:12:11.898Z] [INFO] 🚀 Starting getKeyringPairFromMnemonic method tests...
+[2025-08-25T20:12:11.899Z] [INFO] 📋 Test 1: Get keyring pair from valid mnemonic
+[2025-08-25T20:12:11.900Z] [INFO] Mock keyring: Retrieved keyring pair from mnemonic | Data: {
+  "address": "5328d88c3",
+  "mnemonicLength": 12
+}
+[2025-08-25T20:12:11.901Z] [SUCCESS] Test 1 completed | Data: {
+  "mnemonicProvided": true,
+  "mnemonicLength": 12,
+  "keyringPairRetrieved": true,
+  "address": "5328d88c3",
+  "publicKeyLength": 32,
+  "mnemonicStored": true
+}
+[2025-08-25T20:12:11.901Z] [INFO] 📋 Test 2: Get keyring pair from different mnemonic
+[2025-08-25T20:12:11.901Z] [INFO] Mock keyring: Retrieved keyring pair from mnemonic | Data: {
+  "address": "538f0beb0",
+  "mnemonicLength": 12
+}
+[2025-08-25T20:12:11.902Z] [SUCCESS] Test 2 completed | Data: {
+  "mnemonicProvided": true,
+  "mnemonicLength": 12,
+  "keyringPairRetrieved": true,
+  "address": "538f0beb0",
+  "publicKeyLength": 32,
+  "mnemonicStored": true
+}
+[2025-08-25T20:12:11.902Z] [INFO] 📋 Test 3: Verify keyring integration
+[2025-08-25T20:12:11.902Z] [INFO] Mock keyring: Retrieved keyring pair from mnemonic | Data: {
+  "address": "569374a66",
+  "mnemonicLength": 12
+}
+[2025-08-25T20:12:11.903Z] [SUCCESS] Test 3 completed | Data: {
+  "keyringPairRetrieved": true,
+  "accountCount": 1,
+  "address": "569374a66",
+  "mnemonicStored": true
+}
+[2025-08-25T20:12:11.904Z] [INFO] 📋 Test 4: Test with short mnemonic
+[2025-08-25T20:12:11.904Z] [INFO] Mock keyring: Retrieved keyring pair from mnemonic | Data: {
+  "address": "57d48b0b4",
+  "mnemonicLength": 6
+}
+[2025-08-25T20:12:11.904Z] [SUCCESS] Test 4 completed | Data: {
+  "mnemonicProvided": true,
+  "mnemonicLength": 6,
+  "keyringPairRetrieved": true,
+  "address": "57d48b0b4",
+  "publicKeyLength": 32
+}
+[2025-08-25T20:12:11.906Z] [INFO] 📋 Test 5: Test with long mnemonic
+[2025-08-25T20:12:11.907Z] [INFO] Mock keyring: Retrieved keyring pair from mnemonic | Data: {
+  "address": "554abc999",
+  "mnemonicLength": 46
+}
+[2025-08-25T20:12:11.908Z] [SUCCESS] Test 5 completed | Data: {
+  "mnemonicProvided": true,
+  "mnemonicLength": 46,
+  "keyringPairRetrieved": true,
+  "address": "554abc999",
+  "publicKeyLength": 32
+}
+[2025-08-25T20:12:11.908Z] [INFO] 📊 Test Summary | Data: {
+  "totalTests": 5,
+  "logFile": "/home/guilherme/code/hummingbot-gateway/temporary/logs/getKeyringPairFromMnemonic-test-2025-08-25T20-12-11-897Z.log"
+}
+[2025-08-25T20:12:11.909Z] [SUCCESS] 🎉 All getKeyringPairFromMnemonic tests completed successfully!
+[2025-08-25T20:12:11.909Z] [INFO] 📁 Logs saved to: /home/guilherme/code/hummingbot-gateway/temporary/logs/getKeyringPairFromMnemonic-test-2025-08-25T20-12-11-897Z.log

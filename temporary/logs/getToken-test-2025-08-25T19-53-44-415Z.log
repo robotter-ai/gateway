@@ -1,0 +1,193 @@
+[2025-08-25T19:53:44.417Z] [INFO] 🚀 Starting getToken method tests...
+[2025-08-25T19:53:44.420Z] [INFO] 📋 Test 1: Get token by symbol (exact match)
+[2025-08-25T19:53:44.421Z] [SUCCESS] Test 1 completed | Data: {
+  "hdxFound": true,
+  "hdxSymbol": "HDX",
+  "hdxName": "HydraDX",
+  "dotFound": true,
+  "dotSymbol": "DOT",
+  "wethFound": true,
+  "duration": "0ms"
+}
+[2025-08-25T19:53:44.423Z] [TEST_RESULT] getToken_SYMBOL_EXACT | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "hdxFound": true,
+    "dotFound": true,
+    "wethFound": true,
+    "duration": 0
+  }
+}
+[2025-08-25T19:53:44.423Z] [PERFORMANCE] getToken_SYMBOL_EXACT: 0ms | Data: {
+  "tokensFound": 3
+}
+[2025-08-25T19:53:44.423Z] [INFO] 📋 Test 2: Get token by symbol (case insensitive)
+[2025-08-25T19:53:44.424Z] [SUCCESS] Test 2 completed | Data: {
+  "hdxLowerFound": true,
+  "hdxLowerSymbol": "HDX",
+  "dotUpperFound": true,
+  "dotUpperSymbol": "DOT",
+  "wethMixedFound": true,
+  "wethMixedSymbol": "WETH",
+  "duration": "0ms"
+}
+[2025-08-25T19:53:44.425Z] [TEST_RESULT] getToken_SYMBOL_CASE_INSENSITIVE | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "hdxLowerFound": true,
+    "dotUpperFound": true,
+    "wethMixedFound": true,
+    "duration": 0
+  }
+}
+[2025-08-25T19:53:44.425Z] [INFO] 📋 Test 3: Get token by address
+[2025-08-25T19:53:44.426Z] [SUCCESS] Test 3 completed | Data: {
+  "token0Found": true,
+  "token0Symbol": "HDX",
+  "token0Address": "0",
+  "token1Found": true,
+  "token1Symbol": "DOT",
+  "token2Found": true,
+  "token2Symbol": "WETH",
+  "duration": "0ms"
+}
+[2025-08-25T19:53:44.427Z] [TEST_RESULT] getToken_ADDRESS | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "token0Found": true,
+    "token1Found": true,
+    "token2Found": true,
+    "duration": 0
+  }
+}
+[2025-08-25T19:53:44.427Z] [INFO] 📋 Test 4: Get token by address (case insensitive)
+[2025-08-25T19:53:44.427Z] [SUCCESS] Test 4 completed | Data: {
+  "token0UpperFound": true,
+  "token0UpperSymbol": "HDX",
+  "token1LowerFound": true,
+  "token1LowerSymbol": "DOT",
+  "duration": "0ms"
+}
+[2025-08-25T19:53:44.429Z] [TEST_RESULT] getToken_ADDRESS_CASE_INSENSITIVE | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "token0UpperFound": true,
+    "token1LowerFound": true,
+    "duration": 0
+  }
+}
+[2025-08-25T19:53:44.429Z] [INFO] 📋 Test 5: Get non-existent token
+[2025-08-25T19:53:44.429Z] [SUCCESS] Test 5 completed | Data: {
+  "nonExistentSymbolFound": false,
+  "nonExistentAddressFound": false,
+  "emptyStringFound": false,
+  "duration": "0ms"
+}
+[2025-08-25T19:53:44.430Z] [TEST_RESULT] getToken_NON_EXISTENT | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "nonExistentSymbolFound": false,
+    "nonExistentAddressFound": false,
+    "emptyStringFound": false,
+    "duration": 0
+  }
+}
+[2025-08-25T19:53:44.430Z] [INFO] 📋 Test 6: Performance test with multiple lookups
+[2025-08-25T19:53:44.430Z] [SUCCESS] Test 6 completed | Data: {
+  "totalLookups": 200,
+  "successfulLookups": 200,
+  "successRate": "100.00%",
+  "duration": "0ms",
+  "averageDuration": "0ms"
+}
+[2025-08-25T19:53:44.431Z] [TEST_RESULT] getToken_PERFORMANCE | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "totalLookups": 200,
+    "successRate": 1,
+    "duration": 0,
+    "averageDuration": 0
+  }
+}
+[2025-08-25T19:53:44.431Z] [PERFORMANCE] getToken_MULTIPLE_LOOKUPS: 0ms | Data: {
+  "totalLookups": 200,
+  "successRate": 1
+}
+[2025-08-25T19:53:44.431Z] [INFO] 📋 Test 7: Test with dynamic token list changes
+[2025-08-25T19:53:44.431Z] [SUCCESS] Test 7 completed | Data: {
+  "newTokenFound": true,
+  "newAddressFound": true,
+  "removedTokenFound": false,
+  "finalTokenCount": 5,
+  "duration": "0ms"
+}
+[2025-08-25T19:53:44.432Z] [TEST_RESULT] getToken_DYNAMIC_CHANGES | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "newTokenFound": true,
+    "newAddressFound": true,
+    "removedTokenFound": false,
+    "finalTokenCount": 5,
+    "duration": 0
+  }
+}
+[2025-08-25T19:53:44.432Z] [INFO] 📋 Test 8: Test edge cases
+[2025-08-25T19:53:44.432Z] [SUCCESS] Test 8 completed | Data: {
+  "longSymbolFound": false,
+  "longAddressFound": false,
+  "specialSymbolFound": false,
+  "specialAddressFound": false,
+  "numberSymbolFound": false,
+  "numberAddressFound": false,
+  "duration": "0ms"
+}
+[2025-08-25T19:53:44.433Z] [TEST_RESULT] getToken_EDGE_CASES | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "longSymbolFound": false,
+    "longAddressFound": false,
+    "specialSymbolFound": false,
+    "specialAddressFound": false,
+    "numberSymbolFound": false,
+    "numberAddressFound": false,
+    "duration": 0
+  }
+}
+[2025-08-25T19:53:44.433Z] [INFO] 📋 Test 10: Comprehensive token lookup test
+[2025-08-25T19:53:44.434Z] [SUCCESS] Test 10 completed | Data: {
+  "symbolLookups": 5,
+  "symbolSuccessRate": "100.00%",
+  "addressLookups": 5,
+  "addressSuccessRate": "100.00%",
+  "duration": "1ms"
+}
+[2025-08-25T19:53:44.434Z] [TEST_RESULT] getToken_COMPREHENSIVE | Data: {
+  "result": {
+    "result": "SUCCESS",
+    "symbolLookups": 5,
+    "symbolSuccessRate": 1,
+    "addressLookups": 5,
+    "addressSuccessRate": 1,
+    "duration": 1
+  }
+}
+[2025-08-25T19:53:44.434Z] [INFO] 📊 Symbol lookup results:
+[2025-08-25T19:53:44.434Z] [INFO]   HDX: ✅ - HydraDX
+[2025-08-25T19:53:44.434Z] [INFO]   DOT: ✅ - Polkadot
+[2025-08-25T19:53:44.435Z] [INFO]   WETH: ✅ - Wrapped Ethereum
+[2025-08-25T19:53:44.435Z] [INFO]   USDC: ✅ - USD Coin
+[2025-08-25T19:53:44.435Z] [INFO]   BTC: ✅ - Bitcoin
+[2025-08-25T19:53:44.435Z] [INFO] 📊 Address lookup results:
+[2025-08-25T19:53:44.435Z] [INFO]   0: ✅ - HDX
+[2025-08-25T19:53:44.435Z] [INFO]   1: ✅ - DOT
+[2025-08-25T19:53:44.435Z] [INFO]   2: ✅ - WETH
+[2025-08-25T19:53:44.435Z] [INFO]   3: ✅ - USDC
+[2025-08-25T19:53:44.435Z] [INFO]   4: ✅ - BTC
+[2025-08-25T19:53:44.435Z] [INFO] 📊 Test Summary | Data: {
+  "totalDuration": "20ms",
+  "logFile": "/home/guilherme/code/hummingbot-gateway/temporary/logs/getToken-test-2025-08-25T19-53-44-415Z.log",
+  "totalTests": 10,
+  "testMode": "MOCK_DATA"
+}
+[2025-08-25T19:53:44.436Z] [SUCCESS] 🎉 All getToken tests completed successfully!
+[2025-08-25T19:53:44.436Z] [INFO] 📁 Logs saved to: /home/guilherme/code/hummingbot-gateway/temporary/logs/getToken-test-2025-08-25T19-53-44-415Z.log

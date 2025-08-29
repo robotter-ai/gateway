@@ -1,12 +1,12 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 
-import { Polkadot } from '../polkadot';
+import { HydrationChain } from '../hydration';
 import {
-  PolkadotEstimateGasRequest,
-  PolkadotEstimateGasResponse,
-  PolkadotEstimateGasRequestSchema,
-  PolkadotEstimateGasResponseSchema,
-} from '../polkadot.types';
+  HydrationChainEstimateGasRequest,
+  HydrationChainEstimateGasResponse,
+  HydrationChainEstimateGasRequestSchema,
+  HydrationChainEstimateGasResponseSchema,
+} from '../hydration.types';
 
 /**
  * Estimates gas (fees) for a Polkadot transaction
@@ -26,12 +26,12 @@ export async function estimateGasPolkadot(
   _fastify: FastifyInstance,
   network: string,
   gasLimit?: number,
-): Promise<PolkadotEstimateGasResponse> {
+): Promise<HydrationChainEstimateGasResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
 
-  const polkadot = await Polkadot.getInstance(network);
+  const polkadot = await HydrationChain.getInstance(network);
   return await polkadot.estimateTransactionGas(gasLimit);
 }
 
@@ -40,8 +40,8 @@ export async function estimateGasPolkadot(
  */
 export const estimateGasRoute: FastifyPluginAsync = async (fastify) => {
   fastify.post<{
-    Body: PolkadotEstimateGasRequest;
-    Reply: PolkadotEstimateGasResponse;
+    Body: HydrationChainEstimateGasRequest;
+    Reply: HydrationChainEstimateGasResponse;
   }>(
     '/estimate-gas',
     {
@@ -49,9 +49,9 @@ export const estimateGasRoute: FastifyPluginAsync = async (fastify) => {
         description: 'Estimate gas for a Polkadot transaction',
         tags: ['polkadot'],
         body: {
-          ...PolkadotEstimateGasRequestSchema,
+          ...HydrationChainEstimateGasRequestSchema,
           properties: {
-            ...PolkadotEstimateGasRequestSchema.properties,
+            ...HydrationChainEstimateGasRequestSchema.properties,
             chain: {
               type: 'string',
               enum: ['polkadot'],
@@ -62,7 +62,7 @@ export const estimateGasRoute: FastifyPluginAsync = async (fastify) => {
           },
         },
         response: {
-          200: PolkadotEstimateGasResponseSchema,
+          200: HydrationChainEstimateGasResponseSchema,
         },
       },
     },

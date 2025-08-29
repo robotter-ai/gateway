@@ -1,7 +1,7 @@
 import { FastifyPluginAsync, FastifyInstance } from 'fastify';
 
-import { Polkadot } from '../../../../chains/polkadot/polkadot';
-import { validatePolkadotAddress } from '../../../../chains/polkadot/polkadot.validators';
+import { HydrationChain } from '../../../../chains/hydration/hydration';
+import { validateHydrationAddress } from '../../../../chains/hydration/hydration.validators';
 import { RemoveLiquidityRequest } from '../../../../schemas/trading-types/amm-schema';
 import { logger } from '../../../../services/logger';
 import { Hydration } from '../../hydration';
@@ -40,9 +40,9 @@ export async function removeLiquidity(
 
   // Validate address
   try {
-    validatePolkadotAddress(walletAddress);
+    validateHydrationAddress(walletAddress);
   } catch (error) {
-    throw fastify.httpErrors.badRequest('Invalid Polkadot address');
+    throw fastify.httpErrors.badRequest('Invalid HydrationChain address');
   }
 
   // Get Hydration instance
@@ -98,10 +98,10 @@ export async function removeLiquidity(
  */
 export const removeLiquidityRoute: FastifyPluginAsync = async (fastify) => {
   // Get first wallet address for example
-  const polkadot = await Polkadot.getInstance('mainnet');
-  let firstWalletAddress = '<polkadot-wallet-address>';
+  const hydrationChain = await HydrationChain.getInstance('mainnet');
+  let firstWalletAddress = '<hydrationChain-wallet-address>';
 
-  const foundWallet = await polkadot.getFirstWalletAddress();
+  const foundWallet = await hydrationChain.getFirstWalletAddress();
   if (foundWallet) {
     firstWalletAddress = foundWallet;
   } else {

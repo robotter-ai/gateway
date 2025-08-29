@@ -20,15 +20,15 @@ import { logger } from '../../services/logger';
 import { walletPath } from '../../wallet/utils';
 import { TokenInfo } from '../ethereum/ethereum';
 
-import { Config, getPolkadotConfig } from './polkadot.config';
-import { PolkadotAccount } from './polkadot.types';
+import { Config, getHydrationConfig } from './hydration.config';
+import { HydrationChainAccount } from './hydration.types';
 import {
   Constant,
   fromBaseUnits,
   runWithRetryAndTimeout,
   sleep,
-} from './polkadot.utils';
-import { validatePolkadotAddress } from './polkadot.validators';
+} from './hydration.utils';
+import { validateHydrationAddress } from './hydration.validators';
 
 /**
  * Main class for interacting with the Polkadot blockchain.
@@ -36,7 +36,7 @@ import { validatePolkadotAddress } from './polkadot.validators';
  * This class provides methods for account management, balance queries,
  * transaction operations, and network status for Polkadot networks.
  */
-export class Polkadot {
+export class HydrationChain {
   // noinspection JSUnusedGlobalSymbols
   public wsProvider: WsProvider;
   // noinspection JSUnusedGlobalSymbols
@@ -44,14 +44,14 @@ export class Polkadot {
   // noinspection JSUnusedGlobalSymbols
   public apiPromise: ApiPromise;
   public network: string;
-  public chain: string = 'polkadot';
+  public chain: string = 'HydrationChain';
   public nativeTokenSymbol: string;
   public tokenList: TokenInfo[] = [];
   public config: Config;
   private _tokenMap: Record<string, TokenInfo> = {};
   private _keyring: Keyring;
 
-  private static _instances: { [name: string]: Polkadot } = {};
+  private static _instances: { [name: string]: HydrationChain } = {};
 
   /**
    * Private constructor - use getInstance instead
@@ -59,34 +59,34 @@ export class Polkadot {
    */
   private constructor(network: string) {
     this.network = network;
-    this.config = getPolkadotConfig('polkadot', network);
+    this.config = getHydrationConfig('HydrationChain', network);
     this.nativeTokenSymbol = this.config.network.nativeCurrencySymbol;
     this._keyring = new Keyring({ type: 'sr25519' });
   }
 
   /**
-   * Get or create an instance of the Polkadot class
+   * Get or create an instance of the HydrationChain class
    * @param network The network to connect to
-   * @returns A Promise that resolves to a Polkadot instance
+   * @returns A Promise that resolves to a HydrationChain instance
    */
-  public static async getInstance(network: string): Promise<Polkadot> {
+  public static async getInstance(network: string): Promise<HydrationChain> {
     if (!network) {
       throw new Error('Network parameter is required');
     }
 
-    if (!Polkadot._instances[network]) {
-      Polkadot._instances[network] = new Polkadot(network);
-      await Polkadot._instances[network].init();
+    if (!HydrationChain._instances[network]) {
+      HydrationChain._instances[network] = new HydrationChain(network);
+      await HydrationChain._instances[network].init();
     }
-    return Polkadot._instances[network];
+    return HydrationChain._instances[network];
   }
 
   /**
-   * Initialize the Polkadot instance
+   * Initialize the HydrationChain instance
    * @returns A Promise that resolves when initialization is complete
    */
   private async init(): Promise<void> {
-    logger.info(`Initializing Polkadot for network: ${this.network}`);
+    logger.info(`Initializing HydrationChain for network: ${this.network}`);
 
     // Wait for crypto to be ready
     await this.utilCryptoWaitReady();
@@ -102,7 +102,7 @@ export class Polkadot {
       this.config.network.tokenListType,
     );
 
-    logger.info(`Polkadot initialized for network: ${this.network}`);
+    logger.info(`HydrationChain initialized for network: ${this.network}`);
   }
 
   /**
@@ -205,14 +205,14 @@ export class Polkadot {
    * Create a new account with a generated mnemonic
    * @returns A Promise that resolves to a new account
    */
-  async createAccount(): Promise<PolkadotAccount> {
+  async createAccount(): Promise<HydrationChainAccount> {
     // Generate mnemonic
     const mnemonic = mnemonicGenerate();
 
     // Create keyring pair
     const keyringPair = this._keyring.addFromMnemonic(mnemonic);
 
-    const account: PolkadotAccount = {
+    const account: HydrationChainAccount = {
       address: keyringPair.address,
       publicKey: u8aToHex(keyringPair.publicKey),
       keyringPair,
@@ -237,7 +237,7 @@ export class Polkadot {
    */
   async getWallet(address: string): Promise<KeyringPair> {
     // Check if address is valid
-    validatePolkadotAddress(address);
+    validateHydrationAddress(address);
 
     // Look for existing pair with this address
     const existingPair = this._keyring
@@ -572,7 +572,7 @@ export class Polkadot {
    * @param address The address to check
    * @returns True if the address is valid, false otherwise
    */
-  public static validatePolkadotAddress(address: string): boolean {
+  public static validateHydrationAddress(address: string): boolean {
     try {
       decodeAddress(address);
       return true;
@@ -715,7 +715,7 @@ export class Polkadot {
    * @returns A Promise that resolves to the network status
    */
   async getNetworkStatus(): Promise<any> {
-    const chain = 'polkadot';
+    const chain = 'HydrationChain';
     const network = this.network;
     const rpcUrl = this.config.network.nodeURL;
     const nativeCurrency = this.config.network.nativeCurrencySymbol;

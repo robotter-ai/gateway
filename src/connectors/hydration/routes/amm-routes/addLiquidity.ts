@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 
-import { validatePolkadotAddress } from '../../../../chains/polkadot/polkadot.validators';
+import { validateHydrationAddress } from '../../../../chains/hydration/hydration.validators';
 import { logger } from '../../../../services/logger';
 import { Hydration } from '../../hydration';
 import {
@@ -46,7 +46,7 @@ export async function addLiquidityToHydration(
 
   // Validate wallet address
   try {
-    validatePolkadotAddress(walletAddress);
+    validateHydrationAddress(walletAddress);
   } catch (error) {
     throw fastify.httpErrors.badRequest('Invalid Polkadot address');
   }

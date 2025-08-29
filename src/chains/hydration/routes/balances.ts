@@ -1,28 +1,28 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 
-import { Polkadot } from '../polkadot';
+import { HydrationChain } from '../hydration';
 import {
-  PolkadotBalanceRequest,
-  PolkadotBalanceResponse,
-  PolkadotBalanceRequestSchema,
-  PolkadotBalanceResponseSchema,
-} from '../polkadot.types';
+  HydrationChainBalanceRequest,
+  HydrationChainBalanceResponse,
+  HydrationChainBalanceRequestSchema,
+  HydrationChainBalanceResponseSchema,
+} from '../hydration.types';
 
 /**
- * Retrieves token balances for a Polkadot address
+ * Retrieves token balances for a HydrationChain address
  *
  * @param fastify Fastify instance
  * @param network Network identifier (e.g., 'mainnet', 'westend')
- * @param address Polkadot address to check balances for
+ * @param address HydrationChain address to check balances for
  * @param tokenSymbols Optional list of specific token symbols to check
  * @returns Balance response object with token balances
  */
-export async function getPolkadotBalances(
+export async function getHydrationChainBalances(
   _fastify: FastifyInstance,
   network: string,
   address: string,
   tokenSymbols?: string[],
-): Promise<PolkadotBalanceResponse> {
+): Promise<HydrationChainBalanceResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
@@ -31,9 +31,9 @@ export async function getPolkadotBalances(
     throw new Error('Address parameter is required');
   }
 
-  const polkadot = await Polkadot.getInstance(network);
+  const hydrationChain = await HydrationChain.getInstance(network);
 
-  return await polkadot.getAddressBalances(address, tokenSymbols);
+  return await hydrationChain.getAddressBalances(address, tokenSymbols);
 }
 
 /**
@@ -41,22 +41,22 @@ export async function getPolkadotBalances(
  */
 export const balancesRoute: FastifyPluginAsync = async (fastify) => {
   fastify.post<{
-    Body: PolkadotBalanceRequest;
-    Reply: PolkadotBalanceResponse;
+    Body: HydrationChainBalanceRequest;
+    Reply: HydrationChainBalanceResponse;
   }>(
     '/balances',
     {
       schema: {
-        description: 'Get token balances for a Polkadot address',
-        tags: ['polkadot'],
-        body: PolkadotBalanceRequestSchema,
+        description: 'Get token balances for a HydrationChain address',
+        tags: ['hydrationChain'],
+        body: HydrationChainBalanceRequestSchema,
         response: {
-          200: PolkadotBalanceResponseSchema,
+          200: HydrationChainBalanceResponseSchema,
         },
       },
     },
     async (request) => {
-      const response = await getPolkadotBalances(
+      const response = await getHydrationChainBalances(
         fastify,
         request.body.network,
         request.body.address,

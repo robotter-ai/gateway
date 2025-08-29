@@ -1,12 +1,12 @@
 import { FastifyPluginAsync, FastifyInstance } from 'fastify';
 
-import { Polkadot } from '../polkadot';
+import { HydrationChain } from '../hydration';
 import {
-  PolkadotPollRequest,
-  PolkadotPollResponse,
-  PolkadotPollRequestSchema,
-  PolkadotPollResponseSchema,
-} from '../polkadot.types';
+  HydrationChainPollRequest,
+  HydrationChainPollResponse,
+  HydrationChainPollRequestSchema,
+  HydrationChainPollResponseSchema,
+} from '../hydration.types';
 
 /**
  * Polls transaction status on the Polkadot network
@@ -16,11 +16,11 @@ import {
  * @param txHash Transaction hash to poll
  * @returns Transaction status information
  */
-export async function pollPolkadotTransaction(
+export async function pollHydrationTransaction(
   _fastify: FastifyInstance,
   network: string,
   txHash: string,
-): Promise<PolkadotPollResponse> {
+): Promise<HydrationChainPollResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
@@ -29,7 +29,7 @@ export async function pollPolkadotTransaction(
     throw new Error('Transaction hash parameter is required');
   }
 
-  const polkadot = await Polkadot.getInstance(network);
+  const polkadot = await HydrationChain.getInstance(network);
   return await polkadot.pollTransaction(txHash);
 }
 
@@ -38,22 +38,22 @@ export async function pollPolkadotTransaction(
  */
 export const pollRoute: FastifyPluginAsync = async (fastify) => {
   fastify.post<{
-    Body: PolkadotPollRequest;
-    Reply: PolkadotPollResponse;
+    Body: HydrationChainPollRequest;
+    Reply: HydrationChainPollResponse;
   }>(
     '/poll',
     {
       schema: {
         description: 'Poll transaction status on Polkadot network',
         tags: ['polkadot'],
-        body: PolkadotPollRequestSchema,
+        body: HydrationChainPollRequestSchema,
         response: {
-          200: PolkadotPollResponseSchema,
+          200: HydrationChainPollResponseSchema,
         },
       },
     },
     async (request) => {
-      return await pollPolkadotTransaction(
+      return await pollHydrationTransaction(
         fastify,
         request.body.network,
         request.body.txHash,

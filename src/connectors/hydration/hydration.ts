@@ -4,9 +4,9 @@ import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { encodeAddress, decodeAddress, cryptoWaitReady } from '@polkadot/util-crypto';
 
-import { Polkadot } from '../../chains/polkadot/polkadot';
-import { runWithRetryAndTimeout } from "../../chains/polkadot/polkadot.utils";
-import { validatePolkadotAddress } from '../../chains/polkadot/polkadot.validators';
+import { HydrationChain } from '../../chains/hydration/hydration';
+import { runWithRetryAndTimeout } from "../../chains/hydration/hydration.utils";
+import { validateHydrationAddress } from '../../chains/hydration/hydration.validators';
 import { PoolItem } from '../../schemas/trading-types/amm-schema';
 import { percentRegexp } from '../../services/config-manager-v2';
 import { logger } from '../../services/logger';
@@ -42,11 +42,11 @@ const HYDRA_ADDRESS_PREFIX = 63;
 const LP_DECIMALS = 18;
 
 /**
- * Main class for interacting with the Hydration protocol on Polkadot
+ * Main class for interacting with the Hydration protocol on HydrationChain
  */
 export class Hydration {
   private static _instances: { [name: string]: Hydration } = {};
-  public polkadot: Polkadot;
+  public HydrationChain: HydrationChain;
   public config: HydrationConfig.NetworkConfig;
   // noinspection JSUnusedLocalSymbols
   private apiPromise: ApiPromise;
@@ -80,7 +80,7 @@ export class Hydration {
    */
   private async init(network: string) {
     logger.info(`Initializing Hydration for network: ${network}`);
-    this.polkadot = await Polkadot.getInstance(network);
+    this.HydrationChain = await HydrationChain.getInstance(network);
     await this.cryptoWaitReady();
     await this.getSdkContext();
     logger.info(`Hydration initialized for network: ${network}`);
@@ -92,7 +92,7 @@ export class Hydration {
    * @returns A Promise that resolves to an array of supported tokens
    */
   public getAllTokens() {
-    return this.polkadot.tokenList;
+    return this.HydrationChain.tokenList;
   }
 
   /**
@@ -117,7 +117,7 @@ export class Hydration {
 
       if (isOmnipool) {
         // For omnipool, use hub asset (H2O) as both base and quote token
-        const hubAsset = this.polkadot.getToken('H2O');
+        const hubAsset = this.HydrationChain.getToken('H2O');
         if (!hubAsset) {
           throw new Error('Hub asset (H2O) not found');
         }
@@ -137,8 +137,8 @@ export class Hydration {
       }
 
       // For regular pools, continue with existing logic
-      const baseToken = this.polkadot.getToken(poolData.tokens[0].symbol);
-      const quoteToken = this.polkadot.getToken(poolData.tokens[1].symbol);
+      const baseToken = this.HydrationChain.getToken(poolData.tokens[0].symbol);
+      const quoteToken = this.HydrationChain.getToken(poolData.tokens[1].symbol);
 
       if (!baseToken) {
         throw new Error(`Base token not found for pool ${poolAddress}: ${poolData.tokens[0].symbol}`);
@@ -225,8 +225,8 @@ export class Hydration {
     const sdkContext = await this.getSdkContext();
 
     // Get token info
-    const baseToken = this.polkadot.getToken(baseTokenSymbol);
-    const quoteToken = this.polkadot.getToken(quoteTokenSymbol);
+    const baseToken = this.HydrationChain.getToken(baseTokenSymbol);
+    const quoteToken = this.HydrationChain.getToken(quoteTokenSymbol);
 
     if (!baseToken || !quoteToken) {
       throw new Error(`Token not found: ${!baseToken ? baseTokenSymbol : quoteTokenSymbol}`);
@@ -357,8 +357,8 @@ export class Hydration {
   ): Promise<any> {
     const sdkContext = await this.getSdkContext();
 
-    const baseToken = this.polkadot.getToken(baseTokenSymbol);
-    const quoteToken = this.polkadot.getToken(quoteTokenSymbol);
+    const baseToken = this.HydrationChain.getToken(baseTokenSymbol);
+    const quoteToken = this.HydrationChain.getToken(quoteTokenSymbol);
 
     if (!baseToken || !quoteToken) {
       throw new Error(`Token not found: ${!baseToken ? baseTokenSymbol : quoteTokenSymbol}`);
@@ -403,7 +403,7 @@ export class Hydration {
 
     const { txHash, transaction } = await this.submitTransaction(apiPromise, tx, wallet);
 
-    const feePaymentToken = this.polkadot.getFeePaymentToken();
+    const feePaymentToken = this.HydrationChain.getFeePaymentToken();
 
     let fee: BigNumber;
     try {
@@ -637,7 +637,7 @@ export class Hydration {
    * @returns Token symbol
    */
   async getTokenSymbol(tokenAddress: string): Promise<string> {
-    const token = this.polkadot.getToken(tokenAddress);
+    const token = this.HydrationChain.getToken(tokenAddress);
     if (!token) {
       throw new Error(`Token not found: ${tokenAddress}`);
     }
@@ -667,7 +667,7 @@ export class Hydration {
     //
     // return this.httpProvider;
 
-    return new HttpProvider(this.polkadot.config.network.nodeURL);
+    return new HttpProvider(this.HydrationChain.config.network.nodeURL);
   }
 
   /**
@@ -680,14 +680,14 @@ export class Hydration {
     //
     // return this.wsProvider;
 
-    return new WsProvider(this.polkadot.config.network.nodeURL);
+    return new WsProvider(this.HydrationChain.config.network.nodeURL);
   }
 
   /**
    * Get the appropriate provider based on the URL scheme
    */
   public getProvider(): WsProvider | HttpProvider {
-    if (this.polkadot.config.network.nodeURL.startsWith('http')) {
+    if (this.HydrationChain.config.network.nodeURL.startsWith('http')) {
       return this.getHttpProvider();
     } else {
       return this.getWsProvider();
@@ -758,10 +758,10 @@ export class Hydration {
   }
 
   /**
-   * Get Polkadot instance with retry capability
+   * Get HydrationChain instance with retry capability
    */
   @runWithRetryAndTimeout()
-  public async polkadotGetInstance(target: typeof Polkadot, network: string): Promise<Polkadot> {
+  public async hydrationChainGetInstance(target: typeof HydrationChain, network: string): Promise<HydrationChain> {
     return await target.getInstance(network);
   }
 
@@ -808,7 +808,7 @@ export class Hydration {
     quoteTokenSymbol?: string
   ): Promise<HydrationAddLiquidityResponse> {
     // Get wallet
-    const wallet = await this.polkadot.getWallet(walletAddress);
+    const wallet = await this.HydrationChain.getWallet(walletAddress);
 
     // Get pool info
     const pool = await this.getPoolInfo(poolId);
@@ -830,7 +830,7 @@ export class Hydration {
     }
 
     // Check balances with transaction buffer
-    const balances = await this.polkadot.getBalance(wallet, [baseTokenSymbol, quoteTokenSymbol]);
+    const balances = await this.HydrationChain.getBalance(wallet, [baseTokenSymbol, quoteTokenSymbol]);
     const requiredBase = baseTokenAmount;
     const requiredQuote = quoteTokenAmount;
 
@@ -850,8 +850,8 @@ export class Hydration {
 
     logger.info(`Adding liquidity to pool ${poolId}: ${baseTokenAmount.toFixed(4)} ${baseTokenSymbol}, ${quoteTokenAmount.toFixed(4)} ${quoteTokenSymbol}`);
 
-    const baseToken = this.polkadot.getToken(baseTokenSymbol);
-    const quoteToken = this.polkadot.getToken(quoteTokenSymbol);
+    const baseToken = this.HydrationChain.getToken(baseTokenSymbol);
+    const quoteToken = this.HydrationChain.getToken(quoteTokenSymbol);
 
     if (!baseToken || !quoteToken) {
       throw new Error(`Asset not found: ${!baseToken ? baseTokenSymbol : quoteTokenSymbol}`);
@@ -938,7 +938,7 @@ export class Hydration {
 
     const { txHash, transaction } = await this.submitTransaction(apiPromise, addLiquidityTx, wallet, poolType);
 
-    const feePaymentToken = this.polkadot.getFeePaymentToken();
+    const feePaymentToken = this.HydrationChain.getFeePaymentToken();
 
     let fee: BigNumber;
     try {
@@ -1153,7 +1153,7 @@ export class Hydration {
     tokenAddresses = tokenAddresses.map(address => address.toLowerCase());
 
     const allTokenAddresses = tokenAddresses
-      .concat(tokenSymbols.map(symbol => this.polkadot.getToken(symbol).address.toLowerCase()))
+      .concat(tokenSymbols.map(symbol => this.HydrationChain.getToken(symbol).address.toLowerCase()))
       .sort((a, b) => a.localeCompare(b));
 
     // Get all pools and token mappings
@@ -1366,8 +1366,8 @@ export class Hydration {
     }
 
     // Get the wallet
-    const polkadot = await this.polkadotGetInstance(Polkadot, network);
-    const wallet = await polkadot.getWallet(walletAddress);
+    const hydrationChain = await this.hydrationChainGetInstance(HydrationChain, network);
+    const wallet = await hydrationChain.getWallet(walletAddress);
 
     const effectiveSlippage = this.getSlippagePercentage(slippagePct);
 
@@ -1416,7 +1416,7 @@ export class Hydration {
       case POOL_TYPE.XYK: {
         const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
         const baseSymbol = await this.getTokenSymbol(poolInfo.baseTokenAddress);
-        const baseToken = this.polkadot.getToken(baseSymbol);
+        const baseToken = this.HydrationChain.getToken(baseSymbol);
         lpMint = {
           address: shareTokenId.toString(),
           decimals: baseToken?.decimals || 0
@@ -1433,7 +1433,7 @@ export class Hydration {
       }
 
       case POOL_TYPE.OMNIPOOL: {
-        const hubAsset = await this.polkadot.getToken('H2O');
+        const hubAsset = await this.HydrationChain.getToken('H2O');
         lpMint = {
           address: hubAsset?.address || '',
           decimals: hubAsset?.decimals || 0
@@ -1486,7 +1486,7 @@ export class Hydration {
     }
 
     // Get wallet
-    const wallet = await this.polkadot.getWallet(walletAddress);
+    const wallet = await this.HydrationChain.getWallet(walletAddress);
 
     // Get pool info
     const pool = await this.getPoolInfo(poolAddress);
@@ -1507,8 +1507,8 @@ export class Hydration {
     switch (poolType) {
       case POOL_TYPE.XYK: {
         const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
-        const baseToken = this.polkadot.getToken(pool.baseTokenAddress);
-        const quoteToken = this.polkadot.getToken(pool.quoteTokenAddress);
+        const baseToken = this.HydrationChain.getToken(pool.baseTokenAddress);
+        const quoteToken = this.HydrationChain.getToken(pool.quoteTokenAddress);
 
         if (!baseToken || !quoteToken) {
           throw new Error(`Token not found: ${!baseToken ? pool.baseTokenAddress : pool.quoteTokenAddress}`);
@@ -1602,8 +1602,8 @@ export class Hydration {
           throw new Error(`Could not find pool data for ${shareTokenId}`);
         }
 
-        const baseToken = this.polkadot.getToken(pool.baseTokenAddress);
-        const quoteToken = this.polkadot.getToken(pool.quoteTokenAddress);
+        const baseToken = this.HydrationChain.getToken(pool.baseTokenAddress);
+        const quoteToken = this.HydrationChain.getToken(pool.quoteTokenAddress);
 
         if (!baseToken || !quoteToken) {
           throw new Error(`Token not found: ${!baseToken ? pool.baseTokenAddress : pool.quoteTokenAddress}`);
@@ -1725,7 +1725,7 @@ export class Hydration {
 
     const { txHash, transaction } = await this.submitTransaction(apiPromise, removeLiquidityTx, wallet, poolType);
 
-    const feePaymentToken = this.polkadot.getFeePaymentToken();
+    const feePaymentToken = this.HydrationChain.getFeePaymentToken();
     let fee: BigNumber;
     try {
       fee = new BigNumber(transaction.events
@@ -1848,7 +1848,7 @@ export class Hydration {
     if (!walletAddress) {
       throw new Error('Wallet address parameter is required');
     }
-    validatePolkadotAddress(walletAddress);
+    validateHydrationAddress(walletAddress);
 
     // Convert wallet address to Hydration format
     const hydraWalletAddress = encodeAddress(
@@ -1888,7 +1888,7 @@ export class Hydration {
     // Ensure valid quote token
     if (
       !poolInfo.quoteTokenAddress ||
-      poolInfo.quoteTokenAddress === this.polkadot.getNativeToken().address
+      poolInfo.quoteTokenAddress === this.HydrationChain.getNativeToken().address
     ) {
       if (poolData.tokens.length > 1) {
         poolInfo.quoteTokenAddress = poolData.tokens[1].id.toString();

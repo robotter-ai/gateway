@@ -14,7 +14,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 // Routes
 import { chainRoutes } from './chains/chain.routes';
 import { ethereumRoutes } from './chains/ethereum/ethereum.routes';
-import { polkadotRoutes } from './chains/polkadot/polkadot.routes';
+import { hydrationChainRoutes } from './chains/hydration/hydration.routes';
 import { solanaRoutes } from './chains/solana/solana.routes';
 import { configRoutes } from './config/config.routes';
 import { connectorsRoutes } from './connectors/connector.routes';
@@ -222,7 +222,7 @@ const configureGatewayServer = () => {
     // Register chain routes
     app.register(solanaRoutes, { prefix: '/chains/solana' });
     app.register(ethereumRoutes, { prefix: '/chains/ethereum' });
-    app.register(polkadotRoutes, { prefix: '/chains/polkadot' });
+    app.register(hydrationChainRoutes, { prefix: '/chains/polkadot' });
   };
 
   // Register routes on main server

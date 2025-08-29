@@ -46,12 +46,12 @@ import {
 } from '@polkadot/types/lookup';
 import Fastify from 'fastify';
 
-import { Polkadot } from '../../src/chains/polkadot/polkadot';
-import { balancesRoute } from '../../src/chains/polkadot/routes/balances';
-import { estimateGasRoute } from '../../src/chains/polkadot/routes/estimate-gas';
-import { pollRoute } from '../../src/chains/polkadot/routes/poll';
-import { statusRoute } from '../../src/chains/polkadot/routes/status';
-import { tokensRoute } from '../../src/chains/polkadot/routes/tokens';
+import { Hydration } from '../../src/chains/hydration/polkadot';
+import { balancesRoute } from '../../src/chains/hydration/routes/balances';
+import { estimateGasRoute } from '../../src/chains/hydration/routes/estimate-gas';
+import { pollRoute } from '../../src/chains/hydration/routes/poll';
+import { statusRoute } from '../../src/chains/hydration/routes/status';
+import { tokensRoute } from '../../src/chains/hydration/routes/tokens';
 import { ConfigManagerCertPassphrase } from '../../src/services/config-manager-cert-passphrase';
 
 const MOCK_API = {
@@ -125,13 +125,13 @@ const CHAIN_NETWORK = 'mainnet';
 const MOCK_ADDRESS_WALLET = '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty';
 
 const MockDecrypt = () => {
-  jest.spyOn(Polkadot.prototype, 'decrypt').mockImplementation(async () => {
+  jest.spyOn(Hydration.prototype, 'decrypt').mockImplementation(async () => {
     return 'seed sock milk update focus rotate barely fade car face mechanic mercy';
   });
 };
 
 const MockAxiosGet = () => {
-  jest.spyOn(Polkadot.prototype, 'axiosGet').mockResolvedValue({
+  jest.spyOn(Hydration.prototype, 'axiosGet').mockResolvedValue({
     data: [{ symbol: 'DOT', name: 'Polkadot', decimals: 10, id: '0x1' }],
   });
 };
@@ -144,14 +144,14 @@ const MockBalances = () => {
   };
 };
 const MockAxiosPost = () => {
-  jest.spyOn(Polkadot.prototype, 'axiosPost').mockResolvedValue({
+  jest.spyOn(Hydration.prototype, 'axiosPost').mockResolvedValue({
     data: { data: { success: true, fee: '1000000' } },
   });
 };
 
 const MockfsReadFile = () => {
   jest
-    .spyOn(Polkadot.prototype, 'fsReadFile')
+    .spyOn(Hydration.prototype, 'fsReadFile')
     .mockImplementation((path: string) => {
       const pathStr = path?.toString?.() || '';
 
@@ -185,7 +185,7 @@ networks:
 
 const MockapiPromiseTx = () => {
   jest
-    .spyOn(Polkadot.prototype, 'apiPromiseTx')
+    .spyOn(Hydration.prototype, 'apiPromiseTx')
     .mockImplementation(
       () =>
         MOCK_API.tx as unknown as Promise<
@@ -202,14 +202,14 @@ const MockReadPassphrase = () => {
 
 const MockapiPromiseErrors = () => {
   jest
-    .spyOn(Polkadot.prototype, 'apiPromiseErrors')
+    .spyOn(Hydration.prototype, 'apiPromiseErrors')
     .mockReturnValue(
       MOCK_API.errors as unknown as Promise<ModuleErrors<ApiTypes>>,
     );
 };
 const MockapiPromiseCreate = () => {
   jest
-    .spyOn(Polkadot.prototype, 'apiPromiseCreate')
+    .spyOn(Hydration.prototype, 'apiPromiseCreate')
     .mockResolvedValue(MOCK_API as unknown as ApiPromise);
 };
 

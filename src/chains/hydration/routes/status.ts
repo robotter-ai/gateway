@@ -1,12 +1,12 @@
 import { FastifyPluginAsync, FastifyInstance } from 'fastify';
 
-import { Polkadot } from '../polkadot';
+import { HydrationChain } from '../hydration';
 import {
-  PolkadotStatusRequest,
-  PolkadotStatusResponse,
-  PolkadotStatusRequestSchema,
-  PolkadotStatusResponseSchema,
-} from '../polkadot.types';
+  HydrationChainStatusRequest,
+  HydrationChainStatusResponse,
+  HydrationChainStatusRequestSchema,
+  HydrationChainPollResponseSchema,
+} from '../hydration.types';
 
 /**
  * Gets network status information from the Polkadot blockchain
@@ -15,15 +15,15 @@ import {
  * @param network Network identifier (e.g., 'mainnet', 'westend')
  * @returns Network status information
  */
-export async function getPolkadotStatus(
+export async function getHydrationStatus(
   _fastify: FastifyInstance,
   network: string,
-): Promise<PolkadotStatusResponse> {
+): Promise<HydrationChainStatusResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
 
-  const polkadot = await Polkadot.getInstance(network);
+  const polkadot = await HydrationChain.getInstance(network);
   return await polkadot.getNetworkStatus();
 }
 
@@ -32,22 +32,22 @@ export async function getPolkadotStatus(
  */
 export const statusRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
-    Querystring: PolkadotStatusRequest;
-    Reply: PolkadotStatusResponse;
+    Querystring: HydrationChainStatusRequest;
+    Reply: HydrationChainStatusResponse;
   }>(
     '/status',
     {
       schema: {
         description: 'Get Polkadot network status',
         tags: ['polkadot'],
-        querystring: PolkadotStatusRequestSchema,
+        querystring: HydrationChainStatusRequestSchema,
         response: {
-          200: PolkadotStatusResponseSchema,
+          200: HydrationChainPollResponseSchema,
         },
       },
     },
     async (request) => {
-      return await getPolkadotStatus(fastify, request.query.network);
+      return await getHydrationStatus(fastify, request.query.network);
     },
   );
 };

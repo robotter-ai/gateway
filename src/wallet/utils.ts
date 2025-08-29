@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import fse from 'fs-extra';
 
 import { Ethereum } from '../chains/ethereum/ethereum';
-import { Polkadot } from '../chains/polkadot/polkadot';
+import { HydrationChain } from '../chains/hydration/hydration';
 import { Solana } from '../chains/solana/solana';
 import { ConfigManagerCertPassphrase } from '../services/config-manager-cert-passphrase';
 import {
@@ -32,7 +32,7 @@ export function sanitizePathComponent(input: string): string {
 // Validate chain name against known chains to prevent injection
 export function validateChainName(chain: string): boolean {
   if (!chain) return false;
-  return ['ethereum', 'solana', 'polkadot'].includes(chain.toLowerCase());
+  return ['ethereum', 'solana', 'hydrationChain'].includes(chain.toLowerCase());
 }
 
 // Get safe path for wallet files, with chain and address validation
@@ -114,7 +114,7 @@ export async function addWallet(
         req.privateKey,
         passphrase,
       );
-    } else if (connection instanceof Polkadot) {
+    } else if (connection instanceof HydrationChain) {
       address = connection
         .getKeyringPairFromMnemonic(req.privateKey)
         .address.toString();
@@ -166,8 +166,8 @@ export async function removeWallet(
       validatedAddress = Ethereum.validateAddress(req.address);
     } else if (req.chain.toLowerCase() === 'solana') {
       validatedAddress = Solana.validateAddress(req.address);
-    } else if (req.chain.toLowerCase() === 'polkadot') {
-      validatedAddress = req.address; // Polkadot addresses are already validated in the chain class
+    } else if (req.chain.toLowerCase() === 'hydrationChain') {
+      validatedAddress = req.address; // ydrationChain addresses are already validated in the chain class
     } else {
       // This should not happen due to validateChainName check, but just in case
       throw new Error(`Unsupported chain: ${req.chain}`);
@@ -213,8 +213,8 @@ export async function signMessage(
       validatedAddress = Ethereum.validateAddress(req.address);
     } else if (req.chain.toLowerCase() === 'solana') {
       validatedAddress = Solana.validateAddress(req.address);
-    } else if (req.chain.toLowerCase() === 'polkadot') {
-      validatedAddress = req.address; // Polkadot addresses are already validated in the chain class
+    } else if (req.chain.toLowerCase() === 'hydrationChain') {
+      validatedAddress = req.address; // HydrationChain addresses are already validated in the chain class
     } else {
       throw new Error(`Unsupported chain: ${req.chain}`);
     }
@@ -282,7 +282,7 @@ export async function getWallets(
     await mkdirIfDoesNotExist(walletPath);
 
     // Get only valid chain directories
-    const validChains = ['ethereum', 'solana', 'polkadot'];
+    const validChains = ['ethereum', 'solana', 'hydrationChain'];
     const allDirs = await getDirectories(walletPath);
     const chains = allDirs.filter((dir) =>
       validChains.includes(dir.toLowerCase()),
@@ -306,8 +306,8 @@ export async function getWallets(
             } else if (chain.toLowerCase() === 'solana') {
               // Basic Solana address length check
               return address.length >= 32 && address.length <= 44;
-            } else if (chain.toLowerCase() === 'polkadot') {
-              // Basic Polkadot address length check
+            } else if (chain.toLowerCase() === 'hydrationChain') {
+              // Basic HydrationChain address length check
               return address.length >= 32 && address.length <= 48;
             }
             return false;

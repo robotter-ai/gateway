@@ -2,10 +2,10 @@ import { TokenListType } from '../../services/base';
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
 
 /**
- * Configuration for a Polkadot network
+ * Configuration for a HydrationChain network
  */
 interface NetworkConfig {
-  /** URL of the Polkadot node RPC endpoint */
+  /** URL of the HydrationChain node RPC endpoint */
   nodeURL: string;
   /** URL for transaction lookup service */
   transactionURL: string;
@@ -20,7 +20,7 @@ interface NetworkConfig {
 }
 
 /**
- * Complete Polkadot configuration
+ * Complete HydrationChain configuration
  */
 export interface Config {
   /** Network-specific configuration */
@@ -28,13 +28,13 @@ export interface Config {
 }
 
 /**
- * Retrieves the configuration for a specified Polkadot network
+ * Retrieves the configuration for a specified HydrationChain network
  *
- * @param chainName The name of the chain (e.g., 'polkadot')
+ * @param chainName The name of the chain (e.g., 'HydrationChain')
  * @param networkName The name of the network (e.g., 'mainnet', 'westend')
  * @returns Configuration object for the specified network
  */
-export function getPolkadotConfig(
+export function getHydrationConfig(
   chainName: string,
   networkName: string,
 ): Config {

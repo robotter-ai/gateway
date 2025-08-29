@@ -49,7 +49,7 @@ jest.mock('@polkadot/util-crypto', () => ({
   cryptoWaitReady: jest.fn().mockResolvedValue(true),
 }));
 
-jest.mock('../../../src/chains/polkadot/polkadot.validators', () => ({
+jest.mock('../../../src/chains/hydration/hydration.validators', () => ({
   validatePolkadotAddress: jest.fn().mockReturnValue(true),
 }));
 
@@ -282,7 +282,7 @@ const _MOCK_API = {
   disconnect: jest.fn().mockResolvedValue(undefined),
 };
 
-jest.mock('../../../src/chains/polkadot/polkadot', () => ({
+jest.mock('../../../src/chains/hydration/polkadot', () => ({
   Polkadot: {
     getInstance: jest.fn().mockResolvedValue({
       config: {

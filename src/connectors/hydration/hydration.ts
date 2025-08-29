@@ -24,7 +24,8 @@ import {
   LiquidityQuote,
   PositionStrategyType,
   SwapQuote,
-  SwapRoute
+  SwapRoute,
+  HydrationToken
 } from './hydration.types';
 
 // Pool types
@@ -404,14 +405,8 @@ export class Hydration {
     const { txHash, transaction } = await this.submitTransaction(apiPromise, tx, wallet);
 
     const feePaymentToken = this.HydrationChain.getFeePaymentToken();
-
-    let fee: BigNumber;
-    try {
-      fee = new BigNumber(transaction.events.map((it: any) => it.toHuman()).filter((it: any) => it.event.method == 'TransactionFeePaid')[0].event.data.actualFee.toString().replaceAll(',', '')).dividedBy(Math.pow(10, feePaymentToken.decimals));
-    } catch (error) {
-      logger.error(`It was not possible to extract the fee from the transaction:`, error);
-      fee = new BigNumber(Number.NaN);
-    }
+    
+    const fee = this.getFee(feePaymentToken, transaction);
 
     const tradeHuman = trade.toHuman();
 
@@ -448,6 +443,18 @@ export class Hydration {
     }
 
     return new BigNumber(actualSlippagePercentage).multipliedBy(new BigNumber(100));
+  }
+
+  getFee(feePaymentToken: HydrationToken, transaction: any) {
+      let fee: BigNumber;
+      try {
+          fee = new BigNumber(transaction.events.map((it: any) => it.toHuman()).filter((it: any) => it.event.method == 'TransactionFeePaid')[0].event.data.actualFee.toString().replaceAll(',', '')).dividedBy(Math.pow(10, feePaymentToken.decimals));
+      } catch (error) {
+          logger.error(`It was not possible to extract the fee from the transaction:`, error);
+          fee = new BigNumber(Number.NaN);
+      }
+
+      return fee;
   }
 
   /**

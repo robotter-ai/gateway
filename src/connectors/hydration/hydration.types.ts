@@ -556,3 +556,19 @@ export interface HydrationCLMMPositionInfo extends HydrationPositionInfo {
   tickLower: number;
   tickUpper: number;
 }
+
+/**
+ * Represents a token in the Hydration ecosystem
+ */
+export interface HydrationToken {
+  /** The token symbol (e.g., 'H2O', 'USDC') */
+  symbol: string;
+  /** The token address/ID */
+  address: string;
+  /** The number of decimal places for the token */
+  decimals: number;
+  /** Optional token name */
+  name?: string;
+  /** Optional token logo/icon URL */
+  logo?: string;
+}

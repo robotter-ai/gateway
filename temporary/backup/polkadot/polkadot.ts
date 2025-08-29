@@ -1,6 +1,6 @@
 import LRUCache from 'lru-cache';
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
-import { getPolkadotConfiguration } from './polkadot.config';
+import { getHydrationChainConfiguration } from './polkadot.config';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 // noinspection ES6PreferShortImport
 import { TokenListType, walletPath } from '../../services/base';
@@ -45,7 +45,7 @@ export class Polkadot {
     assetListType: AssetListTypeAlias,
     assetListSource: string,
   ) {
-    const config = getPolkadotConfiguration(network);
+    const config = getHydrationChainConfiguration(network);
     this._network = network;
     this.nativeTokenSymbol = config.nativeCurrencySymbol;
     this.nodeUrl = nodeUrl;
@@ -98,7 +98,7 @@ export class Polkadot {
   }
 
   public static getInstance(network: string): Polkadot {
-    const config = getPolkadotConfiguration(network);
+    const config = getHydrationChainConfiguration(network);
     if (!Polkadot._instances) {
       Polkadot._instances = new LRUCache<string, Polkadot>({
         max: config.network.maximumLRUCacheInstances,

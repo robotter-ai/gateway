@@ -53,7 +53,7 @@ export namespace HydrationConfig {
     allowedSlippage: configManager.get('hydration.allowedSlippage'),
     priorityLevel: configManager.get('hydration.priorityLevel'),
     tradingTypes: ['amm', 'swap'],
-    availableNetworks: [{ chain: 'polkadot', networks: ['mainnet'] }],
+    availableNetworks: [{ chain: 'hydrationChain', networks: ['mainnet'] }],
     feePaymentCurrencySymbol: configManager.get(
       'hydration.feePaymentCurrencySymbol',
     ),
@@ -63,6 +63,6 @@ export namespace HydrationConfig {
   };
 
   // Direct properties matching core-2.6
-  export const chain = 'polkadot';
+  export const chain = 'hydrationChain';
   export const networks = ['mainnet'];
 }

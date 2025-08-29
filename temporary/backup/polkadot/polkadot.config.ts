@@ -9,27 +9,27 @@ export interface NetworkConfiguration {
   assetListSource: string;
 }
 
-export interface PolkadotConfiguration {
+export interface HydrationChainConfiguration {
   network: NetworkConfiguration;
   nativeCurrencySymbol: string;
 }
 
 const DEFAULT_MAX_LRU_CACHE_INSTANCES = 10;
 
-export function getPolkadotConfiguration(
+export function getHydrationChainConfiguration(
   network: string,
-): PolkadotConfiguration {
+): HydrationChainConfiguration {
   const configManager = ConfigManagerV2.getInstance();
 
-  const nodeURL = configManager.get(`polkadot.networks.${network}.nodeURL`);
+  const nodeURL = configManager.get(`hydrationChain.networks.${network}.nodeURL`);
   const assetListType = configManager.get(
-    `polkadot.networks.${network}.assetListType`,
+    `hydrationChain.networks.${network}.assetListType`,
   );
   const assetListSource = configManager.get(
-    `polkadot.networks.${network}.assetListSource`,
+    `hydrationChain.networks.${network}.assetListSource`,
   );
   const nativeCurrencySymbol = configManager.get(
-    `polkadot.nativeCurrencySymbol`,
+    `hydrationChain.nativeCurrencySymbol`,
   );
 
   return {

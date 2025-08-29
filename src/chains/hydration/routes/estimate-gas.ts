@@ -9,10 +9,10 @@ import {
 } from '../hydration.types';
 
 /**
- * Estimates gas (fees) for a Polkadot transaction
+ * Estimates gas (fees) for a HydrationChain transaction
  *
- * For Polkadot networks, this provides fee estimation information including:
- * - Gas price (usually 0 as Polkadot uses weight-based fees)
+ * For HydrationChain networks, this provides fee estimation information including:
+ * - Gas price (usually 0 as HydrationChain uses weight-based fees)
  * - Gas price token (native currency symbol)
  * - Gas limit (if specified)
  * - Gas cost estimate
@@ -22,7 +22,7 @@ import {
  * @param gasLimit Optional gas limit for the transaction
  * @returns Gas estimation information
  */
-export async function estimateGasPolkadot(
+export async function estimateGasHydrationChain(
   _fastify: FastifyInstance,
   network: string,
   gasLimit?: number,
@@ -31,8 +31,8 @@ export async function estimateGasPolkadot(
     throw new Error('Network parameter is required');
   }
 
-  const polkadot = await HydrationChain.getInstance(network);
-  return await polkadot.estimateTransactionGas(gasLimit);
+  const hydrationChain = await HydrationChain.getInstance(network);
+  return await hydrationChain.estimateTransactionGas(gasLimit);
 }
 
 /**
@@ -46,16 +46,16 @@ export const estimateGasRoute: FastifyPluginAsync = async (fastify) => {
     '/estimate-gas',
     {
       schema: {
-        description: 'Estimate gas for a Polkadot transaction',
-        tags: ['polkadot'],
+        description: 'Estimate gas for a HydrationChain transaction',
+        tags: ['HydrationChain'],
         body: {
           ...HydrationChainEstimateGasRequestSchema,
           properties: {
             ...HydrationChainEstimateGasRequestSchema.properties,
             chain: {
               type: 'string',
-              enum: ['polkadot'],
-              examples: ['polkadot'],
+              enum: ['HydrationChain'],
+              examples: ['HydrationChain'],
             },
             network: { type: 'string', examples: ['mainnet', 'westend'] },
             gasLimit: { type: 'number', examples: [100000] },
@@ -69,7 +69,7 @@ export const estimateGasRoute: FastifyPluginAsync = async (fastify) => {
     async (request) => {
       const { network, gasLimit } = request.body;
 
-      return await estimateGasPolkadot(fastify, network, gasLimit);
+      return await estimateGasHydrationChain(fastify, network, gasLimit);
     },
   );
 };

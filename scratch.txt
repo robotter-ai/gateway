@@ -1,0 +1,5 @@
+Change the configuration unifying them, renaming polkadot to hydration
+Double check if there's not hardcoded information about the fees (extract the fee calculation of fee)
+Add a runWithRetryAndTimeout mechanism to try to submit the transaction several times
+Fix the positionInfo and positionsOwned endpoints for omnipools
+Alterar a mensagem do client que pede para informar a private key para informar o mnemonic

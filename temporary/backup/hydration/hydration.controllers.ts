@@ -8,7 +8,7 @@ import {
   TradeResponse,
 } from '../../amm/amm.requests';
 // noinspection ES6PreferShortImport
-import { Polkadot } from '../../chains/polkadot/polkadot';
+import { HydrationChain } from '../../chains/hydration/hydration';
 // noinspection ES6PreferShortImport
 import {
   HttpException,
@@ -30,7 +30,7 @@ import Decimal from 'decimal.js-light';
 import { logger } from '../../services/logger';
 
 export async function price(
-  polkadot: Polkadot,
+  hydrationChain: HydrationChain,
   hydration: Hydration,
   req: PriceRequest,
 ): Promise<PriceResponse> {
@@ -59,7 +59,7 @@ export async function price(
   }
 
   return {
-    network: polkadot.network,
+    network:   hydrationChain.network,
     timestamp: startTimestamp,
     latency: latency(startTimestamp, Date.now()),
     base: req.base,
@@ -68,16 +68,16 @@ export async function price(
     rawAmount: req.amount,
     expectedAmount: tradeHuman.amountOut,
     price: tradeHuman.spotPrice,
-    gasPrice: polkadot.gasPrice,
-    gasPriceToken: polkadot.nativeTokenSymbol,
-    gasLimit: polkadot.gasLimit,
+    gasPrice:   hydrationChain.gasPrice,
+    gasPriceToken:   hydrationChain.nativeTokenSymbol,
+    gasLimit:   hydrationChain.gasLimit,
     gasCost: tradeHuman.tradeFee,
     gasWanted: null,
   } as PriceResponse;
 }
 
 export async function trade(
-  polkadot: Polkadot,
+  polkadot: HydrationChain,
   hydration: Hydration,
   req: TradeRequest,
 ): Promise<TradeResponse> {
@@ -157,7 +157,7 @@ export async function trade(
 }
 
 export async function estimateGas(
-  polkadot: Polkadot,
+  polkadot: HydrationChain,
   _hydration: Hydration,
 ): Promise<EstimateGasResponse> {
   return {

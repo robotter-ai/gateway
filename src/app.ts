@@ -65,7 +65,7 @@ const swaggerOptions = {
       // Chains
       { name: 'solana', description: 'Solana chain endpoints' },
       { name: 'ethereum', description: 'Ethereum chain endpoints' },
-      { name: 'polkadot', description: 'Polkadot chain endpoints' },
+      { name: 'hydrationChain', description: 'hydrationChain chain endpoints' },
 
       // Connectors
       { name: 'jupiter', description: 'Jupiter DEX aggregator (Solana)' },
@@ -95,7 +95,7 @@ const swaggerOptions = {
       },
       {
         name: 'hydration/amm',
-        description: 'Hydration AMM connector (Polkadot)',
+        description: 'Hydration AMM connector (hydrationChain)',
       },
     ],
     components: {
@@ -222,7 +222,7 @@ const configureGatewayServer = () => {
     // Register chain routes
     app.register(solanaRoutes, { prefix: '/chains/solana' });
     app.register(ethereumRoutes, { prefix: '/chains/ethereum' });
-    app.register(hydrationChainRoutes, { prefix: '/chains/polkadot' });
+    app.register(hydrationChainRoutes, { prefix: '/chains/hydrationChain' });
   };
 
   // Register routes on main server

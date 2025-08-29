@@ -9,7 +9,7 @@ import {
 } from '../hydration.types';
 
 /**
- * Polls transaction status on the Polkadot network
+ * Polls transaction status on the HydrationChain network
  *
  * @param fastify Fastify instance
  * @param network Network identifier (e.g., 'mainnet', 'westend')
@@ -29,8 +29,8 @@ export async function pollHydrationTransaction(
     throw new Error('Transaction hash parameter is required');
   }
 
-  const polkadot = await HydrationChain.getInstance(network);
-  return await polkadot.pollTransaction(txHash);
+  const hydrationChain = await HydrationChain.getInstance(network);
+  return await hydrationChain.pollTransaction(txHash);
 }
 
 /**
@@ -44,8 +44,8 @@ export const pollRoute: FastifyPluginAsync = async (fastify) => {
     '/poll',
     {
       schema: {
-        description: 'Poll transaction status on Polkadot network',
-        tags: ['polkadot'],
+        description: 'Poll transaction status on HydrationChain network',
+        tags: ['HydrationChain'],
         body: HydrationChainPollRequestSchema,
         response: {
           200: HydrationChainPollResponseSchema,

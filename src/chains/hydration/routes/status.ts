@@ -9,7 +9,7 @@ import {
 } from '../hydration.types';
 
 /**
- * Gets network status information from the Polkadot blockchain
+ * Gets network status information from the HydrationChain blockchain
  *
  * @param fastify Fastify instance
  * @param network Network identifier (e.g., 'mainnet', 'westend')
@@ -23,8 +23,8 @@ export async function getHydrationStatus(
     throw new Error('Network parameter is required');
   }
 
-  const polkadot = await HydrationChain.getInstance(network);
-  return await polkadot.getNetworkStatus();
+  const hydrationChain = await HydrationChain.getInstance(network);
+  return await hydrationChain.getNetworkStatus();
 }
 
 /**
@@ -38,8 +38,8 @@ export const statusRoute: FastifyPluginAsync = async (fastify) => {
     '/status',
     {
       schema: {
-        description: 'Get Polkadot network status',
-        tags: ['polkadot'],
+        description: 'Get HydrationChain network status',
+        tags: ['hydrationChain'],
         querystring: HydrationChainStatusRequestSchema,
         response: {
           200: HydrationChainPollResponseSchema,

@@ -665,11 +665,11 @@ export class Hydration {
   }
 
   /**
-   * Gets the HTTP provider for the Polkadot node
+   * Gets the HTTP provider for the HydrationChain node
    */
   public getHttpProvider(): HttpProvider {
     // if (!this.httpProvider) {
-    //   this.httpProvider = new HttpProvider(this.polkadot.config.network.nodeURL);
+    //   this.httpProvider = new HttpProvider(this.HydrationChain.config.network.nodeURL);
     // }
     //
     // return this.httpProvider;
@@ -678,11 +678,11 @@ export class Hydration {
   }
 
   /**
-   * Gets the WebSocket provider for the Polkadot node
+   * Gets the WebSocket provider for the HydrationChain node
    */
   public getWsProvider(): WsProvider {
     // if (!this.wsProvider) {
-    //   this.wsProvider = new WsProvider(this.polkadot.config.network.nodeURL);
+    //   this.wsProvider = new WsProvider(this.HydrationChain.config.network.nodeURL);
     // }
     //
     // return this.wsProvider;
@@ -1798,7 +1798,7 @@ export class Hydration {
         hydraWalletAddress,
         // Try with SS58 format 42 (generic Substrate)
         encodeAddress(decodeAddress(walletAddress), 42),
-        // Try with SS58 format 0 (Polkadot)
+        // Try with SS58 format 0 (HydrationChain)
         encodeAddress(decodeAddress(walletAddress), 0)
       ];
 

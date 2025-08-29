@@ -994,6 +994,7 @@ export class Hydration {
    * @returns Transaction hash if successful
    * @throws Error if transaction fails
    */
+  @runWithRetryAndTimeout()
   private async submitTransaction(api: any, tx: any, wallet: any, poolType?: string): Promise<{ txHash: string, transaction: any }> {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return new Promise<{ txHash: string, transaction: any }>(async (resolve, reject) => {

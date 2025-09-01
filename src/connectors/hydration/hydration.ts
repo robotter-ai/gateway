@@ -986,6 +986,24 @@ export class Hydration {
   }
 
   /**
+   * Submit a transaction to the network
+   * @param tx Transaction to submit
+   * @param wallet Wallet to sign the transaction
+   * @param statusHandler Status handler
+   * @returns Unsubscribe function
+   */
+  private async submitTransactionToNetwork(tx: any, wallet: any, statusHandler: any): Promise<() => void> {
+    try {
+      logger.info(`Submitting transaction...`);
+      return await tx.signAndSend(wallet, statusHandler);
+    } catch (error) {
+      const fallbackHash = tx.hex || tx.hash?.toHex?.() || 'unknown';
+      logger.error(`Exception during transaction submission: ${error.message}`);
+      throw new Error(`Transaction ${fallbackHash} submission failed: ${error.message}`);
+    }
+  }
+
+  /**
    * Submit a transaction and wait for it to be included in a block
    * @param api Polkadot API instance
    * @param tx Transaction to submit
@@ -994,7 +1012,7 @@ export class Hydration {
    * @returns Transaction hash if successful
    * @throws Error if transaction fails
    */
-  @runWithRetryAndTimeout()
+
   private async submitTransaction(api: any, tx: any, wallet: any, poolType?: string): Promise<{ txHash: string, transaction: any }> {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return new Promise<{ txHash: string, transaction: any }>(async (resolve, reject) => {
@@ -1060,7 +1078,7 @@ export class Hydration {
 
       try {
         logger.info(`Submitting transaction...`);
-        unsub = await tx.signAndSend(wallet, statusHandler);
+        unsub = await this.submitTransactionToNetwork(tx, wallet, statusHandler);
       } catch (error) {
         const fallbackHash = tx.hex || tx.hash?.toHex?.() || 'unknown';
         logger.error(`Exception during transaction submission: ${error.message}`);
@@ -1068,6 +1086,7 @@ export class Hydration {
       }
     });
   }
+
 
   /**
    * Extract a meaningful error message from a dispatch error

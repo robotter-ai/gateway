@@ -992,6 +992,7 @@ export class Hydration {
    * @param statusHandler Status handler
    * @returns Unsubscribe function
    */
+  @runWithRetryAndTimeout()
   private async submitTransactionToNetwork(tx: any, wallet: any, statusHandler: any): Promise<() => void> {
     try {
       logger.info(`Submitting transaction...`);

@@ -42,7 +42,7 @@ export async function getInitializedChain<_T>(
  */
 export function getSupportedChains(): string[] {
   // These should match the chains in getChainInstance
-  return ['ethereum', 'solana', 'HydrationChain'];
+  return ['ethereum', 'solana', 'hydrationChain'];
 }
 
 export async function getChainInstance(
@@ -56,7 +56,7 @@ export async function getChainInstance(
     connection = await Ethereum.getInstance(network);
   } else if (chainLower === 'solana') {
     connection = await Solana.getInstance(network);
-  } else if (chainLower === 'HydrationChain') {
+  } else if (chainLower === 'hydrationchain') {
     connection = await HydrationChain.getInstance(network);
   } else {
     connection = undefined;

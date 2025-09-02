@@ -25,7 +25,7 @@ import {
   PositionStrategyType,
   SwapQuote,
   SwapRoute,
-  HydrationToken
+  HydrationToken,
 } from './hydration.types';
 
 // Pool types
@@ -39,8 +39,14 @@ const POOL_TYPE = {
 
 // Hydration-specific constants
 const HYDRA_ADDRESS_PREFIX = 63;
-
+const HUB_SYMBOL = 'H2O';
 const LP_DECIMALS = 18;
+const DEFAULT_OMNIPOOL_FEE = 500 / 10000;
+const DEFAULT_OMNIPOOL_PRICE = 1;
+const STABLECOIN_MIN_PRICE = 0.5;
+const STABLECOIN_MAX_PRICE = 2.0;
+const STABLECOIN_DEFAULT_PRICE = 1.0;
+const DEFAULT_PERCENTAGE = 100;
 
 /**
  * Main class for interacting with the Hydration protocol on HydrationChain
@@ -118,7 +124,7 @@ export class Hydration {
 
       if (isOmnipool) {
         // For omnipool, use hub asset (H2O) as both base and quote token
-        const hubAsset = this.HydrationChain.getToken('H2O');
+        const hubAsset = this.HydrationChain.getToken(HUB_SYMBOL);
         if (!hubAsset) {
           throw new Error('Hub asset (H2O) not found');
         }
@@ -127,8 +133,8 @@ export class Hydration {
           address: poolData.address,
           baseTokenAddress: hubAsset.address,
           quoteTokenAddress: hubAsset.address,
-          feePct: 500 / 10000, // Default fee for omnipool
-          price: 1, // Default price for omnipool
+          feePct: DEFAULT_OMNIPOOL_FEE, // Default fee for omnipool
+          price: DEFAULT_OMNIPOOL_PRICE, // Default price for omnipool
           baseTokenAmount: 0,
           quoteTokenAmount: 0,
           poolType: POOL_TYPE.OMNIPOOL,
@@ -191,7 +197,7 @@ export class Hydration {
         address: poolData.address,
         baseTokenAddress: baseToken.address,
         quoteTokenAddress: quoteToken.address,
-        feePct: 500 / 10000,
+        feePct: DEFAULT_OMNIPOOL_FEE,
         price: poolPrice,
         baseTokenAmount,
         quoteTokenAmount,
@@ -278,8 +284,8 @@ export class Hydration {
         price = estimatedAmountIn.dividedBy(estimatedAmountOut);
       }
 
-      if (price.lt(new BigNumber(0.5)) || price.gt(new BigNumber(2.0))) {
-        price = (new BigNumber(1.0)).plus((estimatedAmountIn.minus(estimatedAmountOut)).dividedBy(BigNumber.max(estimatedAmountIn, estimatedAmountOut)));
+      if (price.lt(new BigNumber(STABLECOIN_MIN_PRICE)) || price.gt(new BigNumber(STABLECOIN_MAX_PRICE))) {
+        price = (new BigNumber(STABLECOIN_DEFAULT_PRICE)).plus((estimatedAmountIn.minus(estimatedAmountOut)).dividedBy(BigNumber.max(estimatedAmountIn, estimatedAmountOut)));
         logger.warn(`Adjusting unreasonable stablecoin price (${estimatedAmountIn}/${estimatedAmountOut}) to ${price}`);
       }
     } else {
@@ -299,17 +305,17 @@ export class Hydration {
 
     if (side === 'BUY') {
       minAmountOut = estimatedAmountOut;
-      maxAmountIn = estimatedAmountIn.multipliedBy((new BigNumber(100)).plus(effectiveSlippage).dividedBy(new BigNumber(100)));
+      maxAmountIn = estimatedAmountIn.multipliedBy((new BigNumber(DEFAULT_PERCENTAGE)).plus(effectiveSlippage).dividedBy(new BigNumber(DEFAULT_PERCENTAGE)));
     } else {
       maxAmountIn = estimatedAmountIn;
-      minAmountOut = estimatedAmountOut.multipliedBy((new BigNumber(100)).minus(effectiveSlippage).dividedBy(new BigNumber(100)));
+      minAmountOut = estimatedAmountOut.multipliedBy((new BigNumber(DEFAULT_PERCENTAGE)).minus(effectiveSlippage).dividedBy(new BigNumber(DEFAULT_PERCENTAGE)));
     }
 
     const route: SwapRoute[] = tradeHuman.swaps.map(swap => ({
       poolAddress: swap.poolAddress,
       baseToken,
       quoteToken,
-      percentage: swap.tradeFeePct || 100
+      percentage: swap.tradeFeePct || DEFAULT_PERCENTAGE
     }));
 
     const gasPrice = this.config.gasPrice;
@@ -391,7 +397,7 @@ export class Hydration {
     const effectiveSlippage = this.getSlippagePercentage(slippagePct);
     
     // Use the new SDK TxBuilderFactory to create transaction
-    const slippagePercentage = effectiveSlippage.dividedBy(100).toNumber(); // Convert to decimal
+    const slippagePercentage = effectiveSlippage.dividedBy(DEFAULT_PERCENTAGE).toNumber(); // Convert to decimal
     
     const builtTx = await sdkContext.tx.trade(trade)
       .withBeneficiary(wallet.address)
@@ -431,7 +437,7 @@ export class Hydration {
     if (slippagePercentage === null || slippagePercentage === undefined) {
       actualSlippagePercentage = this.config.allowedSlippage;
     } else {
-      actualSlippagePercentage = new BigNumber(slippagePercentage.toString()).dividedBy(new BigNumber(100)).toString();
+      actualSlippagePercentage = new BigNumber(slippagePercentage.toString()).dividedBy(new BigNumber(DEFAULT_PERCENTAGE)).toString();
     }
 
     if (actualSlippagePercentage.includes('/')) {
@@ -442,7 +448,7 @@ export class Hydration {
       actualSlippagePercentage = actualSlippagePercentage.toString();
     }
 
-    return new BigNumber(actualSlippagePercentage).multipliedBy(new BigNumber(100));
+    return new BigNumber(actualSlippagePercentage).multipliedBy(new BigNumber(DEFAULT_PERCENTAGE));
   }
 
   getFee(feePaymentToken: HydrationToken, transaction: any) {
@@ -972,7 +978,7 @@ export class Hydration {
    * @returns Maximum amount with slippage applied
    */
   private calculateMaxAmountIn(amount: BigNumber, slippagePct: BigNumber): BigNumber {
-    return amount.multipliedBy(((new BigNumber(100)).plus(slippagePct)).dividedBy(100)).integerValue(BigNumber.ROUND_DOWN);
+    return amount.multipliedBy(((new BigNumber(DEFAULT_PERCENTAGE)).plus(slippagePct)).dividedBy(new BigNumber(DEFAULT_PERCENTAGE))).integerValue(BigNumber.ROUND_DOWN);
   }
 
   /**
@@ -982,7 +988,7 @@ export class Hydration {
    * @returns Minimum amount with slippage applied
    */
   private calculateMinSharesLimit(amount: BigNumber, slippagePct: BigNumber): BigNumber {
-    return amount.multipliedBy(((new BigNumber(100)).minus(slippagePct)).dividedBy(100)).integerValue(BigNumber.ROUND_DOWN);
+    return amount.multipliedBy(((new BigNumber(DEFAULT_PERCENTAGE)).minus(slippagePct)).dividedBy(new BigNumber(DEFAULT_PERCENTAGE))).integerValue(BigNumber.ROUND_DOWN);
   }
 
   /**
@@ -1353,8 +1359,8 @@ export class Hydration {
       baseLimited: amountType === 'base',
       baseTokenAmount: finalBaseAmount.toNumber(),
       quoteTokenAmount: finalQuoteAmount.toNumber(),
-      baseTokenAmountMax: finalBaseAmount.multipliedBy((new BigNumber(100)).plus(effectiveSlippage).dividedBy(new BigNumber(100))).toNumber(),
-      quoteTokenAmountMax: finalQuoteAmount.multipliedBy((new BigNumber(100)).plus(effectiveSlippage).dividedBy(new BigNumber(100))).toNumber()
+      baseTokenAmountMax: finalBaseAmount.multipliedBy((new BigNumber(DEFAULT_PERCENTAGE)).plus(effectiveSlippage).dividedBy(new BigNumber(DEFAULT_PERCENTAGE))).toNumber(),
+      quoteTokenAmountMax: finalQuoteAmount.multipliedBy((new BigNumber(DEFAULT_PERCENTAGE)).plus(effectiveSlippage).dividedBy(new BigNumber(DEFAULT_PERCENTAGE))).toNumber()
     };
   }
 
@@ -1509,7 +1515,7 @@ export class Hydration {
     percentageToRemove: number,
     tokenId?: string | number
   ): Promise<HydrationRemoveLiquidityResponse> {
-    if (percentageToRemove <= 0 || percentageToRemove > 100) {
+    if (percentageToRemove <= 0 || percentageToRemove > DEFAULT_PERCENTAGE) {
       throw new Error('Percentage to remove must be between 0 and 100');
     }
 
@@ -1553,7 +1559,7 @@ export class Hydration {
 
         totalUserSharesInThePool = new BigNumber(freeBalance);
         const percentageToRemoveBN = BigNumber(percentageToRemove.toString());
-        userSharesToRemove = percentageToRemoveBN.multipliedBy(totalUserSharesInThePool).dividedBy(100).integerValue(BigNumber.ROUND_DOWN);
+        userSharesToRemove = percentageToRemoveBN.multipliedBy(totalUserSharesInThePool).dividedBy(DEFAULT_PERCENTAGE).integerValue(BigNumber.ROUND_DOWN);
 
         if (userSharesToRemove.lte(0)) {
           throw new Error(`Calculated liquidity to remove is zero.`);
@@ -1616,7 +1622,7 @@ export class Hydration {
 
         totalUserSharesInThePool = new BigNumber(freeBalance);
         const percentageToRemoveBN = BigNumber(percentageToRemove.toString());
-        userSharesToRemove = percentageToRemoveBN.multipliedBy(totalUserSharesInThePool).dividedBy(100).integerValue(BigNumber.ROUND_DOWN);
+        userSharesToRemove = percentageToRemoveBN.multipliedBy(totalUserSharesInThePool).dividedBy(DEFAULT_PERCENTAGE).integerValue(BigNumber.ROUND_DOWN);
 
         if (userSharesToRemove.lte(0)) {
           throw new Error(`Calculated liquidity to remove is zero.`);
@@ -1700,7 +1706,7 @@ export class Hydration {
                 totalShares: acc.totalShares.plus(shares),
                 totalAmount: acc.totalAmount.plus(amount),
                 totalSharesToRemove: acc.totalSharesToRemove.plus(
-                  shares.multipliedBy(percentageToRemove).dividedBy(100)
+                  shares.multipliedBy(percentageToRemove).dividedBy(DEFAULT_PERCENTAGE)
                 )
               };
             },

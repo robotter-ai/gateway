@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import fse from 'fs-extra';
 
 import { Ethereum } from '../chains/ethereum/ethereum';
-import { HydrationChain } from '../chains/hydration/hydration';
+import { Hydration as HydrationChain } from '../chains/hydration/hydration';
 import { Solana } from '../chains/solana/solana';
 import { ConfigManagerCertPassphrase } from '../services/config-manager-cert-passphrase';
 import {

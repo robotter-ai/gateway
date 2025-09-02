@@ -17,7 +17,7 @@ import {
 /**
  * Represents a Hydration account with its address and keys
  */
-export interface HydrationChainAccount {
+export interface HydrationAccount {
   /** The public address of the account */
   address: string;
   /** The public key in hex format */
@@ -27,115 +27,115 @@ export interface HydrationChainAccount {
 }
 
 /**
- * HydrationChain balance request schema
+ * Hydration balance request schema
  */
-export const HydrationChainBalanceRequestSchema = Type.Composite(
+export const HydrationBalanceRequestSchema = Type.Composite(
   [BalanceRequestSchema],
-  { $id: 'HydrationChainBalanceRequest' },
+  { $id: 'HydrationBalanceRequest' },
 );
-export type HydrationChainBalanceRequest = Static<
-  typeof HydrationChainBalanceRequestSchema
+export type HydrationBalanceRequest = Static<
+  typeof HydrationBalanceRequestSchema
 >;
 
 /**
- * HydrationChain balance response schema
+ * Hydration balance response schema
  */
-export const HydrationChainBalanceResponseSchema = Type.Composite(
+export const HydrationBalanceResponseSchema = Type.Composite(
   [BalanceResponseSchema],
-  { $id: 'HydrationChainBalanceResponse' },
+  { $id: 'HydrationBalanceResponse' },
 );
-export type HydrationChainBalanceResponse = Static<
-  typeof HydrationChainBalanceResponseSchema
+export type HydrationBalanceResponse = Static<
+  typeof HydrationBalanceResponseSchema
 >;
 
 /**
- * HydrationChain estimate gas request schema
+ * Hydration estimate gas request schema
  */
-export const HydrationChainEstimateGasRequestSchema = Type.Composite(
+export const HydrationEstimateGasRequestSchema = Type.Composite(
   [EstimateGasRequestSchema],
-  { $id: 'HydrationChainEstimateGasRequest' },
+  { $id: 'HydrationEstimateGasRequest' },
 );
-export type HydrationChainEstimateGasRequest = Static<
-  typeof HydrationChainEstimateGasRequestSchema
+export type HydrationEstimateGasRequest = Static<
+  typeof HydrationEstimateGasRequestSchema
 >;
 
 /**
- * HydrationChain estimate gas response schema
+ * Hydration estimate gas response schema
  */
-export const HydrationChainEstimateGasResponseSchema = Type.Composite(
+export const HydrationEstimateGasResponseSchema = Type.Composite(
   [EstimateGasResponseSchema],
-  { $id: 'HydrationChainEstimateGasResponse' },
+  { $id: 'HydrationEstimateGasResponse' },
 );
-export type HydrationChainEstimateGasResponse = Static<
-  typeof HydrationChainEstimateGasResponseSchema
+export type HydrationEstimateGasResponse = Static<
+  typeof HydrationEstimateGasResponseSchema
 >;
 
 /**
- * HydrationChain poll request schema
+ * Hydration poll request schema
  */
-export const HydrationChainPollRequestSchema = Type.Composite(
+export const HydrationPollRequestSchema = Type.Composite(
   [PollRequestSchema],
   {
-    $id: 'HydrationChainPollRequest',
+    $id: 'HydrationPollRequest',
   },
 );
-export type HydrationChainPollRequest = Static<
-  typeof HydrationChainPollRequestSchema
+export type HydrationPollRequest = Static<
+  typeof HydrationPollRequestSchema
 >;
 
 /**
- * HydrationChain poll response schema
+ * Hydration poll response schema
  */
-export const HydrationChainPollResponseSchema = Type.Composite(
+export const HydrationPollResponseSchema = Type.Composite(
   [PollResponseSchema],
   {
-    $id: 'HydrationChainPollResponse',
+    $id: 'HydrationPollResponse',
   },
 );
-export type HydrationChainPollResponse = Static<
-  typeof HydrationChainPollResponseSchema
+export type HydrationPollResponse = Static<
+  typeof HydrationPollResponseSchema
 >;
 
 /**
- * HydrationChain status request schema
+ * Hydration status request schema
  */
-export const HydrationChainStatusRequestSchema = Type.Composite(
+export const HydrationStatusRequestSchema = Type.Composite(
   [StatusRequestSchema],
-  { $id: 'HydrationChainStatusRequest' },
+  { $id: 'HydrationStatusRequest' },
 );
-export type HydrationChainStatusRequest = Static<
-  typeof HydrationChainStatusRequestSchema
+export type HydrationStatusRequest = Static<
+  typeof HydrationStatusRequestSchema
 >;
 
 /**
- * HydrationChain status response schema
+ * Hydration status response schema
  */
-export const HydrationChainStatusResponseSchema = Type.Composite(
+export const HydrationStatusResponseSchema = Type.Composite(
   [StatusResponseSchema],
-  { $id: 'HydrationChainStatusResponse' },
+  { $id: 'HydrationStatusResponse' },
 );
-export type HydrationChainStatusResponse = Static<
-  typeof HydrationChainStatusResponseSchema
+export type HydrationStatusResponse = Static<
+  typeof HydrationStatusResponseSchema
 >;
 
 /**
- * HydrationChain tokens request schema
+ * Hydration tokens request schema
  */
-export const HydrationChainTokensRequestSchema = Type.Composite(
+export const HydrationTokensRequestSchema = Type.Composite(
   [TokensRequestSchema],
-  { $id: 'HydrationChainTokensRequest' },
+  { $id: 'HydrationTokensRequest' },
 );
-export type HydrationChainTokensRequest = Static<
-  typeof HydrationChainTokensRequestSchema
+export type HydrationTokensRequest = Static<
+  typeof HydrationTokensRequestSchema
 >;
 
 /**
- * HydrationChain tokens response schema
+ * Hydration tokens response schema
  */
-export const HydrationChainTokensResponseSchema = Type.Composite(
+export const HydrationTokensResponseSchema = Type.Composite(
   [TokensResponseSchema],
-  { $id: 'HydrationChainTokensResponse' },
+  { $id: 'HydrationTokensResponse' },
 );
-export type HydrationChainTokensResponse = Static<
-  typeof HydrationChainTokensResponseSchema
+export type HydrationTokensResponse = Static<
+  typeof HydrationTokensResponseSchema
 >;

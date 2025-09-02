@@ -1,28 +1,28 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 
-import { HydrationChain } from '../hydration';
+import { Hydration } from '../hydration';
 import {
-  HydrationChainBalanceRequest,
-  HydrationChainBalanceResponse,
-  HydrationChainBalanceRequestSchema,
-  HydrationChainBalanceResponseSchema,
+  HydrationBalanceRequest,
+  HydrationBalanceResponse,
+  HydrationBalanceRequestSchema,
+  HydrationBalanceResponseSchema,
 } from '../hydration.types';
 
 /**
- * Retrieves token balances for a HydrationChain address
+ * Retrieves token balances for a Hydration address
  *
  * @param fastify Fastify instance
  * @param network Network identifier (e.g., 'mainnet', 'westend')
- * @param address HydrationChain address to check balances for
+ * @param address Hydration address to check balances for
  * @param tokenSymbols Optional list of specific token symbols to check
  * @returns Balance response object with token balances
  */
-export async function getHydrationChainBalances(
+export async function getHydrationBalances(
   _fastify: FastifyInstance,
   network: string,
   address: string,
   tokenSymbols?: string[],
-): Promise<HydrationChainBalanceResponse> {
+): Promise<HydrationBalanceResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
@@ -31,9 +31,9 @@ export async function getHydrationChainBalances(
     throw new Error('Address parameter is required');
   }
 
-  const hydrationChain = await HydrationChain.getInstance(network);
+  const hydration = await Hydration.getInstance(network);
 
-  return await hydrationChain.getAddressBalances(address, tokenSymbols);
+  return await hydration.getAddressBalances(address, tokenSymbols);
 }
 
 /**
@@ -41,22 +41,22 @@ export async function getHydrationChainBalances(
  */
 export const balancesRoute: FastifyPluginAsync = async (fastify) => {
   fastify.post<{
-    Body: HydrationChainBalanceRequest;
-    Reply: HydrationChainBalanceResponse;
+    Body: HydrationBalanceRequest;
+    Reply: HydrationBalanceResponse;
   }>(
     '/balances',
     {
       schema: {
-        description: 'Get token balances for a HydrationChain address',
-        tags: ['hydrationChain'],
-        body: HydrationChainBalanceRequestSchema,
+        description: 'Get token balances for a Hydration address',
+        tags: ['hydration'],
+        body: HydrationBalanceRequestSchema,
         response: {
-          200: HydrationChainBalanceResponseSchema,
+          200: HydrationBalanceResponseSchema,
         },
       },
     },
     async (request) => {
-      const response = await getHydrationChainBalances(
+      const response = await getHydrationBalances(
         fastify,
         request.body.network,
         request.body.address,

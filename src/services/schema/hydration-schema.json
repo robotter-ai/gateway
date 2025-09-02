@@ -2,6 +2,10 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
+      "allowedSlippage": {
+        "type": "string",
+        "description": "How much the execution price is allowed to move unfavorably from the trade execution price (format: '1/100')"
+      },
         "networks": {
             "type": "object",
             "patternProperties": {
@@ -31,10 +35,6 @@
                         "feePaymentCurrencySymbol": {
                             "type": "string",
                             "description": "Symbol of the currency used for fee payment"
-                        },
-                        "allowedSlippage": {
-                            "type": "string",
-                            "description": "How much the execution price is allowed to move unfavorably from the trade execution price (format: '1/100')"
                         }
                     },
                     "required": [
@@ -43,8 +43,7 @@
                         "tokenListType",
                         "tokenListSource",
                         "nativeCurrencySymbol",
-                        "feePaymentCurrencySymbol",
-                        "allowedSlippage"
+                        "feePaymentCurrencySymbol"
                     ],
                     "additionalProperties": false
                 }
@@ -54,6 +53,7 @@
     },
     "additionalProperties": false,
     "required": [
-        "networks"
+      "networks",
+      "allowedSlippage"
     ]
 }

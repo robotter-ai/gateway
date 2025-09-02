@@ -1,3 +1,4 @@
+allowedSlippage: '1/100'
 networks:
   mainnet:
     nodeURL: 'wss://rpc.hydradx.cloud'
@@ -6,4 +7,3 @@ networks:
     tokenListSource: 'src/templates/lists/hydration.json'
     nativeCurrencySymbol: 'HDX'
     feePaymentCurrencySymbol: 'HDX'
-    allowedSlippage: '1/100'

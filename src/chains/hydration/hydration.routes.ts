@@ -16,7 +16,7 @@ import { tokensRoute } from './routes/tokens';
  * - POST /poll - Transaction status polling
  * - POST /estimate-gas - Gas estimation for transactions
  */
-export const hydrationChainRoutes: FastifyPluginAsync = async (fastify) => {
+export const hydrationRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.register(statusRoute);
   fastify.register(tokensRoute);
   fastify.register(balancesRoute);
@@ -24,4 +24,4 @@ export const hydrationChainRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.register(estimateGasRoute);
 };
 
-export default hydrationChainRoutes;
+export default hydrationRoutes;

@@ -1,15 +1,15 @@
 import { FastifyPluginAsync, FastifyInstance } from 'fastify';
 
-import { HydrationChain } from '../hydration';
+import { Hydration } from '../hydration';
 import {
-  HydrationChainStatusRequest,
-  HydrationChainStatusResponse,
-  HydrationChainStatusRequestSchema,
-  HydrationChainPollResponseSchema,
+  HydrationStatusRequest,
+  HydrationStatusResponse,
+  HydrationStatusRequestSchema,
+  HydrationPollResponseSchema,
 } from '../hydration.types';
 
 /**
- * Gets network status information from the HydrationChain blockchain
+ * Gets network status information from the Hydration blockchain
  *
  * @param fastify Fastify instance
  * @param network Network identifier (e.g., 'mainnet', 'westend')
@@ -18,13 +18,13 @@ import {
 export async function getHydrationStatus(
   _fastify: FastifyInstance,
   network: string,
-): Promise<HydrationChainStatusResponse> {
+): Promise<HydrationStatusResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
 
-  const hydrationChain = await HydrationChain.getInstance(network);
-  return await hydrationChain.getNetworkStatus();
+  const hydration = await Hydration.getInstance(network);
+  return await hydration.getNetworkStatus();
 }
 
 /**
@@ -32,17 +32,17 @@ export async function getHydrationStatus(
  */
 export const statusRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
-    Querystring: HydrationChainStatusRequest;
-    Reply: HydrationChainStatusResponse;
+    Querystring: HydrationStatusRequest;
+    Reply: HydrationStatusResponse;
   }>(
     '/status',
     {
       schema: {
-        description: 'Get HydrationChain network status',
-        tags: ['hydrationChain'],
-        querystring: HydrationChainStatusRequestSchema,
+        description: 'Get Hydration network status',
+        tags: ['hydration'],
+        querystring: HydrationStatusRequestSchema,
         response: {
-          200: HydrationChainPollResponseSchema,
+          200: HydrationPollResponseSchema,
         },
       },
     },

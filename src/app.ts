@@ -14,7 +14,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 // Routes
 import { chainRoutes } from './chains/chain.routes';
 import { ethereumRoutes } from './chains/ethereum/ethereum.routes';
-import { hydrationChainRoutes } from './chains/hydration/hydration.routes';
+import { hydrationRoutes as hydrationChainRoutes } from './chains/hydration/hydration.routes';
 import { solanaRoutes } from './chains/solana/solana.routes';
 import { configRoutes } from './config/config.routes';
 import { connectorsRoutes } from './connectors/connector.routes';
@@ -65,7 +65,7 @@ const swaggerOptions = {
       // Chains
       { name: 'solana', description: 'Solana chain endpoints' },
       { name: 'ethereum', description: 'Ethereum chain endpoints' },
-      { name: 'hydrationChain', description: 'hydrationChain chain endpoints' },
+      { name: 'hydrationChain', description: 'HydrationChain chain endpoints' },
 
       // Connectors
       { name: 'jupiter', description: 'Jupiter DEX aggregator (Solana)' },
@@ -95,7 +95,7 @@ const swaggerOptions = {
       },
       {
         name: 'hydration/amm',
-        description: 'Hydration AMM connector (hydrationChain)',
+        description: 'Hydration AMM connector (hydration)',
       },
     ],
     components: {

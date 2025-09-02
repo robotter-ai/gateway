@@ -1,6 +1,6 @@
 import { FastifyPluginAsync, FastifyInstance } from 'fastify';
 
-import { HydrationChain } from '../../../../chains/hydration/hydration';
+import { Hydration as HydrationChain } from '../../../../chains/hydration/hydration';
 import { validateHydrationAddress } from '../../../../chains/hydration/hydration.validators';
 import { RemoveLiquidityRequest } from '../../../../schemas/trading-types/amm-schema';
 import { logger } from '../../../../services/logger';

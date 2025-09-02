@@ -1,15 +1,15 @@
 import { FastifyPluginAsync, FastifyInstance } from 'fastify';
 
-import { HydrationChain } from '../hydration';
+import { Hydration } from '../hydration';
 import {
-  HydrationChainPollRequest,
-  HydrationChainPollResponse,
-  HydrationChainPollRequestSchema,
-  HydrationChainPollResponseSchema,
+  HydrationPollRequest,
+  HydrationPollResponse,
+  HydrationPollRequestSchema,
+  HydrationPollResponseSchema,
 } from '../hydration.types';
 
 /**
- * Polls transaction status on the HydrationChain network
+ * Polls transaction status on the Hydration network
  *
  * @param fastify Fastify instance
  * @param network Network identifier (e.g., 'mainnet', 'westend')
@@ -20,7 +20,7 @@ export async function pollHydrationTransaction(
   _fastify: FastifyInstance,
   network: string,
   txHash: string,
-): Promise<HydrationChainPollResponse> {
+): Promise<HydrationPollResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
@@ -29,8 +29,8 @@ export async function pollHydrationTransaction(
     throw new Error('Transaction hash parameter is required');
   }
 
-  const hydrationChain = await HydrationChain.getInstance(network);
-  return await hydrationChain.pollTransaction(txHash);
+  const hydration = await Hydration.getInstance(network);
+  return await hydration.pollTransaction(txHash);
 }
 
 /**
@@ -38,17 +38,17 @@ export async function pollHydrationTransaction(
  */
 export const pollRoute: FastifyPluginAsync = async (fastify) => {
   fastify.post<{
-    Body: HydrationChainPollRequest;
-    Reply: HydrationChainPollResponse;
+    Body: HydrationPollRequest;
+    Reply: HydrationPollResponse;
   }>(
     '/poll',
     {
       schema: {
-        description: 'Poll transaction status on HydrationChain network',
-        tags: ['HydrationChain'],
-        body: HydrationChainPollRequestSchema,
+        description: 'Poll transaction status on Hydration network',
+        tags: ['hydration'],
+        body: HydrationPollRequestSchema,
         response: {
-          200: HydrationChainPollResponseSchema,
+          200: HydrationPollResponseSchema,
         },
       },
     },

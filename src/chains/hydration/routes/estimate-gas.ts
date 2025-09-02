@@ -1,18 +1,18 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 
-import { HydrationChain } from '../hydration';
+import { Hydration } from '../hydration';
 import {
-  HydrationChainEstimateGasRequest,
-  HydrationChainEstimateGasResponse,
-  HydrationChainEstimateGasRequestSchema,
-  HydrationChainEstimateGasResponseSchema,
+  HydrationEstimateGasRequest,
+  HydrationEstimateGasResponse,
+  HydrationEstimateGasRequestSchema,
+  HydrationEstimateGasResponseSchema,
 } from '../hydration.types';
 
 /**
- * Estimates gas (fees) for a HydrationChain transaction
+ * Estimates gas (fees) for a Hydration transaction
  *
- * For HydrationChain networks, this provides fee estimation information including:
- * - Gas price (usually 0 as HydrationChain uses weight-based fees)
+ * For Hydration networks, this provides fee estimation information including:
+ * - Gas price (usually 0 as Hydration uses weight-based fees)
  * - Gas price token (native currency symbol)
  * - Gas limit (if specified)
  * - Gas cost estimate
@@ -22,17 +22,17 @@ import {
  * @param gasLimit Optional gas limit for the transaction
  * @returns Gas estimation information
  */
-export async function estimateGasHydrationChain(
+export async function estimateGasHydration(
   _fastify: FastifyInstance,
   network: string,
   gasLimit?: number,
-): Promise<HydrationChainEstimateGasResponse> {
+): Promise<HydrationEstimateGasResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
 
-  const hydrationChain = await HydrationChain.getInstance(network);
-  return await hydrationChain.estimateTransactionGas(gasLimit);
+  const hydration = await Hydration.getInstance(network);
+  return await hydration.estimateTransactionGas(gasLimit);
 }
 
 /**
@@ -40,36 +40,36 @@ export async function estimateGasHydrationChain(
  */
 export const estimateGasRoute: FastifyPluginAsync = async (fastify) => {
   fastify.post<{
-    Body: HydrationChainEstimateGasRequest;
-    Reply: HydrationChainEstimateGasResponse;
+    Body: HydrationEstimateGasRequest;
+    Reply: HydrationEstimateGasResponse;
   }>(
     '/estimate-gas',
     {
       schema: {
-        description: 'Estimate gas for a HydrationChain transaction',
-        tags: ['HydrationChain'],
+        description: 'Estimate gas for a Hydration transaction',
+        tags: ['hydration'],
         body: {
-          ...HydrationChainEstimateGasRequestSchema,
+          ...HydrationEstimateGasRequestSchema,
           properties: {
-            ...HydrationChainEstimateGasRequestSchema.properties,
+            ...HydrationEstimateGasRequestSchema.properties,
             chain: {
               type: 'string',
-              enum: ['HydrationChain'],
-              examples: ['HydrationChain'],
+              enum: ['hydration'],
+              examples: ['hydration'],
             },
             network: { type: 'string', examples: ['mainnet', 'westend'] },
             gasLimit: { type: 'number', examples: [100000] },
           },
         },
         response: {
-          200: HydrationChainEstimateGasResponseSchema,
+          200: HydrationEstimateGasResponseSchema,
         },
       },
     },
     async (request) => {
       const { network, gasLimit } = request.body;
 
-      return await estimateGasHydrationChain(fastify, network, gasLimit);
+      return await estimateGasHydration(fastify, network, gasLimit);
     },
   );
 };

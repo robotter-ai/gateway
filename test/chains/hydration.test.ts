@@ -46,7 +46,7 @@ import {
 } from '@polkadot/types/lookup';
 import Fastify from 'fastify';
 
-import { Hydration } from '../../src/chains/hydration/polkadot';
+import { Hydration } from '../../src/chains/hydration/hydration';
 import { balancesRoute } from '../../src/chains/hydration/routes/balances';
 import { estimateGasRoute } from '../../src/chains/hydration/routes/estimate-gas';
 import { pollRoute } from '../../src/chains/hydration/routes/poll';

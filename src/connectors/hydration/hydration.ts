@@ -4,7 +4,7 @@ import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { encodeAddress, decodeAddress, cryptoWaitReady } from '@polkadot/util-crypto';
 
-import { HydrationChain } from '../../chains/hydration/hydration';
+import { Hydration as HydrationChain } from '../../chains/hydration/hydration';
 import { runWithRetryAndTimeout } from "../../chains/hydration/hydration.utils";
 import { validateHydrationAddress } from '../../chains/hydration/hydration.validators';
 import { PoolItem } from '../../schemas/trading-types/amm-schema';
@@ -774,7 +774,7 @@ export class Hydration {
    * Get HydrationChain instance with retry capability
    */
   @runWithRetryAndTimeout()
-  public async hydrationChainGetInstance(target: typeof HydrationChain, network: string): Promise<HydrationChain> {
+  public async hydrationGetInstance(target: typeof HydrationChain, network: string): Promise<HydrationChain> {
     return await target.getInstance(network);
   }
 
@@ -1400,8 +1400,8 @@ export class Hydration {
     }
 
     // Get the wallet
-    const hydrationChain = await this.hydrationChainGetInstance(HydrationChain, network);
-    const wallet = await hydrationChain.getWallet(walletAddress);
+    const hydration = await this.hydrationGetInstance(HydrationChain, network);
+    const wallet = await hydration.getWallet(walletAddress);
 
     const effectiveSlippage = this.getSlippagePercentage(slippagePct);
 

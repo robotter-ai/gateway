@@ -1,32 +1,32 @@
 import { FastifyPluginAsync, FastifyInstance } from 'fastify';
 
-import { HydrationChain } from '../hydration';
+import { Hydration } from '../hydration';
 import {
-  HydrationChainTokensRequest,
-  HydrationChainTokensResponse,
-  HydrationChainTokensRequestSchema,
-  HydrationChainTokensResponseSchema,
+  HydrationTokensRequest,
+  HydrationTokensResponse,
+  HydrationTokensRequestSchema,
+  HydrationTokensResponseSchema,
 } from '../hydration.types';
 
 /**
- * Retrieves token information from the HydrationChain network
+ * Retrieves token information from the Hydration network
  *
  * @param fastify Fastify instance
  * @param network Network identifier (e.g., 'mainnet', 'westend')
  * @param tokenSymbols Optional array or string of token symbols to filter by
  * @returns Token information for the requested tokens
  */
-export async function getHydrationChainTokens(
+export async function getHydrationTokens(
   _fastify: FastifyInstance,
   network: string,
   tokenSymbols?: string[] | string,
-): Promise<HydrationChainTokensResponse> {
+): Promise<HydrationTokensResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
 
-  const hydrationChain = await HydrationChain.getInstance(network);
-  const tokens = await hydrationChain.getTokensWithSymbols(tokenSymbols);
+  const hydration = await Hydration.getInstance(network);
+  const tokens = await hydration.getTokensWithSymbols(tokenSymbols);
 
   return {
     tokens: tokens.map((token) => ({
@@ -43,22 +43,22 @@ export async function getHydrationChainTokens(
  */
 export const tokensRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
-    Querystring: HydrationChainTokensRequest;
-    Reply: HydrationChainTokensResponse;
+    Querystring: HydrationTokensRequest;
+    Reply: HydrationTokensResponse;
   }>(
     '/tokens',
     {
       schema: {
-        description: 'Get token information for HydrationChain network',
-        tags: ['HydrationChain'],
-        querystring: HydrationChainTokensRequestSchema,
+        description: 'Get token information for Hydration network',
+        tags: ['hydration'],
+        querystring: HydrationTokensRequestSchema,
         response: {
-          200: HydrationChainTokensResponseSchema,
+          200: HydrationTokensResponseSchema,
         },
       },
     },
     async (request) => {
-      return await getHydrationChainTokens(
+      return await getHydrationTokens(
         fastify,
         request.query.network,
         request.query.tokenSymbols,

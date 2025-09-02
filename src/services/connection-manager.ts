@@ -1,5 +1,5 @@
 import { Ethereum } from '../chains/ethereum/ethereum';
-import { HydrationChain } from '../chains/hydration/hydration';
+import { Hydration as HydrationChain } from '../chains/hydration/hydration';
 import { Solana } from '../chains/solana/solana';
 
 export interface Chain {

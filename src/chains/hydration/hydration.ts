@@ -21,7 +21,7 @@ import { walletPath } from '../../wallet/utils';
 import { TokenInfo } from '../ethereum/ethereum';
 
 import { Config, getHydrationConfig } from './hydration.config';
-import { HydrationChainAccount } from './hydration.types';
+import { HydrationAccount } from './hydration.types';
 import {
   Constant,
   fromBaseUnits,
@@ -36,7 +36,7 @@ import { validateHydrationAddress } from './hydration.validators';
  * This class provides methods for account management, balance queries,
  * transaction operations, and network status for Polkadot networks.
  */
-export class HydrationChain {
+export class Hydration {
   // noinspection JSUnusedGlobalSymbols
   public wsProvider: WsProvider;
   // noinspection JSUnusedGlobalSymbols
@@ -44,14 +44,14 @@ export class HydrationChain {
   // noinspection JSUnusedGlobalSymbols
   public apiPromise: ApiPromise;
   public network: string;
-  public chain: string = 'HydrationChain';
+  public chain: string = 'hydration';
   public nativeTokenSymbol: string;
   public tokenList: TokenInfo[] = [];
   public config: Config;
   private _tokenMap: Record<string, TokenInfo> = {};
   private _keyring: Keyring;
 
-  private static _instances: { [name: string]: HydrationChain } = {};
+  private static _instances: { [name: string]: Hydration } = {};
 
   /**
    * Private constructor - use getInstance instead
@@ -59,34 +59,34 @@ export class HydrationChain {
    */
   private constructor(network: string) {
     this.network = network;
-    this.config = getHydrationConfig('HydrationChain', network);
+    this.config = getHydrationConfig('hydration', network);
     this.nativeTokenSymbol = this.config.network.nativeCurrencySymbol;
     this._keyring = new Keyring({ type: 'sr25519' });
   }
 
   /**
-   * Get or create an instance of the HydrationChain class
+   * Get or create an instance of the Hydration class
    * @param network The network to connect to
-   * @returns A Promise that resolves to a HydrationChain instance
+   * @returns A Promise that resolves to a Hydration instance
    */
-  public static async getInstance(network: string): Promise<HydrationChain> {
+  public static async getInstance(network: string): Promise<Hydration> {
     if (!network) {
       throw new Error('Network parameter is required');
     }
 
-    if (!HydrationChain._instances[network]) {
-      HydrationChain._instances[network] = new HydrationChain(network);
-      await HydrationChain._instances[network].init();
+    if (!Hydration._instances[network]) {
+      Hydration._instances[network] = new Hydration(network);
+      await Hydration._instances[network].init();
     }
-    return HydrationChain._instances[network];
+    return Hydration._instances[network];
   }
 
   /**
-   * Initialize the HydrationChain instance
+   * Initialize the Hydration instance
    * @returns A Promise that resolves when initialization is complete
    */
   private async init(): Promise<void> {
-    logger.info(`Initializing HydrationChain for network: ${this.network}`);
+    logger.info(`Initializing Hydration for network: ${this.network}`);
 
     // Wait for crypto to be ready
     await this.utilCryptoWaitReady();
@@ -102,7 +102,7 @@ export class HydrationChain {
       this.config.network.tokenListType,
     );
 
-    logger.info(`HydrationChain initialized for network: ${this.network}`);
+    logger.info(`Hydration initialized for network: ${this.network}`);
   }
 
   /**
@@ -205,14 +205,14 @@ export class HydrationChain {
    * Create a new account with a generated mnemonic
    * @returns A Promise that resolves to a new account
    */
-  async createAccount(): Promise<HydrationChainAccount> {
+  async createAccount(): Promise<HydrationAccount> {
     // Generate mnemonic
     const mnemonic = mnemonicGenerate();
 
     // Create keyring pair
     const keyringPair = this._keyring.addFromMnemonic(mnemonic);
 
-    const account: HydrationChainAccount = {
+    const account: HydrationAccount = {
       address: keyringPair.address,
       publicKey: u8aToHex(keyringPair.publicKey),
       keyringPair,
@@ -715,7 +715,7 @@ export class HydrationChain {
    * @returns A Promise that resolves to the network status
    */
   async getNetworkStatus(): Promise<any> {
-    const chain = 'HydrationChain';
+    const chain = 'hydrationChain';
     const network = this.network;
     const rpcUrl = this.config.network.nodeURL;
     const nativeCurrency = this.config.network.nativeCurrencySymbol;

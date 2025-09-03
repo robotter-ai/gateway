@@ -999,15 +999,8 @@ export class Hydration {
    * @returns Unsubscribe function
    */
   @runWithRetryAndTimeout()
-  private async submitTransactionToNetwork(tx: any, wallet: any, statusHandler: any): Promise<() => void> {
-    try {
-      logger.info(`Submitting transaction...`);
-      return await tx.signAndSend(wallet, statusHandler);
-    } catch (error) {
-      const fallbackHash = tx.hex || tx.hash?.toHex?.() || 'unknown';
-      logger.error(`Exception during transaction submission: ${error.message}`);
-      throw new Error(`Transaction ${fallbackHash} submission failed: ${error.message}`);
-    }
+  private async transactionSignAndSend(tx: any, wallet: any, statusHandler: any): Promise<() => void> {
+    return await tx.signAndSend(wallet, statusHandler);
   }
 
   /**
@@ -1085,7 +1078,7 @@ export class Hydration {
 
       try {
         logger.info(`Submitting transaction...`);
-        unsub = await this.submitTransactionToNetwork(tx, wallet, statusHandler);
+        unsub = await this.transactionSignAndSend(tx, wallet, statusHandler);
       } catch (error) {
         const fallbackHash = tx.hex || tx.hash?.toHex?.() || 'unknown';
         logger.error(`Exception during transaction submission: ${error.message}`);

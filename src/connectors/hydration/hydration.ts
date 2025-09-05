@@ -1787,72 +1787,132 @@ export class Hydration {
    * @param tokenId The token ID to filter positions by
    * @returns Array of positions owned by the wallet
    */
-  async getPositionsOwned(walletAddress: string, tokenId: string): Promise<HydrationPosition[]> {
+  async getPositionsOwned(walletAddress: string, tokenId?: string): Promise<HydrationPosition[]> {
     const apiPromise = await this.getApiPromise();
 
     try {
-      // Convert wallet address to Hydration format
-      const hydraWalletAddress = encodeAddress(
-        decodeAddress(walletAddress),
-        HYDRA_ADDRESS_PREFIX
-      );
 
-      const collectionId = await apiPromise.consts.omnipool.nftCollectionId;
-
-      const [positions, uniques] = await Promise.all([
+      const collectionId = apiPromise.consts.omnipool.nftCollectionId.toString();
+   
+      const [positions, uniques, accounts] = await Promise.all([
         apiPromise.query.omnipool.positions.entries(),
-        apiPromise.query.uniques.asset.entries(collectionId.toString())
+        apiPromise.query.uniques.asset.entries(),
+        apiPromise.query.uniques.account.entries(),
       ]);
+      
+      const nftOwners = new Map<string, string>();
+      for (const [key, value] of uniques as any[]) {
+        try {
+          const args: any[] = (key as any).args as any[];
+          const classId = args?.[0]?.toString();
+          const itemId = args?.[1]?.toString() ?? args?.[args.length - 1]?.toString();
+          if (classId !== collectionId) continue;
+          const details: any = (value as any);
+          const owner = details?.isSome ? details.unwrap()?.owner?.toString() : details?.owner?.toString();
+          if (itemId && owner) {
+            nftOwners.set(itemId, owner);
+          }
+        } catch (e){
+          logger.error(`Error in getPositionsOwned: ${e.message}`);
+        }
+      }
 
-      const nftOwners = new Map(
-        uniques.map(([key, value]) => {
-          const [, itemId] = key.args;
-          const owner = value.unwrap()?.owner.toString();
-          return [itemId.toString(), owner];
-        })
-      );
+      if (nftOwners.size === 0 && Array.isArray(accounts) && accounts.length > 0) {
+        for (const [key] of accounts as any[]) {
+          try {
+            const args: any[] = (key as any).args as any[];
+            const classIdx = args.findIndex(a => a?.toString?.() === collectionId);
+            if (classIdx === -1) continue;
+            const itemIdxCandidates = [classIdx + 1, 1];
+            const acctIdxCandidates = [classIdx + 2, 2, args.length - 1];
+            const itemId = itemIdxCandidates.map(i => args?.[i]?.toString()).find(Boolean);
+            const owner = acctIdxCandidates.map(i => args?.[i]?.toString()).find(Boolean);
+            if (itemId && owner && !nftOwners.has(itemId)) {
+              nftOwners.set(itemId, owner);
+            }
+          } catch (e){
+            logger.error(`Error in getPositionsOwned: ${e.message}`);
+          }
+        }
+      }
 
-      // Check alternate format - some Substrate chains have different address format encoding
-      const alternateHydraAddresses = [
-        hydraWalletAddress,
-        // Try with SS58 format 42 (generic Substrate)
-        encodeAddress(decodeAddress(walletAddress), 42),
-        // Try with SS58 format 0 (HydrationChain)
-        encodeAddress(decodeAddress(walletAddress), 0)
-      ];
+      const alternateHydraAddresses: string[] = [];
+      const tryFormats = [HYDRA_ADDRESS_PREFIX, 42, 0];
+      for (const fmt of tryFormats) {
+        try {
+          alternateHydraAddresses.push(encodeAddress(decodeAddress(walletAddress), fmt));
+        } catch (e){
+          logger.error(`Error in getPositionsOwned: ${e.message}`);
+        }
+      }
+
+      const tokenFilterActive = !!tokenId && /^\d+$/.test(tokenId.trim());
 
       const result = positions
         .map(([idRaw, dataRaw]) => {
-          const positionId = idRaw.args[0].toString();
-          const positionData = dataRaw.toHuman() as Record<string, any>;
-          const nftOwner = nftOwners.get(positionId);
+          try {
+            const keyArgs: any[] = idRaw.args as any[];
+            const positionId = keyArgs?.[keyArgs.length - 1]?.toString();
+            const assetIdFromKey = keyArgs?.[0]?.toString();
+            if (!positionId) return null;
 
-          const isMatchingToken = positionData?.assetId === tokenId;
-          const isMatchingOwner = alternateHydraAddresses.some(addr => nftOwner === addr);
+            const positionData: any = dataRaw?.toJSON?.() ?? dataRaw?.toHuman?.();
+            const nftOwner = nftOwners.get(positionId);
 
-          if (!nftOwner || !isMatchingToken || !isMatchingOwner) {
+            const assetIdStr = assetIdFromKey ?? (positionData?.assetId?.toString?.() ?? String(positionData?.assetId));
+            const isMatchingToken = tokenFilterActive ? (assetIdStr === tokenId.toString()) : true;
+            const isMatchingOwner = nftOwner ? alternateHydraAddresses.some(addr => nftOwner === addr) : false;
+
+            if (!nftOwner || !isMatchingToken || !isMatchingOwner) {
+              return null;
+            }
+
+            const rawShares = positionData?.shares?.toString?.() ?? String(positionData?.shares ?? '0');
+            const rawAmount = positionData?.amount?.toString?.() ?? String(positionData?.amount ?? '0');
+            const rawPrice = (positionData?.price as any)?.toString?.() ?? positionData?.price;
+
+            const shares = rawShares.startsWith('0x') 
+              ? new BigNumber(rawShares, 16).toString() 
+              : rawShares.replace(/,/g, '');
+              
+            const amount = rawAmount.startsWith('0x') 
+              ? new BigNumber(rawAmount, 16).toString() 
+              : rawAmount.replace(/,/g, '');
+
+            let priceDecimal = rawPrice;
+            if (rawPrice && typeof rawPrice === 'string' && rawPrice.includes(',')) {
+              const [numerator, denominator] = rawPrice.split(',');
+              const num = new BigNumber(numerator.startsWith('0x') ? numerator : `0x${numerator}`, 16);
+              const den = new BigNumber(denominator.startsWith('0x') ? denominator : `0x${denominator}`, 16);
+              priceDecimal = den.gt(0) ? num.dividedBy(den).toString() : '0';
+            } else if (rawPrice && typeof rawPrice === 'string' && rawPrice.startsWith('0x')) {
+              priceDecimal = new BigNumber(rawPrice, 16).toString();
+            } else if (rawPrice) {
+              priceDecimal = String(rawPrice).replace(/,/g, '');
+            }
+
+            if (new BigNumber(shares).lte(0)) {
+              return null;
+            }
+
+            return {
+              positionId,
+              assetId: assetIdStr || '',
+              owner: nftOwner,
+              shares,
+              amount,
+              price: priceDecimal,
+            } as HydrationPosition;
+          } catch (e){
+            logger.error(`Error in getPositionsOwned: ${e.message}`);
             return null;
           }
-
-          const shares = positionData?.shares?.toString().replace(/,/g, '') || '0';
-          if (new BigNumber(shares).lte(0)) {
-            return null;
-          }
-
-          return {
-            positionId,
-            assetId: positionData.assetId,
-            owner: nftOwner,
-            shares,
-            amount: positionData?.amount?.toString().replace(/,/g, '') || '0',
-            price: positionData?.price
-          };
         })
         .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
 
       return result;
     } catch (error) {
-      logger.error(`Error in getPositionsOwned: ${error.message}`);
+      logger.error(`Error in getPositionsOwned: ${error}`);
       return [];
     }
   }

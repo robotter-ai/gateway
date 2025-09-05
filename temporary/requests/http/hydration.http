@@ -642,55 +642,54 @@ Content-Type: application/json
 }
 
 ###
-
+# ok
 # GET /{{connector}}/amm/position-info - XYK Pool
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressXyk}}
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{walletPublicKey}}&poolAddress={{poolAddressXyk}}
 Content-Type: application/json
 
 ###
-
+# lpTokenAmount OK
 # GET /{{connector}}/amm/position-info - Stableswap Pool
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressStableswap}}
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{walletPublicKey}}&poolAddress={{poolAddressStableswap}}
 Content-Type: application/json
 
-###
-
+### ERROR
 # GET /{{connector}}/amm/position-info - Omnipool
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressOmnipool}}&assetId=31
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{walletPublicKey}}&poolAddress={{poolAddressOmnipool}}
 Content-Type: application/json
 
 ###
-
+# OK
 # GET /{{connector}}/amm/position-info - XYK with tokens
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{walletPublicKey}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}
 Content-Type: application/json
 
 ###
-
+# lpTokenAmount OK
 # GET /{{connector}}/amm/position-info - Stableswap with tokens
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{walletPublicKey}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}
 Content-Type: application/json
 
 ###
-
+# price ERROR
 # GET /{{connector}}/amm/position-info - Omnipool with tokens
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{omnipoolBaseTokenSymbol}}&quoteToken={{omnipoolQuoteTokenSymbol}}
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{walletPublicKey}}&baseToken={{omnipoolBaseTokenSymbol}}&quoteToken={{omnipoolQuoteTokenSymbol}}
 Content-Type: application/json
 
 ###
-
+# trouxe várias info mas sem conferir
 # GET /{{connector}}/amm/positions-owned - XYK Pool
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressXyk}}
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{walletPublicKey}}&poolAddress={{poolAddressXyk}}
 Content-Type: application/json
 
 ###
 # GET /{{connector}}/amm/positions-owned - Stableswap Pool
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressStableswap}}
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{walletPublicKey}}&poolAddress={{poolAddressStableswap}}
 Content-Type: application/json
 
 ###
 # GET /{{connector}}/amm/positions-owned - Omnipool
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressOmnipool}}
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{walletPublicKey}}&poolAddress={{poolAddressOmnipool}}
 Content-Type: application/json
 
 ###

@@ -1791,38 +1791,42 @@ export class Hydration {
     const apiPromise = await this.getApiPromise();
 
     try {
-
       const collectionId = apiPromise.consts.omnipool.nftCollectionId.toString();
-   
       const [positions, uniques, accounts] = await Promise.all([
         apiPromise.query.omnipool.positions.entries(),
         apiPromise.query.uniques.asset.entries(),
-        apiPromise.query.uniques.account.entries(),
+        (apiPromise.query as any).uniques?.account?.entries
+          ? (apiPromise.query as any).uniques.account.entries()
+          : Promise.resolve([])
       ]);
       
+      // Build NFT owners map
       const nftOwners = new Map<string, string>();
-      for (const [key, value] of uniques as any[]) {
+      for (const [key, value] of uniques) {
         try {
-          const args: any[] = (key as any).args as any[];
+          const args = (key as any).args as any[];
           const classId = args?.[0]?.toString();
           const itemId = args?.[1]?.toString() ?? args?.[args.length - 1]?.toString();
           if (classId !== collectionId) continue;
-          const details: any = (value as any);
+          
+          const details = (value as any);
           const owner = details?.isSome ? details.unwrap()?.owner?.toString() : details?.owner?.toString();
           if (itemId && owner) {
             nftOwners.set(itemId, owner);
           }
-        } catch (e){
+        } catch (e) {
           logger.error(`Error in getPositionsOwned: ${e.message}`);
         }
       }
 
+      // Fallback to accounts if no uniques found
       if (nftOwners.size === 0 && Array.isArray(accounts) && accounts.length > 0) {
-        for (const [key] of accounts as any[]) {
+        for (const [key] of accounts) {
           try {
-            const args: any[] = (key as any).args as any[];
+            const args = (key as any).args as any[];
             const classIdx = args.findIndex(a => a?.toString?.() === collectionId);
             if (classIdx === -1) continue;
+            
             const itemIdxCandidates = [classIdx + 1, 1];
             const acctIdxCandidates = [classIdx + 2, 2, args.length - 1];
             const itemId = itemIdxCandidates.map(i => args?.[i]?.toString()).find(Boolean);
@@ -1830,43 +1834,45 @@ export class Hydration {
             if (itemId && owner && !nftOwners.has(itemId)) {
               nftOwners.set(itemId, owner);
             }
-          } catch (e){
+          } catch (e) {
             logger.error(`Error in getPositionsOwned: ${e.message}`);
           }
         }
       }
 
-      const alternateHydraAddresses: string[] = [];
+      // Generate alternate addresses
+      const alternateAddresses: string[] = [];
       const tryFormats = [HYDRA_ADDRESS_PREFIX, 42, 0];
       for (const fmt of tryFormats) {
         try {
-          alternateHydraAddresses.push(encodeAddress(decodeAddress(walletAddress), fmt));
-        } catch (e){
+          alternateAddresses.push(encodeAddress(decodeAddress(walletAddress), fmt));
+        } catch (e) {
           logger.error(`Error in getPositionsOwned: ${e.message}`);
         }
       }
 
       const tokenFilterActive = !!tokenId && /^\d+$/.test(tokenId.trim());
 
-      const result = positions
+      return positions
         .map(([idRaw, dataRaw]) => {
           try {
-            const keyArgs: any[] = idRaw.args as any[];
+            const keyArgs = (idRaw as any).args as any[];
             const positionId = keyArgs?.[keyArgs.length - 1]?.toString();
             const assetIdFromKey = keyArgs?.[0]?.toString();
             if (!positionId) return null;
 
-            const positionData: any = dataRaw?.toJSON?.() ?? dataRaw?.toHuman?.();
+            const positionData = (dataRaw as any)?.toJSON?.() ?? (dataRaw as any)?.toHuman?.();
             const nftOwner = nftOwners.get(positionId);
 
             const assetIdStr = assetIdFromKey ?? (positionData?.assetId?.toString?.() ?? String(positionData?.assetId));
             const isMatchingToken = tokenFilterActive ? (assetIdStr === tokenId.toString()) : true;
-            const isMatchingOwner = nftOwner ? alternateHydraAddresses.some(addr => nftOwner === addr) : false;
+            const isMatchingOwner = nftOwner ? alternateAddresses.some(addr => nftOwner === addr) : false;
 
             if (!nftOwner || !isMatchingToken || !isMatchingOwner) {
               return null;
             }
 
+            // Parse numeric values
             const rawShares = positionData?.shares?.toString?.() ?? String(positionData?.shares ?? '0');
             const rawAmount = positionData?.amount?.toString?.() ?? String(positionData?.amount ?? '0');
             const rawPrice = (positionData?.price as any)?.toString?.() ?? positionData?.price;
@@ -1879,6 +1885,7 @@ export class Hydration {
               ? new BigNumber(rawAmount, 16).toString() 
               : rawAmount.replace(/,/g, '');
 
+            // Parse price
             let priceDecimal = rawPrice;
             if (rawPrice && typeof rawPrice === 'string' && rawPrice.includes(',')) {
               const [numerator, denominator] = rawPrice.split(',');
@@ -1901,16 +1908,14 @@ export class Hydration {
               owner: nftOwner,
               shares,
               amount,
-              price: priceDecimal,
+              price: priceDecimal ? parseFloat(priceDecimal) : undefined,
             } as HydrationPosition;
-          } catch (e){
+          } catch (e) {
             logger.error(`Error in getPositionsOwned: ${e.message}`);
             return null;
           }
         })
         .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
-
-      return result;
     } catch (error) {
       logger.error(`Error in getPositionsOwned: ${error}`);
       return [];

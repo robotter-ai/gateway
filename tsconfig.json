@@ -6,7 +6,7 @@
     "module": "CommonJS",
     "allowJs": true,
     // "lib": ["es6", "es2020", "esnext.asynciterable", "dom"],
-    // "sourceMap": true,
+    "sourceMap": true,
     "outDir": "./dist",
     // "moduleResolution": "node",
     "removeComments": true,

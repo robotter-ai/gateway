@@ -1788,17 +1788,26 @@ export class Hydration {
    * @returns Array of positions owned by the wallet
    */
   async getPositionsOwned(walletAddress: string, tokenId?: string): Promise<HydrationPosition[]> {
-    const apiPromise = await this.getApiPromise();
+    const maxRetries = 3;
+    let lastError: Error | null = null;
 
-    try {
-      const collectionId = apiPromise.consts.omnipool.nftCollectionId.toString();
-      const [positions, uniques, accounts] = await Promise.all([
-        apiPromise.query.omnipool.positions.entries(),
-        apiPromise.query.uniques.asset.entries(),
-        (apiPromise.query as any).uniques?.account?.entries
-          ? (apiPromise.query as any).uniques.account.entries()
-          : Promise.resolve([])
-      ]);
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const apiPromise = await this.getApiPromise();
+        
+        // Check if API is connected
+        if (!apiPromise.isConnected) {
+          throw new Error('API not connected');
+        }
+
+        const collectionId = apiPromise.consts.omnipool.nftCollectionId.toString();
+        const [positions, uniques, accounts] = await Promise.all([
+          apiPromise.query.omnipool.positions.entries(),
+          apiPromise.query.uniques.asset.entries(),
+          (apiPromise.query as any).uniques?.account?.entries
+            ? (apiPromise.query as any).uniques.account.entries()
+            : Promise.resolve([])
+        ]);
       
       // Build NFT owners map
       const nftOwners = new Map<string, string>();
@@ -1853,7 +1862,8 @@ export class Hydration {
 
       const tokenFilterActive = !!tokenId && /^\d+$/.test(tokenId.trim());
 
-      return positions
+      // Process positions and return result
+      const result = positions
         .map(([idRaw, dataRaw]) => {
           try {
             const keyArgs = (idRaw as any).args as any[];
@@ -1916,10 +1926,34 @@ export class Hydration {
           }
         })
         .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
-    } catch (error) {
-      logger.error(`Error in getPositionsOwned: ${error}`);
-      return [];
+
+      // Success - return result
+      return result;
+      } catch (error) {
+        lastError = error as Error;
+        logger.error(`Error in getPositionsOwned (attempt ${attempt}/${maxRetries}): ${error}`);
+        
+        // If it's a connection error and we have retries left, wait and retry
+        if (attempt < maxRetries && (
+          error.message?.includes('disconnected') ||
+          error.message?.includes('1006') ||
+          error.message?.includes('Abnormal Closure') ||
+          error.message?.includes('API not connected')
+        )) {
+          const waitTime = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s, 8s
+          logger.debug(`Retrying in ${waitTime}ms...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+        
+        // If no more retries or non-connection error, break
+        break;
+      }
     }
+
+    // All retries failed
+    logger.error(`getPositionsOwned failed after ${maxRetries} attempts. Last error: ${lastError?.message}`);
+    return [];
   }
 
 

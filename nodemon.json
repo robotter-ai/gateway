@@ -2,10 +2,13 @@
   "restartable": "rs",
   "ignore": [".git", "node_modules/**/node_modules"],
   "verbose": true,
-  "exec": "ts-node --files",
+  "exec": "ts-node --files --inspect=9229",
   "watch": ["src/"],
   "env": {
-    "NODE_ENV": "development"
+    "NODE_ENV": "development",
+    "START_SERVER": "true",
+    "GATEWAY_PASSPHRASE": "asdf",
+    "NODE_OPTIONS": "--max_old_space_size=4096"
   },
   "ext": "js,json,ts,d.ts"
 }

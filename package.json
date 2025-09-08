@@ -15,6 +15,7 @@
     "setup": "./gateway-setup.sh",
     "start": "START_SERVER=true NODE_OPTIONS=--max_old_space_size=4096 node dist/index.js",
     "dev": "START_SERVER=true NODE_ENV=development nodemon --exec \"node --inspect -r ts-node/register\" src/index.ts",
+    "dev:hydration": "START_SERVER=true NODE_ENV=development nodemon --exec \"node --inspect -r ts-node/register\" src/connectors/hydration/hydration.ts",
     "copy-files": "copyfiles 'src/schemas/json/*.json' 'src/services/schema/*.json' 'src/templates/*.yml' 'src/templates/lists/*.json' 'test/services/data/**/*.*' dist",
     "test": "GATEWAY_TEST_MODE=dev jest --verbose",
     "test:debug": "GATEWAY_TEST_MODE=dev jest --watch --runInBand",

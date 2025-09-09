@@ -64,7 +64,7 @@ export const positionInfoRoute: FastifyPluginAsync = async (fastify) => {
 
         if (error.message?.includes('not found')) {
           return reply.status(404).send({ error: error.message });
-        } else if (error.message?.includes('Invalid HydrationChain address')) {
+        } else if (error.message?.includes('Invalid Hydration address')) {
           return reply.status(400).send({ error: error.message });
         } else if (error.message?.includes('must be provided')) {
           return reply.status(400).send({ error: error.message });

@@ -1,12 +1,12 @@
 import { Ethereum } from '../chains/ethereum/ethereum';
-import { Hydration as HydrationChain } from '../chains/hydration/hydration';
+import { Hydration } from '../chains/hydration/hydration';
 import { Solana } from '../chains/solana/solana';
 
 export interface Chain {
   // TODO: Add shared chain properties (e.g., network, chainId, etc.)
 }
 
-export type ChainInstance = Ethereum | Solana | HydrationChain;
+export type ChainInstance = Ethereum | Solana | Hydration;
 
 export class UnsupportedChainException extends Error {
   constructor(message?: string) {
@@ -42,7 +42,7 @@ export async function getInitializedChain<_T>(
  */
 export function getSupportedChains(): string[] {
   // These should match the chains in getChainInstance
-  return ['ethereum', 'solana', 'hydrationChain'];
+  return ['ethereum', 'solana', 'hydration'];
 }
 
 export async function getChainInstance(
@@ -56,8 +56,8 @@ export async function getChainInstance(
     connection = await Ethereum.getInstance(network);
   } else if (chainLower === 'solana') {
     connection = await Solana.getInstance(network);
-  } else if (chainLower === 'hydrationchain') {
-    connection = await HydrationChain.getInstance(network);
+  } else if (chainLower === 'hydration') {
+    connection = await Hydration.getInstance(network);
   } else {
     connection = undefined;
   }

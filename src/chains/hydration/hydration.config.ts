@@ -2,10 +2,10 @@ import { TokenListType } from '../../services/base';
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
 
 /**
- * Configuration for a HydrationChain network
+ * Configuration for a Hydration network
  */
 interface NetworkConfig {
-  /** URL of the HydrationChain node RPC endpoint */
+  /** URL of the Hydration node RPC endpoint */
   nodeURL: string;
   /** URL for transaction lookup service */
   transactionURL: string;
@@ -20,7 +20,7 @@ interface NetworkConfig {
 }
 
 /**
- * Complete HydrationChain configuration
+ * Complete Hydration configuration
  */
 export interface Config {
   /** Network-specific configuration */
@@ -28,9 +28,9 @@ export interface Config {
 }
 
 /**
- * Retrieves the configuration for a specified HydrationChain network
+ * Retrieves the configuration for a specified Hydration network
  *
- * @param chainName The name of the chain (e.g., 'HydrationChain')
+ * @param chainName The name of the chain (e.g., 'Hydration')
  * @param networkName The name of the network (e.g., 'mainnet', 'westend')
  * @returns Configuration object for the specified network
  */

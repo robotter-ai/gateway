@@ -14,7 +14,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 // Routes
 import { chainRoutes } from './chains/chain.routes';
 import { ethereumRoutes } from './chains/ethereum/ethereum.routes';
-import { hydrationRoutes as hydrationChainRoutes } from './chains/hydration/hydration.routes';
+import { HydrationRoutes as HydrationChainRoutes } from './chains/hydration/hydration.routes';
 import { solanaRoutes } from './chains/solana/solana.routes';
 import { configRoutes } from './config/config.routes';
 import { connectorsRoutes } from './connectors/connector.routes';
@@ -65,7 +65,7 @@ const swaggerOptions = {
       // Chains
       { name: 'solana', description: 'Solana chain endpoints' },
       { name: 'ethereum', description: 'Ethereum chain endpoints' },
-      { name: 'hydrationChain', description: 'HydrationChain chain endpoints' },
+      { name: 'hydrationChain', description: 'Hydration chain endpoints' },
 
       // Connectors
       { name: 'jupiter', description: 'Jupiter DEX aggregator (Solana)' },
@@ -222,7 +222,7 @@ const configureGatewayServer = () => {
     // Register chain routes
     app.register(solanaRoutes, { prefix: '/chains/solana' });
     app.register(ethereumRoutes, { prefix: '/chains/ethereum' });
-    app.register(hydrationChainRoutes, { prefix: '/chains/hydrationChain' });
+    app.register(HydrationChainRoutes, { prefix: '/chains/hydration' });
   };
 
   // Register routes on main server

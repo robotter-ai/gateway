@@ -48,7 +48,7 @@ export async function addLiquidityToHydration(
   try {
     validateHydrationAddress(walletAddress);
   } catch (error) {
-    throw fastify.httpErrors.badRequest('Invalid HydrationChain address');
+    throw fastify.httpErrors.badRequest('Invalid hydration address');
   }
 
   // Get Hydration instance

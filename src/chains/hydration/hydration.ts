@@ -715,7 +715,7 @@ export class Hydration {
    * @returns A Promise that resolves to the network status
    */
   async getNetworkStatus(): Promise<any> {
-    const chain = 'hydrationChain';
+    const chain = 'hydration';
     const network = this.network;
     const rpcUrl = this.config.network.nodeURL;
     const nativeCurrency = this.config.network.nativeCurrencySymbol;

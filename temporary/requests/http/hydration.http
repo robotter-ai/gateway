@@ -164,17 +164,11 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/tokens?network={{network}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /<chain>/tokens - Single token
 GET {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/tokens?network={{network}}&tokenSymbols={{nativeTokenSymbol}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -236,6 +230,28 @@ Content-Type: application/json
 ###
 
 # ===================== AMM CONNECTOR ROUTES =====================
+
+# ===================== TOKEN ROUTES =====================
+
+# GET /hydration/amm/get-all-tokens - Get all tokens with complete metadata
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/hydration/amm/get-all-tokens?network={{network}}
+
+###
+
+# GET /hydration/amm/get-all-tokens - Get all tokens including invalid ones
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/hydration/amm/get-all-tokens?network={{network}}&includeInvalid=true
+
+###
+
+# GET /hydration/amm/get-tradeable-tokens - Get all tradeable tokens
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/hydration/amm/get-tradeable-tokens?network={{network}}
+
+###
+
+# GET /hydration/amm/get-all-position-token-ids - Get all token IDs that have positions (for debugging)
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/hydration/amm/get-all-position-token-ids?network={{network}}
+
+###
 
 # ===================== LIST POOLS =====================
 
@@ -732,17 +748,11 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressXyk}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/position-info - Stableswap Pool
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressStableswap}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -758,18 +768,12 @@ Content-Type: application/json
 # GET /{{connector}}/amm/position-info - XYK with tokens
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}
 Content-Type: application/json
-
-{
-}
-
 ###
+
 
 # GET /{{connector}}/amm/position-info - Stableswap with tokens
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}
 Content-Type: application/json
-
-{
-}
 
 ###
 

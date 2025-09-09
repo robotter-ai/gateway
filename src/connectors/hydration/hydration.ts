@@ -21,6 +21,7 @@ import {
   HydrationQuoteLiquidityResponse,
   HydrationRemoveLiquidityResponse,
   HydrationPosition,
+  HydrationToken,
   LiquidityQuote,
   PositionStrategyType,
   SwapQuote,
@@ -93,6 +94,63 @@ export class Hydration {
    */
   public getAllTokens() {
     return this.polkadot.tokenList;
+  }
+
+  /**
+   * Get all tokens available in the Hydration ecosystem using Galactic Council SDK
+   * @param includeInvalid Whether to include invalid assets
+   * @returns A Promise that resolves to an array of all tokens with complete metadata
+   */
+  async getAllTokensFromSDK(includeInvalid: boolean = false): Promise<HydrationToken[]> {
+    try {
+      const sdkContext = await this.getSdkContext();
+      const assets = await sdkContext.client.asset.getOnChainAssets(includeInvalid);
+      
+      return assets.map(asset => ({
+        id: asset.id,
+        name: asset.name,
+        symbol: asset.symbol,
+        decimals: asset.decimals,
+        icon: asset.icon,
+        type: asset.type,
+        existentialDeposit: asset.existentialDeposit,
+        isSufficient: asset.isSufficient,
+        location: asset.location,
+        meta: asset.meta,
+        isWhiteListed: asset.isWhiteListed
+      }));
+    } catch (error) {
+      logger.error(`Error getting all tokens from SDK: ${error.message}`);
+      throw new Error(`Failed to get all tokens: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get all tradeable tokens using Galactic Council SDK TradeRouter
+   * @returns A Promise that resolves to an array of tradeable tokens
+   */
+  async getTradeableTokensFromSDK(): Promise<HydrationToken[]> {
+    try {
+      const sdkContext = await this.getSdkContext();
+      const assets = await sdkContext.api.router.getAllAssets();
+      
+      return assets.map(asset => ({
+        id: asset.id,
+        name: asset.name,
+        symbol: asset.symbol,
+        decimals: asset.decimals,
+        icon: asset.icon,
+        type: asset.type,
+        existentialDeposit: asset.existentialDeposit,
+        isSufficient: asset.isSufficient,
+        location: asset.location,
+        meta: asset.meta,
+        isWhiteListed: asset.isWhiteListed
+      }));
+    } catch (error) {
+      logger.error(`Error getting tradeable tokens from SDK: ${error.message}`);
+      throw new Error(`Failed to get tradeable tokens: ${error.message}`);
+    }
   }
 
   /**
@@ -1755,34 +1813,17 @@ export class Hydration {
   }
 
   /**
-   * Get all positions owned by a wallet address for a specific token
+   * Get all positions owned by a wallet address for a specific pool
    * @param walletAddress The wallet address to check
-   * @param tokenId The token ID to filter positions by
+   * @param poolAddress The pool address to filter positions by
    * @returns Array of positions owned by the wallet
    */
-  async getPositionsOwned(walletAddress: string, tokenId: string): Promise<HydrationPosition[]> {
-    const apiPromise = await this.getApiPromise();
-
+  async getPositionsOwned(walletAddress: string, poolAddress: string): Promise<HydrationPosition[]> {
     try {
       // Convert wallet address to Hydration format
       const hydraWalletAddress = encodeAddress(
         decodeAddress(walletAddress),
         HYDRA_ADDRESS_PREFIX
-      );
-
-      const collectionId = await apiPromise.consts.omnipool.nftCollectionId;
-
-      const [positions, uniques] = await Promise.all([
-        apiPromise.query.omnipool.positions.entries(),
-        apiPromise.query.uniques.asset.entries(collectionId.toString())
-      ]);
-
-      const nftOwners = new Map(
-        uniques.map(([key, value]) => {
-          const [, itemId] = key.args;
-          const owner = value.unwrap()?.owner.toString();
-          return [itemId.toString(), owner];
-        })
       );
 
       // Check alternate format - some Substrate chains have different address format encoding
@@ -1793,42 +1834,212 @@ export class Hydration {
         // Try with SS58 format 0 (Polkadot)
         encodeAddress(decodeAddress(walletAddress), 0)
       ];
-
-      const result = positions
-        .map(([idRaw, dataRaw]) => {
-          const positionId = idRaw.args[0].toString();
-          const positionData = dataRaw.toHuman() as Record<string, any>;
-          const nftOwner = nftOwners.get(positionId);
-
-          const isMatchingToken = positionData?.assetId === tokenId;
-          const isMatchingOwner = alternateHydraAddresses.some(addr => nftOwner === addr);
-
-          if (!nftOwner || !isMatchingToken || !isMatchingOwner) {
-            return null;
-          }
-
-          const shares = positionData?.shares?.toString().replace(/,/g, '') || '0';
-          if (new BigNumber(shares).lte(0)) {
-            return null;
-          }
-
-          return {
-            positionId,
-            assetId: positionData.assetId,
-            owner: nftOwner,
-            shares,
-            amount: positionData?.amount?.toString().replace(/,/g, '') || '0',
-            price: positionData?.price
-          };
-        })
-        .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
-
-      return result;
+      
+      return await this.getPoolPositions(walletAddress, poolAddress, alternateHydraAddresses);
     } catch (error) {
       logger.error(`Error in getPositionsOwned: ${error.message}`);
       return [];
     }
   }
+
+
+  /**
+   * Get pool-based positions (XYK, Stableswap, etc.)
+   */
+  private async getPoolPositions(
+    walletAddress: string, 
+    poolAddress: string, 
+    alternateAddresses: string[]
+  ): Promise<HydrationPosition[]> {
+    try {
+      // Get pool info to determine pool type
+      const poolInfo = await this.getPoolInfo(poolAddress);
+      if (!poolInfo) {
+        logger.warn(`Pool not found: ${poolAddress}`);
+        return [];
+      }
+
+      // For XYK and Stableswap pools, we need to check LP token balances
+      if (poolInfo.poolType === 'Xyk' || poolInfo.poolType === 'Stableswap') {
+        return await this.getLPTokenPositions(walletAddress, poolAddress, poolInfo, alternateAddresses);
+      }
+
+      logger.info(`Pool type ${poolInfo.poolType} not yet supported for position tracking`);
+      return [];
+      
+    } catch (error) {
+      logger.error(`Error getting pool positions: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Get LP token positions for XYK/Stableswap pools
+   */
+  private async getLPTokenPositions(
+    walletAddress: string,
+    poolAddress: string,
+    poolInfo: any,
+    _alternateAddresses: string[]
+  ): Promise<HydrationPosition[]> {
+    try {
+      // For XYK pools, we need to check the pool's liquidity provider shares
+      if (poolInfo.poolType === 'Xyk') {
+        return await this.getXYKPoolPositions(walletAddress, poolAddress, poolInfo);
+      }
+      
+      // For Stableswap pools, we need to check the pool's shares
+      if (poolInfo.poolType === 'Stableswap') {
+        return await this.getStableswapPoolPositions(walletAddress, poolAddress, poolInfo);
+      }
+      
+      logger.info(`LP token positions not implemented for pool type: ${poolInfo.poolType}`);
+      return [];
+      
+    } catch (error) {
+      logger.error(`Error getting LP token positions: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Get XYK pool positions by checking LP token balance
+   */
+  private async getXYKPoolPositions(
+    walletAddress: string,
+    poolAddress: string,
+    _poolInfo: any
+  ): Promise<HydrationPosition[]> {
+    try {
+      // Convert wallet address to Hydration format
+      const hydraWalletAddress = encodeAddress(
+        decodeAddress(walletAddress),
+        HYDRA_ADDRESS_PREFIX
+      );
+      
+      // Get pool details to get LP token address
+      const poolDetails = await this.getPoolDetails(poolAddress);
+      if (!poolDetails) {
+        logger.warn(`Pool details not found for ${poolAddress}`);
+        return [];
+      }
+      
+      // Get user's LP token balance
+      const api = await this.getApiPromise();
+      const lpBalanceRaw = await api.query.tokens.accounts(
+        hydraWalletAddress,
+        poolDetails.lpMint.address
+      );
+      const userLpBalance = new BigNumber(lpBalanceRaw.free.toString());
+      
+      if (userLpBalance.lte(0)) {
+        return [];
+      }
+
+      // Get total supply of LP tokens
+      const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolDetails.lpMint.address)).toString());
+      
+      // Calculate user's share percentage
+      const userShare = userLpBalance.dividedBy(totalLpSupply);
+      
+      // Get pool reserves from pool details
+      const baseTokenReserve = new BigNumber(poolDetails.baseTokenAmount || 0);
+      const quoteTokenReserve = new BigNumber(poolDetails.quoteTokenAmount || 0);
+      
+      // Calculate user's position in each token
+      const userBaseAmount = baseTokenReserve.multipliedBy(userShare);
+      const userQuoteAmount = quoteTokenReserve.multipliedBy(userShare);
+      
+      // Calculate price as quoteTokenAmount / baseTokenAmount (USDT per HDX)
+      const price = userQuoteAmount.dividedBy(userBaseAmount);
+      
+      // Create position entry
+      const position: HydrationPosition = {
+        positionId: `xyk-${poolAddress}`,
+        assetId: poolAddress,
+        owner: walletAddress,
+        shares: userLpBalance.toString(),
+        amount: userLpBalance.toString(),
+        price: price.toNumber()
+      };
+
+      return [position];
+      
+    } catch (error) {
+      logger.error(`Error getting XYK pool positions: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Get Stableswap pool positions by checking LP token balance
+   */
+  private async getStableswapPoolPositions(
+    walletAddress: string,
+    poolAddress: string,
+    _poolInfo: any
+  ): Promise<HydrationPosition[]> {
+    try {
+      // Convert wallet address to Hydration format
+      const hydraWalletAddress = encodeAddress(
+        decodeAddress(walletAddress),
+        HYDRA_ADDRESS_PREFIX
+      );
+      
+      // Get pool details to get LP token address
+      const poolDetails = await this.getPoolDetails(poolAddress);
+      if (!poolDetails) {
+        logger.warn(`Pool details not found for ${poolAddress}`);
+        return [];
+      }
+      
+      // Get user's LP token balance
+      const api = await this.getApiPromise();
+      const lpBalanceRaw = await api.query.tokens.accounts(
+        hydraWalletAddress,
+        poolDetails.lpMint.address
+      );
+      const userLpBalance = new BigNumber(lpBalanceRaw.free.toString());
+      
+      if (userLpBalance.lte(0)) {
+        return [];
+      }
+
+      // Get total supply of LP tokens
+      const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolDetails.lpMint.address)).toString());
+      
+      // Calculate user's share percentage
+      const userShare = userLpBalance.dividedBy(totalLpSupply);
+      
+      // Get pool reserves from pool details
+      const baseTokenReserve = new BigNumber(poolDetails.baseTokenAmount || 0);
+      const quoteTokenReserve = new BigNumber(poolDetails.quoteTokenAmount || 0);
+      
+      // Calculate user's position in each token
+      const userBaseAmount = baseTokenReserve.multipliedBy(userShare);
+      const userQuoteAmount = quoteTokenReserve.multipliedBy(userShare);
+      
+      // Calculate price as quoteTokenAmount / baseTokenAmount (USDT per USDC)
+      const price = userQuoteAmount.dividedBy(userBaseAmount);
+      
+      // Create position entry
+      const position: HydrationPosition = {
+        positionId: `stableswap-${poolAddress}`,
+        assetId: poolAddress,
+        owner: walletAddress,
+        shares: userLpBalance.toString(),
+        amount: userLpBalance.toString(),
+        price: price.toNumber()
+      };
+
+      return [position];
+      
+    } catch (error) {
+      logger.error(`Error getting Stableswap pool positions: ${error.message}`);
+      return [];
+    }
+  }
+
 
 
   /**

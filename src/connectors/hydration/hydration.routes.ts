@@ -4,6 +4,8 @@ import type { FastifyPluginAsync } from 'fastify';
 // import { fetchPoolsRoute } from './routes/amm-routes/fetchPools';
 import { addLiquidityRoute } from './routes/amm-routes/addLiquidity';
 import { executeSwapRoute } from './routes/amm-routes/executeSwap';
+import { getAllTokensRoute } from './routes/amm-routes/getAllTokens';
+import { getTradeableTokensRoute } from './routes/amm-routes/getTradeableTokens';
 import { listPoolsRoute } from './routes/amm-routes/listPools';
 import { poolInfoRoute } from './routes/amm-routes/poolInfo';
 import { positionInfoRoute } from './routes/amm-routes/positionInfo';
@@ -11,6 +13,7 @@ import { positionsOwnedRoute } from './routes/amm-routes/positionsOwned';
 import { quoteLiquidityRoute } from './routes/amm-routes/quoteLiquidity';
 import { quoteSwapRoute } from './routes/amm-routes/quoteSwap';
 import { removeLiquidityRoute } from './routes/amm-routes/removeLiquidity';
+
 /**
  * Registers all Hydration AMM routes to the Fastify instance.
  * Includes routes for pool management, liquidity operations, and swap functionality.
@@ -30,6 +33,8 @@ export const hydrationAMMRoutes: FastifyPluginAsync = async (fastify) => {
   await fastify.register(removeLiquidityRoute);
   await fastify.register(positionInfoRoute);
   await fastify.register(positionsOwnedRoute);
+  await fastify.register(getAllTokensRoute);
+  await fastify.register(getTradeableTokensRoute);
 };
 
 /**

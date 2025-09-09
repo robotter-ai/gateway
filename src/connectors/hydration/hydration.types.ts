@@ -556,3 +556,70 @@ export interface HydrationCLMMPositionInfo extends HydrationPositionInfo {
   tickLower: number;
   tickUpper: number;
 }
+
+/**
+ * Represents a token in the Hydration ecosystem with complete metadata
+ */
+export interface HydrationToken {
+  /** Unique identifier for the token */
+  id: string;
+  
+  /** Human-readable name of the token */
+  name: string;
+  
+  /** Symbol representing the token (e.g., DOT, HDX) */
+  symbol: string;
+  
+  /** Number of decimal places for the token */
+  decimals: number;
+  
+  /** Icon URL for the token */
+  icon: string;
+  
+  /** Type of the token */
+  type: string;
+  
+  /** Minimum balance required for the token */
+  existentialDeposit: string;
+  
+  /** Whether the token is sufficient for account creation */
+  isSufficient: boolean;
+  
+  /** XCM location data */
+  location?: any;
+  
+  /** Additional metadata */
+  meta?: Record<string, string>;
+  
+  /** Whether the token is whitelisted */
+  isWhiteListed?: boolean;
+}
+
+/**
+ * Request schema for getting all tokens
+ */
+export interface HydrationGetAllTokensRequest {
+  network?: string;
+  includeInvalid?: boolean;
+}
+
+/**
+ * Response schema for getting all tokens
+ */
+export interface HydrationGetAllTokensResponse {
+  tokens: HydrationToken[];
+}
+
+/**
+ * Request schema for getting tradeable tokens
+ */
+export interface HydrationGetTradeableTokensRequest {
+  network?: string;
+}
+
+/**
+ * Response schema for getting tradeable tokens
+ */
+export interface HydrationGetTradeableTokensResponse {
+  tokens: HydrationToken[];
+}

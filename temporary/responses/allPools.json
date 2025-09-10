@@ -1,0 +1,353 @@
+{
+    "pools": [
+        {
+            "address": "7JjNb2NcwoRxPpDMnhVPueuqcijDxaV5JHJZwVQjuWZX8Ymy",
+            "type": "Aave",
+            "tokens": [
+                "aUSDC",
+                "USDC"
+            ]
+        },
+        {
+            "address": "7Ji3wneztHUaxrrZs5Yuvb8sxcBkFpBb3AzyNtnSAgN7ZRzb",
+            "type": "Aave",
+            "tokens": [
+                "aUSDT",
+                "USDT"
+            ]
+        },
+        {
+            "address": "7Ji6crWLMPGBJqiYXWR6ikgWBvcGxxXhrspEJGRBGKFnseuE",
+            "type": "Aave",
+            "tokens": [
+                "aWBTC",
+                "WBTC"
+            ]
+        },
+        {
+            "address": "7JoHqoU5f91uWTtjTXhuNSFV7YgEvfvwUbK8Bj27Sq4S9tbd",
+            "type": "Aave",
+            "tokens": [
+                "aDOT",
+                "DOT"
+            ]
+        },
+        {
+            "address": "7Ji5RwErNEGNjRt11XC9BqwoAD17CLEWwTd49X8HVoa79K4a",
+            "type": "Aave",
+            "tokens": [
+                "avDOT",
+                "vDOT"
+            ]
+        },
+        {
+            "address": "7Ji3wrYYeGNhjw3DFyvHMotkSWU2MEGFXgnap9GtrPiYekgd",
+            "type": "Aave",
+            "tokens": [
+                "atBTC",
+                "tBTC"
+            ]
+        },
+        {
+            "address": "7JperooPxRbmzGCvFXhAb6gtbMfFUouUuwT9aQxEHBksPYgb",
+            "type": "Aave",
+            "tokens": [
+                "2-Pool-GDOT",
+                "GDOT"
+            ]
+        },
+        {
+            "address": "7JmzgeRuEbTxD5in5hAa4CiUQnUYZDgVzv9toMAzkdU2tiqf",
+            "type": "Aave",
+            "tokens": [
+                "2-Pool-GETH",
+                "GETH"
+            ]
+        },
+        {
+            "address": "7JkhEG6F1KR7d6uk1MA226cEWL5TMPcsjdsmrTcGfrq5hidJ",
+            "type": "Aave",
+            "tokens": [
+                "aETH",
+                "ETH"
+            ]
+        },
+        {
+            "address": "7Ji3x4Es5cLBYbYU56nF6zX2dEHop5oKWLrJu1qgVfqW92Jc",
+            "type": "Aave",
+            "tokens": [
+                "3-Pool",
+                "a3-Pool"
+            ]
+        },
+        {
+            "address": "19z3bUdbjo7z7nMGHVBeFkoTAnAFerRdxRaUbTaWb7XehY6",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "HDX"
+            ]
+        },
+        {
+            "address": "15nxMXRcFASuG3EGwEQVUic1c3t686FBrQY5UqXxFf9vSNVz",
+            "type": "Xyk",
+            "tokens": [
+                "CRU",
+                "HDX"
+            ]
+        },
+        {
+            "address": "1hVX5tgPU8DN2RqikLdiQRWgXq7WCZWV2WBcD8Q77STyBYb",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "NODL"
+            ]
+        },
+        {
+            "address": "16X82bJHEsWJ9xSvNApyzSYCYHyxR9qPcSuJxNe4gyWpKqnV",
+            "type": "Xyk",
+            "tokens": [
+                "UNQ",
+                "USDT"
+            ]
+        },
+        {
+            "address": "15L6BQ1sMd9pESapK13dHaXBPPtBYnDnKTVhb2gBeGrrJNBx",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "MYTH"
+            ]
+        },
+        {
+            "address": "15sjxrJkJRCXs64J7wvxNE3vjJ8CGjDPggqeNwEyijvydwri",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "UNQ"
+            ]
+        },
+        {
+            "address": "126gk5HYhQWDaRB8uaxyRT2kD4g1PgiNhamcTphJZX92xH67",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "PEN"
+            ]
+        },
+        {
+            "address": "16FdebekfZBBQnJaPHGueKBJqsvZvT2mscqgZeycCAZLFqQr",
+            "type": "Xyk",
+            "tokens": [
+                "HDX",
+                "vDOT"
+            ]
+        },
+        {
+            "address": "14jtzXmr1nzezeF1tAmq4G4g2ycthmMs84SCSD5ntuFTHAtk",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "LAOS"
+            ]
+        },
+        {
+            "address": "1qJEghmnyvWdtLikC33Yne2eMKrtroS6TLhYXZjZFUrtqQo",
+            "type": "Xyk",
+            "tokens": [
+                "HDX",
+                "USDT"
+            ]
+        },
+        {
+            "address": "12xht4Z98XuyAPRxVc5T2AE84DUooLhFCSuWEAixuDKLeVKA",
+            "type": "Xyk",
+            "tokens": [
+                "HDX",
+                "WUD"
+            ]
+        },
+        {
+            "address": "163MrU87DqxU9tcjuQ3fZW7wqpkPuPQR7yVjELBdS6z9DE33",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "vDOT"
+            ]
+        },
+        {
+            "address": "1KHf8AYaeehLUxU7Dv3dYNAWRoVETKYBmp89csLgT1Jhqm9",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "NEURO"
+            ]
+        },
+        {
+            "address": "16DGoqpetQHPEJDd2RnhCeCeDWzH65mgK2acQ1o1rSJQV8U2",
+            "type": "Xyk",
+            "tokens": [
+                "HDX",
+                "HDXb"
+            ]
+        },
+        {
+            "address": "12iyS9DpPLCbdt1ae136owqNPmcfYvkygeT6VmdtkbSv2ozq",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "SUB"
+            ]
+        },
+        {
+            "address": "15BuQdFibo2wZmwksPWCJ3owmXCduSU56gaXzVKDc1pcCcsd",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "WUD"
+            ]
+        },
+        {
+            "address": "136yWBoTmbXTQ8fEjrjGehvePSb3oW6sQ2H4Sgg7aq1YpRDC",
+            "type": "Xyk",
+            "tokens": [
+                "AJUN",
+                "USDT"
+            ]
+        },
+        {
+            "address": "15nzS2D2wJdh52tqZdUJVMeDQqQe7wJfo5NZKL7pUxhwYgwq",
+            "type": "Xyk",
+            "tokens": [
+                "DOT",
+                "EWT"
+            ]
+        },
+        {
+            "address": "15YMi7QvPArzUWTF4kRG1kyzDUfJQ5pVmG2ageUG22iXsT8B",
+            "type": "Xyk",
+            "tokens": [
+                "HDX",
+                "HDXb"
+            ]
+        },
+        {
+            "address": "13H3G4Lp54xNj7XARdXU68Jr7cxSs4z3x6TbGZta2ngk26dH",
+            "type": "Xyk",
+            "tokens": [
+                "HDX",
+                "INTR"
+            ]
+        },
+        {
+            "address": "13TRTY3buurndamtK8WfwwoCayr6MBRawUkWzncEJdHC1tQV",
+            "type": "Xyk",
+            "tokens": [
+                "AJUN",
+                "DOT"
+            ]
+        },
+        {
+            "address": "15tUVDj8HaSheHvuLxEcGsaAUMHbN12PQGFaQKEJguoA7xiZ",
+            "type": "Xyk",
+            "tokens": [
+                "PEN",
+                "USDC"
+            ]
+        },
+        {
+            "address": "7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1",
+            "type": "Omnipool",
+            "tokens": [
+                "2-Pool",
+                "4-Pool",
+                "AAVE",
+                "ASTR",
+                "BNC",
+                "DOT",
+                "GETH",
+                "GLMR",
+                "H2O",
+                "HDX",
+                "KSM",
+                "LDO",
+                "LINK",
+                "PHA",
+                "SKY",
+                "SOL",
+                "tBTC",
+                "TRAC",
+                "vASTR",
+                "vDOT",
+                "WBTC"
+            ]
+        },
+        {
+            "address": "7JP6TvcH5x31TsbC6qVJHEhsW7UNmpREMZuLBpK2bG1goJRS",
+            "type": "Stableswap",
+            "tokens": [
+                "4-Pool",
+                "DAI",
+                "USDC",
+                "USDT",
+                "USDT"
+            ]
+        },
+        {
+            "address": "7MaKPwwnqN4cqg35PbxsGXUo1dfvjXQ3XfBjWF9UVvKMjJj8",
+            "type": "Stableswap",
+            "tokens": [
+                "2-Pool",
+                "iBTC",
+                "WBTC"
+            ]
+        },
+        {
+            "address": "7KUbeeShExwYhVmQXV3SZ83VaHLYVn6ExU571g7m2Y3DdahG",
+            "type": "Stableswap",
+            "tokens": [
+                "3-Pool",
+                "aUSDT",
+                "USDC",
+                "USDT"
+            ]
+        },
+        {
+            "address": "7HsZbKhSC6kzEnRjFtm5fu2bEKKkvyYXuHMbCamNEzfn7Giq",
+            "type": "Stableswap",
+            "tokens": [
+                "2-Pool-GETH",
+                "aETH",
+                "wstETH"
+            ]
+        },
+        {
+            "address": "7JzbTq8gapgJ4S1mC2rYjcHLrFaNrbMoZARcZtwHStYNC1aT",
+            "type": "Stableswap",
+            "tokens": [
+                "2-Pool-WETH",
+                "aETH",
+                "WETH"
+            ]
+        },
+        {
+            "address": "7LVGEVLFXpsCCtnsvhzkSMQARU7gRVCtwMckG7u7d3V6FVvG",
+            "type": "Stableswap",
+            "tokens": [
+                "2-Pool",
+                "USDC",
+                "USDT"
+            ]
+        },
+        {
+            "address": "7Ni2vDQ41AMCzx8pBpNvL3CtrkprAaAB73NzyJy6T17PaGHo",
+            "type": "Stableswap",
+            "tokens": [
+                "2-Pool-GDOT",
+                "aDOT",
+                "vDOT"
+            ]
+        }
+    ]
+}

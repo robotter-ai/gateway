@@ -1232,7 +1232,7 @@ export class Hydration {
       }
 
       const poolTokenAddresses = pool.tokens
-        .filter(token => !token.symbol.toLowerCase().includes('-pool'))
+        // .filter(token => !token.symbol.toLowerCase().includes('-pool'))
         .map(token => token.id.toString().toLowerCase())
         .sort((a, b) => a.localeCompare(b));
 
@@ -1248,7 +1248,7 @@ export class Hydration {
       type: pool.type,
       tokens: pool.tokens
         .map(token => token.symbol)
-        .filter(symbol => !symbol.includes('-Pool'))
+        // .filter(symbol => !symbol.includes('-Pool'))
         .sort((a, b) => a.localeCompare(b))
     }));
 

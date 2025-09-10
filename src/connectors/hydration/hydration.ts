@@ -1819,7 +1819,7 @@ export class Hydration {
    * @param poolAddress The pool address to filter positions by
    * @returns Array of positions owned by the wallet
    */
-  async getPositionsOwned(walletAddress: string, poolAddress: string): Promise<HydrationPosition[]> {
+  async getPositionsOwned(walletAddress: string, poolAddress: string, tokenAddress?: string, tokenSymbol?: string): Promise<HydrationPosition[]> {
     try {
       // Convert wallet address to Hydration format
       const hydraWalletAddress = encodeAddress(
@@ -1835,7 +1835,9 @@ export class Hydration {
         // Try with SS58 format 0 (Polkadot)
         encodeAddress(decodeAddress(walletAddress), 0)
       ];
-      
+
+      tokenAddress = tokenAddress ?? this.polkadot.getToken(tokenAddress ?? tokenSymbol)?.address;
+
       return await this.getPoolPositions(walletAddress, poolAddress, alternateHydraAddresses);
     } catch (error) {
       logger.error(`Error in getPositionsOwned: ${error.message}`);
@@ -1850,7 +1852,8 @@ export class Hydration {
   private async getPoolPositions(
     walletAddress: string, 
     poolAddress: string, 
-    alternateAddresses: string[]
+    alternateAddresses: string[],
+    _tokenAddress?: string
   ): Promise<HydrationPosition[]> {
     try {
       // Get pool info to determine pool type

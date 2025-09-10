@@ -15,7 +15,19 @@ const PositionsOwnedRequest = Type.Object({
   ),
   poolAddress: Type.Optional(
     Type.String({
-      description: 'The pool address to filter positions by (XYK/Stableswap only)',
+      description: 'The pool address to filter positions by. Works for XYK, Stableswap, and Omnipool (for the Omnipool, leave empty))',
+      examples: [],
+    }),
+  ),
+  tokenAddress: Type.Optional(
+    Type.String({
+      description: 'The token address to filter positions by. Only needed for Omnipool, or leave it empty to get all positions.',
+      examples: [],
+    }),
+  ),
+  tokenSymbol: Type.Optional(
+    Type.String({
+      description: 'The token symbol to filter positions by. Only needed for Omnipool, or leave it empty to get all positions.',
       examples: [],
     }),
   ),
@@ -101,23 +113,15 @@ export const positionsOwnedRoute: FastifyPluginAsync = async (fastify) => {
     },
     async (request) => {
       try {
-        const { walletAddress, poolAddress } = request.query;
+        let { walletAddress, poolAddress, tokenAddress, tokenSymbol } = request.query;
         const network = request.query.network || 'mainnet';
 
         // Get Hydration instance
         const hydration = await Hydration.getInstance(network);
 
-        // If no parameters provided, return debug info
-        if (!walletAddress && !poolAddress) {
-          logger.info('No parameters provided, returning debug info');
-          return {
-            debug: true,
-            message: 'No parameters provided. Use walletAddress + poolAddress for XYK/Stableswap pools',
-            example: {
-              xyk: '?walletAddress=YOUR_WALLET&poolAddress=POOL_ADDRESS',
-              stableswap: '?walletAddress=YOUR_WALLET&poolAddress=POOL_ADDRESS'
-            }
-          };
+        if (!poolAddress) {
+          // Assumes the user wants the positions from the Omnipool
+          poolAddress = hydration.config.omniPoolAddress;
         }
 
         if (!walletAddress) {
@@ -125,13 +129,15 @@ export const positionsOwnedRoute: FastifyPluginAsync = async (fastify) => {
         }
 
         if (!poolAddress) {
-          throw fastify.httpErrors.badRequest('poolAddress is required for XYK/Stableswap pools');
+          throw fastify.httpErrors.badRequest('poolAddress is required for XYK/Stableswap/Ominipool pools');
         }
 
         // Get positions owned by the wallet
         const rawPositions = await hydration.getPositionsOwned(
           walletAddress,
           poolAddress,
+          tokenAddress,
+          tokenSymbol,
         );
 
         // Fetch pool info for base/quote token addresses if poolAddress is provided
@@ -156,9 +162,11 @@ export const positionsOwnedRoute: FastifyPluginAsync = async (fastify) => {
         }));
 
         logger.info(`Found ${positions.length} positions for wallet ${walletAddress} with pool ${poolAddress}`);
+
         return positions;
       } catch (e) {
         logger.error(`Error in positionsOwned route: ${e.message}`);
+
         throw fastify.httpErrors.internalServerError(
           'Failed to fetch positions',
         );

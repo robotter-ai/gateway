@@ -710,3 +710,15 @@ GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-
 Content-Type: application/json
 
 ###
+
+# GET /{{connector}}/amm/get-tradeable-tokens
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/get-tradeable-tokens
+Content-Type: application/json
+
+###
+
+# GET /{{connector}}/amm/get-all-tokens
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/get-all-tokens
+Content-Type: application/json
+
+###

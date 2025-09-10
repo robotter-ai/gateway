@@ -5,10 +5,15 @@
         "allowedSlippage": {
             "type": "string",
             "description": "How much the execution price is allowed to move unfavorably from the trade execution price (format: '1/100')"
+        },
+        "omniPoolAddress": {
+            "type": "string",
+            "description": "The address of the Omnipool pool"
         }
     },
     "additionalProperties": false,
     "required": [
-        "allowedSlippage"
+        "allowedSlippage",
+        "omniPoolAddress"
     ]
 }

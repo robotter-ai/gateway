@@ -65,7 +65,7 @@ const swaggerOptions = {
       // Chains
       { name: 'solana', description: 'Solana chain endpoints' },
       { name: 'ethereum', description: 'Ethereum chain endpoints' },
-      { name: 'hydrationChain', description: 'Hydration chain endpoints' },
+      { name: 'hydration', description: 'Hydration chain endpoints' },
 
       // Connectors
       { name: 'jupiter', description: 'Jupiter DEX aggregator (Solana)' },

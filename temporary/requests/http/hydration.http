@@ -4,9 +4,6 @@
 GET {{httpProtocol}}://{{host}}:{{port}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # ===================== CONFIG ROUTES =====================
@@ -15,26 +12,17 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/config
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /config?chainOrConnector={{chain}}
 GET {{httpProtocol}}://{{host}}:{{port}}/config?chainOrConnector={{chain}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /config?chainOrConnector={{connector}}
 GET {{httpProtocol}}://{{host}}:{{port}}/config?chainOrConnector={{connector}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -53,9 +41,6 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/config?chainOrConnector={{connector}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # ===================== CONNECTOR ROUTES =====================
@@ -64,9 +49,6 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # ===================== WALLET ROUTES =====================
@@ -74,10 +56,6 @@ Content-Type: application/json
 # GET /wallet
 GET {{httpProtocol}}://{{host}}:{{port}}/wallet
 Content-Type: application/json
-
-{
-}
-
 
 ###
 
@@ -95,9 +73,6 @@ Content-Type: application/json
 # GET /wallet
 GET {{httpProtocol}}://{{host}}:{{port}}/wallet
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -117,9 +92,6 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/wallet
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # ===================== CHAIN ROUTES =====================
@@ -127,9 +99,6 @@ Content-Type: application/json
 # GET /<chain>/status
 GET {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/status?network={{network}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -175,9 +144,6 @@ Content-Type: application/json
 # GET /<chain>/tokens - Multiple tokens
 GET {{httpProtocol}}://{{host}}:{{port}}/chains/{{chain}}/tokens?network={{network}}&tokenSymbols={{nativeTokenSymbol}},{{baseTokenSymbol}},{{quoteTokenSymbol}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -297,17 +263,11 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/pool-info?network={{network}}&poolAddress={{poolAddressXyk}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/pool-info - HYDRATION Stableswap
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/pool-info?network={{network}}&poolAddress={{poolAddressStableswap}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -315,17 +275,11 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/pool-info?network={{network}}&poolAddress={{poolAddressOmnipool}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/quote-swap - HYDRATION XYK BUYING MEDIUM AMOUNT
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}&amount={{mediumAmount}}&side={{sideBuy}}&poolAddress={{poolAddressXyk}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -333,17 +287,11 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}&amount={{mediumAmount}}&side={{sideSell}}&poolAddress={{poolAddressXyk}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/quote-swap - HYDRATION Stableswap BUYING SMALL AMOUNT
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}&amount={{smallAmount}}&side={{sideBuy}}&poolAddress={{poolAddressStableswap}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -351,17 +299,11 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}&amount={{smallAmount}}&side={{sideSell}}&poolAddress={{poolAddressStableswap}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/quote-swap - HYDRATION XYK BUYING BIGGER AMOUNT
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}&amount={{biggerAmount}}&side={{sideBuy}}&poolAddress={{poolAddressXyk}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -369,17 +311,11 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}&amount={{biggerAmount}}&side={{sideSell}}&poolAddress={{poolAddressXyk}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/quote-swap - HYDRATION Stableswap BUYING BIGGER AMOUNT
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}&amount={{biggerAmount}}&side={{sideBuy}}&poolAddress={{poolAddressStableswap}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -387,17 +323,11 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}&amount={{biggerAmount}}&side={{sideSell}}&poolAddress={{poolAddressStableswap}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/quote-swap - HYDRATION Omnipool BUYING SMALL AMOUNT
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{baseTokenSymbol}}&quoteToken={{quoteTokenSymbol}}&amount={{
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -405,17 +335,11 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddressXyk}}&baseTokenAmount={{smallBaseTokenAmount}}&quoteTokenAmount={{smallQuoteTokenAmount}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/quote-liquidity - HYDRATION Stableswap SMALL AMOUNT
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddressStableswap}}&baseTokenAmount={{smallBaseTokenAmount}}&quoteTokenAmount={{smallQuoteTokenAmount}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -423,26 +347,17 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddressXyk}}&baseTokenAmount={{biggerBaseTokenAmount}}&quoteTokenAmount={{biggerQuoteTokenAmount}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/quote-liquidity - HYDRATION Stableswap BIGGER AMOUNT
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddressStableswap}}&baseTokenAmount={{biggerBaseTokenAmount}}&quoteTokenAmount={{biggerQuoteTokenAmount}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/quote-liquidity - HYDRATION Omnipool
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-liquidity?network={{network}}&poolAddress={{poolAddressOmnipool}}&baseTokenAmount={{mediumBaseTokenAmount}}&quoteTokenAmount={{mediumQuoteTokenAmount}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
-
-{
-}
 
 ###
 
@@ -659,8 +574,6 @@ Content-Type: application/json
 
 ###
 
-
-
 # POST /{{connector}}/amm/add-liquidity - HYDRATION Omnipool
 POST {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/add-liquidity
 Content-Type: application/json
@@ -760,9 +673,6 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressOmnipool}}&assetId=31
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/position-info - XYK with tokens
@@ -781,9 +691,6 @@ Content-Type: application/json
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{omnipoolBaseTokenSymbol}}&quoteToken={{omnipoolQuoteTokenSymbol}}
 Content-Type: application/json
 
-{
-}
-
 ###
 
 # GET /{{connector}}/amm/positions-owned - XYK Pool
@@ -801,4 +708,3 @@ GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-
 Content-Type: application/json
 
 ###
-

@@ -678,8 +678,8 @@ Content-Type: application/json
 # GET /{{connector}}/amm/position-info - XYK with tokens
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{xykBaseTokenSymbol}}&quoteToken={{xykQuoteTokenSymbol}}
 Content-Type: application/json
-###
 
+###
 
 # GET /{{connector}}/amm/position-info - Stableswap with tokens
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&baseToken={{stableBaseTokenSymbol}}&quoteToken={{stableQuoteTokenSymbol}}
@@ -698,11 +698,13 @@ GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-
 Content-Type: application/json
 
 ###
+
 # GET /{{connector}}/amm/positions-owned - Stableswap Pool
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressStableswap}}
 Content-Type: application/json
 
 ###
+
 # GET /{{connector}}/amm/positions-owned - Omnipool
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressOmnipool}}
 Content-Type: application/json

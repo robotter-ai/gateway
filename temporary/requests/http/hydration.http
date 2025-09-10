@@ -711,6 +711,7 @@ Content-Type: application/json
 
 ###
 
+<<<<<<< Updated upstream
 # GET /{{connector}}/amm/get-tradeable-tokens
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/get-tradeable-tokens
 Content-Type: application/json
@@ -722,3 +723,11 @@ GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/get-all-to
 Content-Type: application/json
 
 ###
+=======
+# Get All Positions (XYK + Stableswap)
+# Get all positions across all supported pool types for a wallet
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/get-all-positions?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}
+
+###
+
+>>>>>>> Stashed changes

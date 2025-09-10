@@ -15,6 +15,7 @@ import { HydrationConfig } from './hydration.config';
 import {
   ExternalPoolInfo,
   HydrationAddLiquidityResponse,
+  HydrationAllPositionsResponse,
   HydrationExecuteSwapResponse,
   HydrationPoolInfo,
   HydrationPositionInfo,
@@ -1939,8 +1940,13 @@ export class Hydration {
       // Get total supply of LP tokens
       const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolDetails.lpMint.address)).toString());
       
+      // Normalize LP balances to human units
+      const lpDecimals = poolDetails.lpMint.decimals || LP_DECIMALS;
+      const userLpHuman = userLpBalance.dividedBy(new BigNumber(10).pow(lpDecimals));
+      const totalLpHuman = totalLpSupply.dividedBy(new BigNumber(10).pow(lpDecimals));
+      
       // Calculate user's share percentage
-      const userShare = userLpBalance.dividedBy(totalLpSupply);
+      const userShare = userLpHuman.dividedBy(totalLpHuman);
       
       // Get pool reserves from pool details
       const baseTokenReserve = new BigNumber(poolDetails.baseTokenAmount || 0);
@@ -1953,13 +1959,16 @@ export class Hydration {
       // Calculate price as quoteTokenAmount / baseTokenAmount (USDT per HDX)
       const price = userQuoteAmount.dividedBy(userBaseAmount);
       
+      // Calculate total position value (base + quote amounts)
+      const totalPositionValue = userBaseAmount.plus(userQuoteAmount);
+      
       // Create position entry
       const position: HydrationPosition = {
         positionId: `xyk-${poolAddress}`,
         assetId: poolAddress,
         owner: walletAddress,
-        shares: userLpBalance.toString(),
-        amount: userLpBalance.toString(),
+        shares: userLpHuman.toString(),
+        amount: totalPositionValue.toString(),
         price: price.toNumber()
       };
 
@@ -2008,8 +2017,13 @@ export class Hydration {
       // Get total supply of LP tokens
       const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolDetails.lpMint.address)).toString());
       
+      // Normalize LP balances to human units
+      const lpDecimals = poolDetails.lpMint.decimals || LP_DECIMALS;
+      const userLpHuman = userLpBalance.dividedBy(new BigNumber(10).pow(lpDecimals));
+      const totalLpHuman = totalLpSupply.dividedBy(new BigNumber(10).pow(lpDecimals));
+      
       // Calculate user's share percentage
-      const userShare = userLpBalance.dividedBy(totalLpSupply);
+      const userShare = userLpHuman.dividedBy(totalLpHuman);
       
       // Get pool reserves from pool details
       const baseTokenReserve = new BigNumber(poolDetails.baseTokenAmount || 0);
@@ -2022,13 +2036,16 @@ export class Hydration {
       // Calculate price as quoteTokenAmount / baseTokenAmount (USDT per USDC)
       const price = userQuoteAmount.dividedBy(userBaseAmount);
       
+      // Calculate total position value (base + quote amounts)
+      const totalPositionValue = userBaseAmount.plus(userQuoteAmount);
+      
       // Create position entry
       const position: HydrationPosition = {
         positionId: `stableswap-${poolAddress}`,
         assetId: poolAddress,
         owner: walletAddress,
-        shares: userLpBalance.toString(),
-        amount: userLpBalance.toString(),
+        shares: userLpHuman.toString(),
+        amount: totalPositionValue.toString(),
         price: price.toNumber()
       };
 
@@ -2041,6 +2058,87 @@ export class Hydration {
   }
 
 
+
+  /**
+   * Get all positions owned by a wallet across all supported pool types (XYK, Stableswap)
+   * @param walletAddress The wallet address to check
+   * @returns Array of all positions with summary information
+   */
+  async getAllPositions(walletAddress: string): Promise<HydrationAllPositionsResponse> {
+    try {
+      const allPositions: HydrationPosition[] = [];
+      let xykPositions = 0;
+      let stableswapPositions = 0;
+      let totalValue = new BigNumber(0);
+
+      // Get all pools to check for positions
+      const sdkContext = await this.getSdkContext();
+      const allPools = await this.sdkContextGetPools(sdkContext, []);
+      
+      // Filter for XYK and Stableswap pools only
+      const supportedPools = allPools.filter(pool => 
+        pool.type === 'Xyk' || pool.type === 'Stableswap'
+      );
+
+      logger.info(`Checking ${supportedPools.length} supported pools for positions`);
+
+      // Check each pool for user positions
+      for (const pool of supportedPools) {
+        try {
+          const positions = await this.getPositionsOwned(walletAddress, pool.address);
+          
+          if (positions.length > 0) {
+            // Add pool type to each position
+            const positionsWithType = positions.map(pos => ({
+              ...pos,
+              poolType: pool.type
+            }));
+            
+            allPositions.push(...positionsWithType);
+            
+            // Count by pool type
+            if (pool.type === 'Xyk') {
+              xykPositions += positions.length;
+            } else if (pool.type === 'Stableswap') {
+              stableswapPositions += positions.length;
+            }
+            
+            // Add to total value
+            positions.forEach(pos => {
+              totalValue = totalValue.plus(new BigNumber(pos.amount));
+            });
+          }
+        } catch (error) {
+          logger.warn(`Error checking positions for pool ${pool.address}: ${error.message}`);
+          // Continue with other pools even if one fails
+        }
+      }
+
+      return {
+        positions: allPositions,
+        summary: {
+          totalPositions: allPositions.length,
+          xykPositions,
+          stableswapPositions,
+          omnipoolPositions: 0, // Not implemented yet
+          totalValue: totalValue.toString()
+        }
+      };
+
+    } catch (error) {
+      logger.error(`Error getting all positions: ${error.message}`);
+      return {
+        positions: [],
+        summary: {
+          totalPositions: 0,
+          xykPositions: 0,
+          stableswapPositions: 0,
+          omnipoolPositions: 0,
+          totalValue: '0'
+        }
+      };
+    }
+  }
 
   /**
      * Get information about a user's position in a Hydration pool

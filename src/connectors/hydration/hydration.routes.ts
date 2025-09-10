@@ -5,6 +5,7 @@ import type { FastifyPluginAsync } from 'fastify';
 import { addLiquidityRoute } from './routes/amm-routes/addLiquidity';
 import { executeSwapRoute } from './routes/amm-routes/executeSwap';
 import { getAllTokensRoute } from './routes/amm-routes/getAllTokens';
+import { getAllPositionsRoute } from './routes/amm-routes/getAllPositions';
 import { getTradeableTokensRoute } from './routes/amm-routes/getTradeableTokens';
 import { listPoolsRoute } from './routes/amm-routes/listPools';
 import { poolInfoRoute } from './routes/amm-routes/poolInfo';
@@ -33,6 +34,7 @@ export const hydrationAMMRoutes: FastifyPluginAsync = async (fastify) => {
   await fastify.register(removeLiquidityRoute);
   await fastify.register(positionInfoRoute);
   await fastify.register(positionsOwnedRoute);
+  await fastify.register(getAllPositionsRoute);
   await fastify.register(getAllTokensRoute);
   await fastify.register(getTradeableTokensRoute);
 };

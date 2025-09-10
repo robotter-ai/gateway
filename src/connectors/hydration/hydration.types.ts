@@ -501,11 +501,56 @@ export interface HydrationPosition {
   shares: string;
   amount: string;
   price?: number;
+  poolType?: string; // Add pool type for better identification
+}
+
+export interface HydrationAllPositionsRequest {
+  network?: string;
+  walletAddress: string;
+}
+
+export interface HydrationAllPositionsResponse {
+  positions: HydrationPosition[];
+  summary: {
+    totalPositions: number;
+    xykPositions: number;
+    stableswapPositions: number;
+    omnipoolPositions: number;
+    totalValue: string;
+  };
 }
 
 /**
  * Schema for position information request
  */
+export const HydrationAllPositionsRequestSchema = {
+  querystring: Type.Object({
+    network: Type.Optional(Type.String()),
+    walletAddress: Type.String(),
+  }),
+};
+
+export const HydrationAllPositionsResponseSchema = {
+  200: Type.Object({
+    positions: Type.Array(Type.Object({
+      positionId: Type.String(),
+      assetId: Type.String(),
+      owner: Type.String(),
+      shares: Type.String(),
+      amount: Type.String(),
+      price: Type.Optional(Type.Number()),
+      poolType: Type.Optional(Type.String()),
+    })),
+    summary: Type.Object({
+      totalPositions: Type.Number(),
+      xykPositions: Type.Number(),
+      stableswapPositions: Type.Number(),
+      omnipoolPositions: Type.Number(),
+      totalValue: Type.String(),
+    }),
+  }),
+};
+
 export const HydrationGetPositionInfoRequestSchema = {
   type: 'object',
   required: ['walletAddress'],

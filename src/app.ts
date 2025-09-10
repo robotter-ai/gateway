@@ -1,6 +1,5 @@
 // External dependencies
-import { spawn } from 'child_process';
-import { exec } from 'child_process';
+import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
 
 import fastifySwagger from '@fastify/swagger';
@@ -14,7 +13,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 // Routes
 import { chainRoutes } from './chains/chain.routes';
 import { ethereumRoutes } from './chains/ethereum/ethereum.routes';
-import { HydrationRoutes as HydrationChainRoutes } from './chains/hydration/hydration.routes';
+import { hydrationRoutes as hydrationChainRoutes } from './chains/hydration/hydration.routes';
 import { solanaRoutes } from './chains/solana/solana.routes';
 import { configRoutes } from './config/config.routes';
 import { connectorsRoutes } from './connectors/connector.routes';
@@ -222,7 +221,7 @@ const configureGatewayServer = () => {
     // Register chain routes
     app.register(solanaRoutes, { prefix: '/chains/solana' });
     app.register(ethereumRoutes, { prefix: '/chains/ethereum' });
-    app.register(HydrationChainRoutes, { prefix: '/chains/hydration' });
+    app.register(hydrationChainRoutes, { prefix: '/chains/hydration' });
   };
 
   // Register routes on main server

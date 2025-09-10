@@ -53,7 +53,7 @@ const DEFAULT_PERCENTAGE = 100;
  */
 export class Hydration {
   private static _instances: { [name: string]: Hydration } = {};
-  public HydrationChain: HydrationChain;
+  public hydrationChain: HydrationChain;
   public config: HydrationConfig.NetworkConfig;
   // noinspection JSUnusedLocalSymbols
   private apiPromise: ApiPromise;
@@ -87,7 +87,7 @@ export class Hydration {
    */
   private async init(network: string) {
     logger.info(`Initializing Hydration for network: ${network}`);
-    this.HydrationChain = await HydrationChain.getInstance(network);
+    this.hydrationChain = await HydrationChain.getInstance(network);
     await this.cryptoWaitReady();
     await this.getSdkContext();
     logger.info(`Hydration initialized for network: ${network}`);
@@ -99,7 +99,7 @@ export class Hydration {
    * @returns A Promise that resolves to an array of supported tokens
    */
   public getAllTokens() {
-    return this.HydrationChain.tokenList;
+    return this.hydrationChain.tokenList;
   }
 
   /**
@@ -124,7 +124,7 @@ export class Hydration {
 
       if (isOmnipool) {
         // For omnipool, use hub asset (H2O) as both base and quote token
-        const hubAsset = this.HydrationChain.getToken(HUB_SYMBOL);
+        const hubAsset = this.hydrationChain.getToken(HUB_SYMBOL);
         if (!hubAsset) {
           throw new Error('Hub asset (H2O) not found');
         }
@@ -144,8 +144,8 @@ export class Hydration {
       }
 
       // For regular pools, continue with existing logic
-      const baseToken = this.HydrationChain.getToken(poolData.tokens[0].symbol);
-      const quoteToken = this.HydrationChain.getToken(poolData.tokens[1].symbol);
+      const baseToken = this.hydrationChain.getToken(poolData.tokens[0].symbol);
+      const quoteToken = this.hydrationChain.getToken(poolData.tokens[1].symbol);
 
       if (!baseToken) {
         throw new Error(`Base token not found for pool ${poolAddress}: ${poolData.tokens[0].symbol}`);
@@ -232,8 +232,8 @@ export class Hydration {
     const sdkContext = await this.getSdkContext();
 
     // Get token info
-    const baseToken = this.HydrationChain.getToken(baseTokenSymbol);
-    const quoteToken = this.HydrationChain.getToken(quoteTokenSymbol);
+    const baseToken = this.hydrationChain.getToken(baseTokenSymbol);
+    const quoteToken = this.hydrationChain.getToken(quoteTokenSymbol);
 
     if (!baseToken || !quoteToken) {
       throw new Error(`Token not found: ${!baseToken ? baseTokenSymbol : quoteTokenSymbol}`);
@@ -364,8 +364,8 @@ export class Hydration {
   ): Promise<any> {
     const sdkContext = await this.getSdkContext();
 
-    const baseToken = this.HydrationChain.getToken(baseTokenSymbol);
-    const quoteToken = this.HydrationChain.getToken(quoteTokenSymbol);
+    const baseToken = this.hydrationChain.getToken(baseTokenSymbol);
+    const quoteToken = this.hydrationChain.getToken(quoteTokenSymbol);
 
     if (!baseToken || !quoteToken) {
       throw new Error(`Token not found: ${!baseToken ? baseTokenSymbol : quoteTokenSymbol}`);
@@ -410,7 +410,7 @@ export class Hydration {
 
     const { txHash, transaction } = await this.submitTransaction(apiPromise, tx, wallet);
 
-    const feePaymentToken = this.HydrationChain.getFeePaymentToken();
+    const feePaymentToken = this.hydrationChain.getFeePaymentToken();
     
     const fee = this.getFee(feePaymentToken, transaction);
 
@@ -650,7 +650,7 @@ export class Hydration {
    * @returns Token symbol
    */
   async getTokenSymbol(tokenAddress: string): Promise<string> {
-    const token = this.HydrationChain.getToken(tokenAddress);
+    const token = this.hydrationChain.getToken(tokenAddress);
     if (!token) {
       throw new Error(`Token not found: ${tokenAddress}`);
     }
@@ -675,12 +675,12 @@ export class Hydration {
    */
   public getHttpProvider(): HttpProvider {
     // if (!this.httpProvider) {
-    //   this.httpProvider = new HttpProvider(this.HydrationChain.config.network.nodeURL);
+    //   this.httpProvider = new HttpProvider(this.hydrationChain.config.network.nodeURL);
     // }
     //
     // return this.httpProvider;
 
-    return new HttpProvider(this.HydrationChain.config.network.nodeURL);
+    return new HttpProvider(this.hydrationChain.config.network.nodeURL);
   }
 
   /**
@@ -688,19 +688,19 @@ export class Hydration {
    */
   public getWsProvider(): WsProvider {
     // if (!this.wsProvider) {
-    //   this.wsProvider = new WsProvider(this.HydrationChain.config.network.nodeURL);
+    //   this.wsProvider = new WsProvider(this.hydrationChain.config.network.nodeURL);
     // }
     //
     // return this.wsProvider;
 
-    return new WsProvider(this.HydrationChain.config.network.nodeURL);
+    return new WsProvider(this.hydrationChain.config.network.nodeURL);
   }
 
   /**
    * Get the appropriate provider based on the URL scheme
    */
   public getProvider(): WsProvider | HttpProvider {
-    if (this.HydrationChain.config.network.nodeURL.startsWith('http')) {
+    if (this.hydrationChain.config.network.nodeURL.startsWith('http')) {
       return this.getHttpProvider();
     } else {
       return this.getWsProvider();
@@ -783,7 +783,7 @@ export class Hydration {
    */
   @runWithRetryAndTimeout()
   public async sdkContextCreate(api: ApiPromise): Promise<any> {
-    return await createSdkContext(api);
+    return createSdkContext(api);
   }
 
   /**
@@ -821,7 +821,7 @@ export class Hydration {
     quoteTokenSymbol?: string
   ): Promise<HydrationAddLiquidityResponse> {
     // Get wallet
-    const wallet = await this.HydrationChain.getWallet(walletAddress);
+    const wallet = await this.hydrationChain.getWallet(walletAddress);
 
     // Get pool info
     const pool = await this.getPoolInfo(poolId);
@@ -843,7 +843,7 @@ export class Hydration {
     }
 
     // Check balances with transaction buffer
-    const balances = await this.HydrationChain.getBalance(wallet, [baseTokenSymbol, quoteTokenSymbol]);
+    const balances = await this.hydrationChain.getBalance(wallet, [baseTokenSymbol, quoteTokenSymbol]);
     const requiredBase = baseTokenAmount;
     const requiredQuote = quoteTokenAmount;
 
@@ -863,8 +863,8 @@ export class Hydration {
 
     logger.info(`Adding liquidity to pool ${poolId}: ${baseTokenAmount.toFixed(4)} ${baseTokenSymbol}, ${quoteTokenAmount.toFixed(4)} ${quoteTokenSymbol}`);
 
-    const baseToken = this.HydrationChain.getToken(baseTokenSymbol);
-    const quoteToken = this.HydrationChain.getToken(quoteTokenSymbol);
+    const baseToken = this.hydrationChain.getToken(baseTokenSymbol);
+    const quoteToken = this.hydrationChain.getToken(quoteTokenSymbol);
 
     if (!baseToken || !quoteToken) {
       throw new Error(`Asset not found: ${!baseToken ? baseTokenSymbol : quoteTokenSymbol}`);
@@ -951,7 +951,7 @@ export class Hydration {
 
     const { txHash, transaction } = await this.submitTransaction(apiPromise, addLiquidityTx, wallet, poolType);
 
-    const feePaymentToken = this.HydrationChain.getFeePaymentToken();
+    const feePaymentToken = this.hydrationChain.getFeePaymentToken();
 
     let fee: BigNumber;
     try {
@@ -1180,7 +1180,7 @@ export class Hydration {
     tokenAddresses = tokenAddresses.map(address => address.toLowerCase());
 
     const allTokenAddresses = tokenAddresses
-      .concat(tokenSymbols.map(symbol => this.HydrationChain.getToken(symbol).address.toLowerCase()))
+      .concat(tokenSymbols.map(symbol => this.hydrationChain.getToken(symbol).address.toLowerCase()))
       .sort((a, b) => a.localeCompare(b));
 
     // Get all pools and token mappings
@@ -1443,7 +1443,7 @@ export class Hydration {
       case POOL_TYPE.XYK: {
         const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
         const baseSymbol = await this.getTokenSymbol(poolInfo.baseTokenAddress);
-        const baseToken = this.HydrationChain.getToken(baseSymbol);
+        const baseToken = this.hydrationChain.getToken(baseSymbol);
         lpMint = {
           address: shareTokenId.toString(),
           decimals: baseToken?.decimals || 0
@@ -1460,7 +1460,7 @@ export class Hydration {
       }
 
       case POOL_TYPE.OMNIPOOL: {
-        const hubAsset = await this.HydrationChain.getToken('H2O');
+        const hubAsset = await this.hydrationChain.getToken('H2O');
         lpMint = {
           address: hubAsset?.address || '',
           decimals: hubAsset?.decimals || 0
@@ -1513,7 +1513,7 @@ export class Hydration {
     }
 
     // Get wallet
-    const wallet = await this.HydrationChain.getWallet(walletAddress);
+    const wallet = await this.hydrationChain.getWallet(walletAddress);
 
     // Get pool info
     const pool = await this.getPoolInfo(poolAddress);
@@ -1534,8 +1534,8 @@ export class Hydration {
     switch (poolType) {
       case POOL_TYPE.XYK: {
         const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
-        const baseToken = this.HydrationChain.getToken(pool.baseTokenAddress);
-        const quoteToken = this.HydrationChain.getToken(pool.quoteTokenAddress);
+        const baseToken = this.hydrationChain.getToken(pool.baseTokenAddress);
+        const quoteToken = this.hydrationChain.getToken(pool.quoteTokenAddress);
 
         if (!baseToken || !quoteToken) {
           throw new Error(`Token not found: ${!baseToken ? pool.baseTokenAddress : pool.quoteTokenAddress}`);
@@ -1629,8 +1629,8 @@ export class Hydration {
           throw new Error(`Could not find pool data for ${shareTokenId}`);
         }
 
-        const baseToken = this.HydrationChain.getToken(pool.baseTokenAddress);
-        const quoteToken = this.HydrationChain.getToken(pool.quoteTokenAddress);
+        const baseToken = this.hydrationChain.getToken(pool.baseTokenAddress);
+        const quoteToken = this.hydrationChain.getToken(pool.quoteTokenAddress);
 
         if (!baseToken || !quoteToken) {
           throw new Error(`Token not found: ${!baseToken ? pool.baseTokenAddress : pool.quoteTokenAddress}`);
@@ -1752,7 +1752,7 @@ export class Hydration {
 
     const { txHash, transaction } = await this.submitTransaction(apiPromise, removeLiquidityTx, wallet, poolType);
 
-    const feePaymentToken = this.HydrationChain.getFeePaymentToken();
+    const feePaymentToken = this.hydrationChain.getFeePaymentToken();
     let fee: BigNumber;
     try {
       fee = new BigNumber(transaction.events
@@ -1801,6 +1801,7 @@ export class Hydration {
         }
 
         const collectionId = apiPromise.consts.omnipool.nftCollectionId.toString();
+
         const [positions, uniques, accounts] = await Promise.all([
           apiPromise.query.omnipool.positions.entries(),
           apiPromise.query.uniques.asset.entries(),
@@ -1809,17 +1810,19 @@ export class Hydration {
             : Promise.resolve([])
         ]);
       
-      // Build NFT owners map
       const nftOwners = new Map<string, string>();
+
       for (const [key, value] of uniques) {
         try {
-          const args = (key as any).args as any[];
+          const args = key.args as any[];
           const classId = args?.[0]?.toString();
           const itemId = args?.[1]?.toString() ?? args?.[args.length - 1]?.toString();
           if (classId !== collectionId) continue;
           
           const details = (value as any);
+
           const owner = details?.isSome ? details.unwrap()?.owner?.toString() : details?.owner?.toString();
+
           if (itemId && owner) {
             nftOwners.set(itemId, owner);
           }
@@ -1832,7 +1835,7 @@ export class Hydration {
       if (nftOwners.size === 0 && Array.isArray(accounts) && accounts.length > 0) {
         for (const [key] of accounts) {
           try {
-            const args = (key as any).args as any[];
+            const args = key.args as any[];
             const classIdx = args.findIndex(a => a?.toString?.() === collectionId);
             if (classIdx === -1) continue;
             
@@ -1866,7 +1869,7 @@ export class Hydration {
       const result = positions
         .map(([idRaw, dataRaw]) => {
           try {
-            const keyArgs = (idRaw as any).args as any[];
+            const keyArgs = idRaw.args as any[];
             const positionId = keyArgs?.[keyArgs.length - 1]?.toString();
             const assetIdFromKey = keyArgs?.[0]?.toString();
             if (!positionId) return null;
@@ -1887,13 +1890,25 @@ export class Hydration {
             const rawAmount = positionData?.amount?.toString?.() ?? String(positionData?.amount ?? '0');
             const rawPrice = (positionData?.price as any)?.toString?.() ?? positionData?.price;
 
+            // Get token decimals for proper conversion
+            let tokenDecimals = 18; // Default to 18 for omnipool positions
+            try {
+              const token = this.hydrationChain.getToken(assetIdStr);
+              if (token?.decimals) {
+                tokenDecimals = token.decimals;
+              }
+            } catch (e) {
+              // Use default 18 decimals for asset IDs that can't be resolved
+              logger.debug(`Using default 18 decimals for assetId ${assetIdStr}: ${e.message}`);
+            }
+
             const shares = rawShares.startsWith('0x') 
-              ? new BigNumber(rawShares, 16).toString() 
-              : rawShares.replace(/,/g, '');
+              ? new BigNumber(rawShares, 16).dividedBy(new BigNumber(10).pow(tokenDecimals)).toString() 
+              : new BigNumber(rawShares.replace(/,/g, '')).dividedBy(new BigNumber(10).pow(tokenDecimals)).toString();
               
             const amount = rawAmount.startsWith('0x') 
-              ? new BigNumber(rawAmount, 16).toString() 
-              : rawAmount.replace(/,/g, '');
+              ? new BigNumber(rawAmount, 16).dividedBy(new BigNumber(10).pow(tokenDecimals)).toString() 
+              : new BigNumber(rawAmount.replace(/,/g, '')).dividedBy(new BigNumber(10).pow(tokenDecimals)).toString();
 
             // Parse price
             let priceDecimal = rawPrice;
@@ -2014,7 +2029,7 @@ export class Hydration {
     // Ensure valid quote token
     if (
       !poolInfo.quoteTokenAddress ||
-      poolInfo.quoteTokenAddress === this.HydrationChain.getNativeToken().address
+      poolInfo.quoteTokenAddress === this.hydrationChain.getNativeToken().address
     ) {
       if (poolData.tokens.length > 1) {
         poolInfo.quoteTokenAddress = poolData.tokens[1].id.toString();

@@ -5,7 +5,7 @@ import {
   HydrationStatusRequest,
   HydrationStatusResponse,
   HydrationStatusRequestSchema,
-  HydrationPollResponseSchema,
+  HydrationStatusResponseSchema,
 } from '../hydration.types';
 
 /**
@@ -42,7 +42,7 @@ export const statusRoute: FastifyPluginAsync = async (fastify) => {
         tags: ['hydration'],
         querystring: HydrationStatusRequestSchema,
         response: {
-          200: HydrationPollResponseSchema,
+          200: HydrationStatusResponseSchema,
         },
       },
     },

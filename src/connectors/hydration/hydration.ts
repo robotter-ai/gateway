@@ -2233,6 +2233,9 @@ export class Hydration {
     poolAddress?: string,
     baseToken?: string,
     quoteToken?: string,
+    omnipoolToken?: string,
+    omnipoolTokenAddress?: string,
+    positionId?: string,
   ): Promise<HydrationPositionInfo> {
     if (!walletAddress) {
       throw new Error('Wallet address parameter is required');
@@ -2245,25 +2248,38 @@ export class Hydration {
       HYDRA_ADDRESS_PREFIX
     );
 
-    if (!poolAddress && (!baseToken || !quoteToken)) {
-      throw new Error(
-        'Either poolAddress or both baseToken and quoteToken must be provided',
-      );
-    }
+    // Check alternate format - some Substrate chains have different address format encoding
+    const alternateHydraAddresses = [
+      hydraWalletAddress,
+      // Try with SS58 format 42 (generic Substrate)
+      encodeAddress(decodeAddress(walletAddress), 42),
+      // Try with SS58 format 0 (Polkadot)
+      encodeAddress(decodeAddress(walletAddress), 0)
+    ];
 
-    // Resolve pool address
+    const sdkContext = await this.getSdkContext();
+    const allPools = await this.sdkContextGetPools(sdkContext, []);
+
     let poolAddressToUse = poolAddress;
-    if (!poolAddressToUse) {
-      const pools = await this.listPools([], [baseToken, quoteToken]);
-      if (pools.length === 0) {
-        throw new Error(`No AMM pool found for pair ${baseToken}-${quoteToken}`);
+    if (!poolAddress && ((baseToken && !quoteToken) || (!baseToken && quoteToken)) && !omnipoolToken) {
+      throw new Error(
+        'Either poolAddress or both baseToken and quoteToken must be provided. For Omnipool, use omnipoolToken without poolAddress.',
+      );
+    } else if (!poolAddress && omnipoolToken) {
+      // Assumes the user wants the information for the Omnipool
+      poolAddressToUse = allPools.find(pool => pool.type.toLowerCase() === POOL_TYPE.OMNIPOOL.toLowerCase())?.address;
+    } else {
+      // Resolve pool address
+      if (!poolAddressToUse) {
+        const pools = await this.listPools([], [baseToken, quoteToken]);
+        if (pools.length === 0) {
+          throw new Error(`No AMM pool found for pair ${baseToken}-${quoteToken}`);
+        }
+        poolAddressToUse = pools[0].address;
       }
-      poolAddressToUse = pools[0].address;
     }
 
     // Fetch pool data
-    const sdkContext = await this.getSdkContext();
-    const allPools = await this.sdkContextGetPools(sdkContext, []);
     const poolData = allPools.find(p => p.address === poolAddressToUse);
     if (!poolData) {
       throw new Error(`Pool not found: ${poolAddressToUse}`);
@@ -2274,74 +2290,101 @@ export class Hydration {
       throw new Error(`Pool not found: ${poolAddressToUse}`);
     }
 
-    // Ensure valid quote token
-    if (
-      !poolInfo.quoteTokenAddress ||
-      poolInfo.quoteTokenAddress === this.polkadot.getNativeToken().address
-    ) {
-      if (poolData.tokens.length > 1) {
-        poolInfo.quoteTokenAddress = poolData.tokens[1].id.toString();
-      } else {
-        throw new Error('Invalid pool configuration: missing quote token');
+    if (poolData.type.toLowerCase() === POOL_TYPE.OMNIPOOL.toLowerCase()) {
+      omnipoolTokenAddress = omnipoolTokenAddress || this.polkadot.getToken(omnipoolToken)?.address;
+
+      let omnipoolPositions = await this.getOmnipoolPositions(alternateHydraAddresses, omnipoolTokenAddress);
+      if (positionId) {
+        omnipoolPositions = omnipoolPositions.filter(pos => pos.positionId === positionId);
       }
+
+      let totalShares = new BigNumber(0);
+      let totalAmount = new BigNumber(0);
+      for (const position of omnipoolPositions) {
+        totalShares = totalShares.plus(new BigNumber(position.shares));
+        totalAmount = totalAmount.plus(new BigNumber(position.amount));
+      }
+
+      return {
+        poolAddress: poolAddressToUse,
+        walletAddress: hydraWalletAddress,
+        baseTokenAddress: poolInfo.baseTokenAddress,
+        quoteTokenAddress: poolInfo.quoteTokenAddress,
+        lpTokenAmount: totalShares.toNumber(),
+        baseTokenAmount: totalAmount.toNumber(),
+        quoteTokenAmount: undefined,
+        price: new BigNumber(poolInfo.price).toNumber(),
+      };
+    } else {
+      // Ensure valid quote token
+      if (
+        !poolInfo.quoteTokenAddress ||
+        poolInfo.quoteTokenAddress === this.polkadot.getNativeToken().address
+      ) {
+        if (poolData.tokens.length > 1) {
+          poolInfo.quoteTokenAddress = poolData.tokens[1].id.toString();
+        } else {
+          throw new Error('Invalid pool configuration: missing quote token');
+        }
+      }
+
+      const api = await this.getApiPromise();
+      let lpTokenAmount = new BigNumber(0);
+      let baseTokenAmount = new BigNumber(0);
+      let quoteTokenAmount = new BigNumber(0);
+
+      // Get LP token balance
+      const lpBalanceRaw = await api.query.tokens.accounts(
+        hydraWalletAddress,
+        poolInfo.lpMint.address
+      );
+      const userLpBalance = new BigNumber(lpBalanceRaw.free.toString());
+      const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolInfo.lpMint.address)).toString());
+
+      if (userLpBalance.gt(0) && totalLpSupply.gt(0)) {
+        // Normalize LP balances to human units
+        const lpDecimals = poolInfo.lpMint.decimals || LP_DECIMALS;
+        const userLpHuman = userLpBalance.dividedBy(
+          new BigNumber(10).pow(lpDecimals)
+        );
+        const totalLpHuman = totalLpSupply.dividedBy(
+          new BigNumber(10).pow(lpDecimals)
+        );
+        const userShareHuman = userLpHuman.dividedBy(totalLpHuman);
+
+        lpTokenAmount = userLpHuman;
+
+        // Pool reserves in human units from poolInfo
+        const poolBaseHuman = new BigNumber(poolInfo.baseTokenAmount);
+        const poolQuoteHuman = new BigNumber(poolInfo.quoteTokenAmount);
+
+        // Calculate user's share of pool reserves
+        const rawBaseHuman = poolBaseHuman.multipliedBy(userShareHuman);
+        const rawQuoteHuman = poolQuoteHuman.multipliedBy(userShareHuman);
+
+        // Round according to token decimals
+        baseTokenAmount = rawBaseHuman.decimalPlaces(
+          poolData.tokens[0].decimals,
+          BigNumber.ROUND_DOWN
+        );
+        quoteTokenAmount = rawQuoteHuman.decimalPlaces(
+          poolData.tokens[1].decimals,
+          BigNumber.ROUND_DOWN
+        );
+      }
+
+      await api.disconnect();
+
+      return {
+        poolAddress: poolAddressToUse,
+        walletAddress: hydraWalletAddress,
+        baseTokenAddress: poolInfo.baseTokenAddress,
+        quoteTokenAddress: poolInfo.quoteTokenAddress,
+        lpTokenAmount: lpTokenAmount.toNumber(),
+        baseTokenAmount: baseTokenAmount.toNumber(),
+        quoteTokenAmount: quoteTokenAmount.toNumber(),
+        price: new BigNumber(poolInfo.price).toNumber(),
+      };
     }
-
-    const api = await this.getApiPromise();
-    let lpTokenAmount = new BigNumber(0);
-    let baseTokenAmount = new BigNumber(0);
-    let quoteTokenAmount = new BigNumber(0);
-
-    // Get LP token balance
-    const lpBalanceRaw = await api.query.tokens.accounts(
-      hydraWalletAddress,
-      poolInfo.lpMint.address
-    );
-    const userLpBalance = new BigNumber(lpBalanceRaw.free.toString());
-    const totalLpSupply = new BigNumber((await api.query.tokens.totalIssuance(poolInfo.lpMint.address)).toString());
-
-    if (userLpBalance.gt(0) && totalLpSupply.gt(0)) {
-      // Normalize LP balances to human units
-      const lpDecimals = poolInfo.lpMint.decimals || LP_DECIMALS;
-      const userLpHuman = userLpBalance.dividedBy(
-        new BigNumber(10).pow(lpDecimals)
-      );
-      const totalLpHuman = totalLpSupply.dividedBy(
-        new BigNumber(10).pow(lpDecimals)
-      );
-      const userShareHuman = userLpHuman.dividedBy(totalLpHuman);
-
-      lpTokenAmount = userLpHuman;
-
-      // Pool reserves in human units from poolInfo
-      const poolBaseHuman = new BigNumber(poolInfo.baseTokenAmount);
-      const poolQuoteHuman = new BigNumber(poolInfo.quoteTokenAmount);
-
-      // Calculate user's share of pool reserves
-      const rawBaseHuman = poolBaseHuman.multipliedBy(userShareHuman);
-      const rawQuoteHuman = poolQuoteHuman.multipliedBy(userShareHuman);
-
-      // Round according to token decimals
-      baseTokenAmount = rawBaseHuman.decimalPlaces(
-        poolData.tokens[0].decimals,
-        BigNumber.ROUND_DOWN
-      );
-      quoteTokenAmount = rawQuoteHuman.decimalPlaces(
-        poolData.tokens[1].decimals,
-        BigNumber.ROUND_DOWN
-      );
-    }
-
-    await api.disconnect();
-
-    return {
-      poolAddress: poolAddressToUse,
-      walletAddress: hydraWalletAddress,
-      baseTokenAddress: poolInfo.baseTokenAddress,
-      quoteTokenAddress: poolInfo.quoteTokenAddress,
-      lpTokenAmount: lpTokenAmount.toNumber(),
-      baseTokenAmount: baseTokenAmount.toNumber(),
-      quoteTokenAmount: quoteTokenAmount.toNumber(),
-      price: new BigNumber(poolInfo.price).toNumber(),
-    };
   }
 }

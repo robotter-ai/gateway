@@ -38,6 +38,9 @@ export const positionInfoRoute: FastifyPluginAsync = async (fastify) => {
           poolAddress,
           baseToken,
           quoteToken,
+          omnipoolToken,
+          omnipoolTokenAddress,
+          positionId,
         } = request.query;
 
         const hydration = await Hydration.getInstance(network);
@@ -52,6 +55,9 @@ export const positionInfoRoute: FastifyPluginAsync = async (fastify) => {
           poolAddress,
           baseToken,
           quoteToken,
+          omnipoolToken,
+          omnipoolTokenAddress,
+          positionId
         );
 
         return result;

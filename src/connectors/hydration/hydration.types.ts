@@ -474,10 +474,13 @@ export type HydrationGetSwapQuoteResponse = Static<
  */
 export interface HydrationGetPositionInfoRequest {
   network?: string;
+  walletAddress: string;
   poolAddress?: string;
   baseToken?: string;
   quoteToken?: string;
-  walletAddress: string;
+  omnipoolToken?: string;
+  omnipoolTokenAddress?: string;
+  positionId?: string;
 }
 
 /**
@@ -556,10 +559,13 @@ export const HydrationGetPositionInfoRequestSchema = {
   required: ['walletAddress'],
   properties: {
     network: { type: 'string', default: 'mainnet' },
+    walletAddress: { type: 'string' },
     poolAddress: { type: 'string' },
     baseToken: { type: 'string' },
     quoteToken: { type: 'string' },
-    walletAddress: { type: 'string' },
+    omnipoolToken: { type: 'string' },
+    omnipoolTokenAddress: { type: 'string' },
+    positionId: { type: 'string' },
   },
 };
 
@@ -572,10 +578,8 @@ export const HydrationPositionInfoSchema = {
     'poolAddress',
     'walletAddress',
     'baseTokenAddress',
-    'quoteTokenAddress',
     'lpTokenAmount',
     'baseTokenAmount',
-    'quoteTokenAmount',
     'price',
   ],
   properties: {

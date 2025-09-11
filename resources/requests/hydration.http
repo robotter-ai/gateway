@@ -582,8 +582,8 @@ Content-Type: application/json
   "network": "{{network}}",
   "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressOmnipool}}",
-  "baseToken": "{{omnipoolBaseTokenSymbol}}",
-  "quoteToken": "{{omnipoolQuoteTokenSymbol}}",
+  "baseToken": "{{omnipoolTokenSymbol}}",
+  "quoteToken": null,
   "baseTokenAmount": "{{mediumBaseTokenAmount}}",
   "quoteTokenAmount": "{{mediumQuoteTokenAmount}}",
   "slippagePct": "{{slippagePercentage}}"

@@ -670,7 +670,7 @@ Content-Type: application/json
 ###
 
 # GET /{{connector}}/amm/position-info - Omnipool
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&poolAddress={{poolAddressOmnipool}}&assetId=31
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&omnipoolToken={{omnipoolTokenSymbol}
 Content-Type: application/json
 
 ###
@@ -687,7 +687,7 @@ Content-Type: application/json
 
 ###
 
-# GET /{{connector}}/amm/position-info - Omnipool with tokens
+# GET /{{connector}}/amm/position-info - Omnipool with token and position id
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&omnipoolToken={{omnipoolTokenSymbol}}&omnipoolTokenAddress={{omnipoolTokenAddress}}&positionId={{omnipoolPositionId}}
 Content-Type: application/json
 

@@ -1240,7 +1240,7 @@ export class Hydration {
       }
 
       const poolTokenAddresses = pool.tokens
-        // .filter(token => !token.symbol.toLowerCase().includes('-pool'))
+        .filter(token => !token.symbol.toLowerCase().includes('-pool'))
         .map(token => token.id.toString().toLowerCase())
         .sort((a, b) => a.localeCompare(b));
 
@@ -2308,8 +2308,8 @@ export class Hydration {
       return {
         poolAddress: poolAddressToUse,
         walletAddress: hydraWalletAddress,
-        baseTokenAddress: poolInfo.baseTokenAddress,
-        quoteTokenAddress: poolInfo.quoteTokenAddress,
+        baseTokenAddress: omnipoolTokenAddress,
+        quoteTokenAddress: undefined,
         lpTokenAmount: totalShares.toNumber(),
         baseTokenAmount: totalAmount.toNumber(),
         quoteTokenAmount: undefined,

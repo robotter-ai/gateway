@@ -1,0 +1,16 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"internalConsoleOptions": "neverOpen",
+			"request": "launch",
+			"name": "gateway:dev",
+			"runtimeExecutable": "pnpm",
+			"runtimeArgs": ["run", "dev", "--passphrase", "<GATEWAY_PASSPHRASE>"],
+			"cwd": "${workspaceFolder}",
+			"stopOnEntry": false,
+			"watchMode": true
+		}
+	]
+}

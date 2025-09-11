@@ -29,15 +29,6 @@ import {
   SwapRoute
 } from './hydration.types';
 
-// Pool types
-const POOL_TYPE = {
-  XYK: 'xyk',
-  LBP: 'lbp',
-  OMNIPOOL: 'omnipool',
-  STABLESWAP: 'stableswap',
-  AAVE: 'aave'
-};
-
 // Hydration-specific constants
 const HYDRA_ADDRESS_PREFIX = 63;
 
@@ -167,7 +158,7 @@ export class Hydration {
 
       if (!poolAddress) {
         // Assumes the user wants the information for the Omnipool
-        poolData = pools.find(pool => pool.type.toLowerCase() === POOL_TYPE.OMNIPOOL.toLowerCase());
+        poolData = pools.find(pool => pool.type.toLowerCase() === PoolType.Omni.toLowerCase());
       } else {
         poolData = pools.find(pool => pool.address === poolAddress || pool.id === poolAddress);
       }
@@ -177,9 +168,8 @@ export class Hydration {
         return null;
       }
 
-      // Check if it's an omnipool - add null check for type
-      const poolType = poolData.type || 'xyk'; // Default to xyk if type is null
-      const isOmnipool = poolType.toLowerCase() === POOL_TYPE.OMNIPOOL;
+      const poolType = poolData.type;
+      const isOmnipool = poolType.toLowerCase() === PoolType.Omni.toLowerCase();
 
       if (isOmnipool) {
         // For omnipool, use hub asset (H2O) as both base and quote token
@@ -196,7 +186,7 @@ export class Hydration {
           price: 1, // Default price for omnipool
           baseTokenAmount: 0,
           quoteTokenAmount: 0,
-          poolType: POOL_TYPE.OMNIPOOL,
+          poolType: PoolType.Omni,
           id: poolData.id,
           tokens: poolData.tokens.map(token => token.symbol)
         };
@@ -244,7 +234,7 @@ export class Hydration {
         const midPrice = (buyPrice + sellPrice) / 2;
 
         if (!isNaN(midPrice) && isFinite(midPrice)) {
-          poolPrice = Number(midPrice.toFixed(6));
+          poolPrice = Number(midPrice);
         }
       } catch (priceError) {
         if (baseTokenAmount > 0 && quoteTokenAmount > 0) {
@@ -260,7 +250,7 @@ export class Hydration {
         price: poolPrice,
         baseTokenAmount,
         quoteTokenAmount,
-        poolType: poolData.type || 'xyk',
+        poolType: poolData.type,
         id: poolData.id,
         tokens: [poolData.tokens[0].symbol, poolData.tokens[1].symbol] // Include base and quote tokens
       };
@@ -541,7 +531,7 @@ export class Hydration {
       }
 
       const currentPrice = poolInfo.price || 10;
-      const poolType = poolInfo.poolType?.toLowerCase() || 'xyk'; // Default to xyk if type is null
+      const poolType = poolInfo.poolType;
 
       if (!amount || amount <= 0) {
         logger.warn(`Invalid amount provided: ${amount}, using default value 1`);
@@ -553,7 +543,7 @@ export class Hydration {
       let baseTokenAmount = 0;
       let quoteTokenAmount = 0;
 
-      if (poolType.includes('stable')) {
+      if (poolType.toLowerCase().includes(PoolType.Stable.toLowerCase())) {
         if (amountType === 'base') {
           baseTokenAmount = amount;
           quoteTokenAmount = amount * currentPrice;
@@ -561,7 +551,7 @@ export class Hydration {
           quoteTokenAmount = amount;
           baseTokenAmount = amount / currentPrice;
         }
-      } else if (poolType.includes('xyk') || poolType.includes('constantproduct')) {
+      } else if (poolType.toLowerCase().includes(PoolType.XYK.toLowerCase())) {
         if (amountType === 'base') {
           baseTokenAmount = amount;
           switch (strategyType) {
@@ -605,7 +595,7 @@ export class Hydration {
               baseTokenAmount = quoteTokenAmount / currentPrice;
           }
         }
-      } else if (poolType.includes('omni')) {
+      } else if (poolType.toLowerCase().includes(PoolType.Omni.toLowerCase())) {
         if (amountType === 'base') {
           baseTokenAmount = amount;
           const pricePosition = (currentPrice - lowerPrice) / (upperPrice - lowerPrice);
@@ -667,11 +657,11 @@ export class Hydration {
       quoteTokenAmount = Number(quoteTokenAmount) || 0;
 
       let liquidity = 0;
-      if (poolType.includes('stable')) {
+      if (poolType.toLowerCase().includes(PoolType.Stable.toLowerCase())) {
         liquidity = Math.sqrt(baseTokenAmount * quoteTokenAmount * currentPrice);
-      } else if (poolType.includes('xyk') || poolType.includes('constantproduct')) {
+      } else if (poolType.toLowerCase().includes(PoolType.XYK.toLowerCase())) {
         liquidity = Math.sqrt(baseTokenAmount * quoteTokenAmount);
-      } else if (poolType.includes('omni')) {
+      } else if (poolType.toLowerCase().includes(PoolType.Omni.toLowerCase())) {
         liquidity = Math.sqrt(baseTokenAmount * quoteTokenAmount) *
           (1 + Math.min(0.2, Math.abs(currentPrice - (lowerPrice + upperPrice) / 2) / ((upperPrice - lowerPrice) / 2)));
       } else {
@@ -938,12 +928,12 @@ export class Hydration {
     const apiPromise = await this.getApiPromise();
 
     let addLiquidityTx;
-    const poolType = pool.poolType?.toLowerCase() || POOL_TYPE.XYK;
+    const poolType = pool.poolType;
 
     logger.info(`Adding liquidity to ${poolType} pool (${poolId})`);
 
-    switch (poolType) {
-      case POOL_TYPE.XYK: {
+    switch (poolType.toLowerCase()) {
+      case PoolType.XYK.toLowerCase(): {
         const quoteAmountMaxLimit = this.calculateMaxAmountIn(quoteAmountBN, effectiveSlippage);
         addLiquidityTx = apiPromise.tx.xyk.addLiquidity(
           baseToken.address,
@@ -954,7 +944,7 @@ export class Hydration {
         break;
       }
 
-      case POOL_TYPE.STABLESWAP: {
+      case PoolType.Stable.toLowerCase(): {
         const assets = [
           { assetId: baseToken.address, amount: baseAmountBN.toString() },
           { assetId: quoteToken.address, amount: quoteAmountBN.toString() }
@@ -972,7 +962,7 @@ export class Hydration {
         break;
       }
 
-      case POOL_TYPE.OMNIPOOL: {
+      case PoolType.Omni.toLowerCase(): {
         if (baseTokenAmount > 0) {
           const minSharesLimit = this.calculateMinSharesLimit(baseAmountBN, effectiveSlippage);
           addLiquidityTx = apiPromise.tx.omnipool.addLiquidityWithLimit(
@@ -1195,10 +1185,10 @@ export class Hydration {
   private async hasSuccessEvent(api: any, events: any[], poolType?: string): Promise<boolean> {
     return events.some(({ event }) =>
       api.events.system.ExtrinsicSuccess.is(event) ||
-      (poolType === POOL_TYPE.XYK && api.events.xyk.LiquidityAdded?.is(event)) ||
-      (poolType === POOL_TYPE.LBP && api.events.lbp.LiquidityAdded?.is(event)) ||
-      (poolType === POOL_TYPE.OMNIPOOL && api.events.omnipool.LiquidityAdded?.is(event)) ||
-      (poolType === POOL_TYPE.STABLESWAP && api.events.stableswap.LiquidityAdded?.is(event))
+      (poolType.toLowerCase() === PoolType.XYK.toLowerCase() && api.events.xyk.LiquidityAdded?.is(event)) ||
+      (poolType.toLowerCase() === PoolType.LBP.toLowerCase() && api.events.lbp.LiquidityAdded?.is(event)) ||
+      (poolType.toLowerCase() === PoolType.Omni.toLowerCase() && api.events.omnipool.LiquidityAdded?.is(event)) ||
+      (poolType.toLowerCase() === PoolType.Stable.toLowerCase() && api.events.stableswap.LiquidityAdded?.is(event))
     );
   }
 
@@ -1311,11 +1301,11 @@ export class Hydration {
     const poolType = (poolInfo.poolType || '').toLowerCase();
 
     // Adjust price range based on pool type
-    if (poolType.includes('stable')) {
+    if (poolType.toLowerCase().includes(PoolType.Stable.toLowerCase())) {
       priceRange = 0.005; // 0.5% for stable pools
-    } else if (poolType.includes('xyk') || poolType.includes('constantproduct')) {
+    } else if (poolType.toLowerCase().includes(PoolType.XYK.toLowerCase())) {
       priceRange = 0.05; // 5% for XYK pools
-    } else if (poolType.includes('omni')) {
+    } else if (poolType.toLowerCase().includes(PoolType.Omni.toLowerCase())) {
       priceRange = 0.15; // 15% for Omnipool (wider range)
     }
 
@@ -1328,7 +1318,7 @@ export class Hydration {
 
     if (baseTokenAmount && quoteTokenAmount) {
       // Choose amount type based on pool characteristics
-      if (poolInfo.poolType?.toLowerCase().includes('stable')) {
+      if (poolInfo.poolType?.toLowerCase().includes(PoolType.Stable.toLowerCase())) {
         amount = quoteTokenAmount;
         amountType = 'quote';
       } else {
@@ -1351,11 +1341,10 @@ export class Hydration {
     // Choose strategy based on pool type and price position
     let positionStrategy = PositionStrategyType.Balanced;
 
-    if (poolInfo.poolType?.toLowerCase().includes('stable')) {
+    if (poolInfo.poolType?.toLowerCase().includes(PoolType.Stable.toLowerCase())) {
       positionStrategy = PositionStrategyType.Balanced;
     }
-    else if (poolInfo.poolType?.toLowerCase().includes('xyk') ||
-      poolInfo.poolType?.toLowerCase().includes('constantproduct')) {
+    else if (poolInfo.poolType?.toLowerCase().includes(PoolType.XYK.toLowerCase())) {
       if (currentPrice < currentPrice * (1 - priceRange * 0.5)) {
         positionStrategy = PositionStrategyType.BaseHeavy;
       }
@@ -1366,7 +1355,7 @@ export class Hydration {
         positionStrategy = PositionStrategyType.Balanced;
       }
     }
-    else if (poolInfo.poolType?.toLowerCase().includes('omni')) {
+    else if (poolInfo.poolType?.toLowerCase().includes(PoolType.Omni.toLowerCase())) {
       positionStrategy = PositionStrategyType.Imbalanced;
     }
 
@@ -1478,8 +1467,8 @@ export class Hydration {
 
     let lpMint = { address: '', decimals: 0 };
 
-    switch (poolType) {
-      case POOL_TYPE.XYK: {
+    switch (poolType.toLowerCase()) {
+      case PoolType.XYK.toLowerCase(): {
         const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
         const baseSymbol = await this.getTokenSymbol(poolInfo.baseTokenAddress);
         const baseToken = this.polkadot.getToken(baseSymbol);
@@ -1490,7 +1479,7 @@ export class Hydration {
         break;
       }
 
-      case POOL_TYPE.STABLESWAP: {
+      case PoolType.Stable.toLowerCase(): {
         lpMint = {
           address: poolInfo.id || '',
           decimals: 18
@@ -1498,7 +1487,7 @@ export class Hydration {
         break;
       }
 
-      case POOL_TYPE.OMNIPOOL: {
+      case PoolType.Omni.toLowerCase(): {
         const hubAsset = await this.polkadot.getToken('H2O');
         lpMint = {
           address: hubAsset?.address || '',
@@ -1526,7 +1515,7 @@ export class Hydration {
       tokens: poolInfo.tokens // Include base and quote tokens
     };
 
-    if (poolInfo.poolType?.toLowerCase() === POOL_TYPE.OMNIPOOL) {
+    if (poolInfo.poolType?.toLowerCase() === PoolType.Omni.toLowerCase()) {
       result.tokens = poolInfo.tokens;
     }
 
@@ -1561,7 +1550,7 @@ export class Hydration {
     }
 
     const apiPromise = await this.getApiPromise();
-    const poolType = pool.poolType?.toLowerCase() || POOL_TYPE.XYK;
+    const poolType = pool.poolType;
     let removeLiquidityTx: any;
     let userSharesToRemove: BigNumber;
     let totalUserSharesInThePool: BigNumber;
@@ -1570,8 +1559,8 @@ export class Hydration {
     let baseTokenAmountRemoved: BigNumber = new BigNumber(0);
     let quoteTokenAmountRemoved: BigNumber = new BigNumber(0);
 
-    switch (poolType) {
-      case POOL_TYPE.XYK: {
+    switch (poolType.toLowerCase()) {
+      case PoolType.XYK.toLowerCase(): {
         const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
         const baseToken = this.polkadot.getToken(pool.baseTokenAddress);
         const quoteToken = this.polkadot.getToken(pool.quoteTokenAddress);
@@ -1637,7 +1626,7 @@ export class Hydration {
         break;
       }
 
-      case POOL_TYPE.STABLESWAP: {
+      case PoolType.Stable.toLowerCase(): {
         if (!pool.id) {
           throw new Error('Invalid stableswap pool ID');
         }
@@ -1716,7 +1705,7 @@ export class Hydration {
         break;
       }
 
-      case POOL_TYPE.OMNIPOOL: {
+      case PoolType.Omni.toLowerCase(): {
         try {
           if (!tokenId) {
             throw new Error('Token ID must be specified for omnipool liquidity removal');
@@ -1733,7 +1722,7 @@ export class Hydration {
           const { totalShares, totalAmount, totalSharesToRemove } = userPositions.reduce(
             (acc, pos) => {
               const shares = new BigNumber(pos.shares);
-              const amount = new BigNumber(pos.amount);
+              const amount = new BigNumber(pos.omnipoolTokenAmount);
               return {
                 totalShares: acc.totalShares.plus(shares),
                 totalAmount: acc.totalAmount.plus(amount),
@@ -1761,7 +1750,7 @@ export class Hydration {
             new BigNumber(pos.shares).gte(userSharesToRemove)
           ) || userPositions[0];
 
-          const positionId = BigInt(position.positionId);
+          const positionId = BigInt(position.id);
 
           if (apiPromise.tx.omnipool.withdraw) {
             removeLiquidityTx = apiPromise.tx.omnipool.withdraw(
@@ -1804,7 +1793,7 @@ export class Hydration {
       fee = new BigNumber(Number.NaN);
     }
 
-    if (poolType === POOL_TYPE.OMNIPOOL) {
+    if (poolType.toLowerCase() === PoolType.Omni.toLowerCase()) {
       shareTokenDecimals = 18;
     }
 
@@ -1843,7 +1832,7 @@ export class Hydration {
         encodeAddress(decodeAddress(walletAddress), 0)
       ];
 
-      omnipoolTokenAddress = omnipoolTokenAddress || this.polkadot.getToken(omnipoolToken)?.address;
+      omnipoolTokenAddress = omnipoolTokenAddress || omnipoolToken ? this.polkadot.getToken(omnipoolToken)?.address : undefined;
       omnipoolTokenAddress = omnipoolTokenAddress?.replace(/,/g, '');
 
       return await this.getPoolPositions(walletAddress, poolAddress, alternateHydraAddresses, omnipoolTokenAddress);
@@ -1871,13 +1860,13 @@ export class Hydration {
       }
 
       // For XYK and Stableswap pools, we need to check LP token balances
-      if (poolInfo.poolType.toString().toLowerCase() === 'xyk' || poolInfo.poolType.toString().toLowerCase() === 'stableswap') {
+      if (poolInfo.poolType.toString().toLowerCase() === PoolType.XYK.toLowerCase() || poolInfo.poolType.toString().toLowerCase() === PoolType.Stable.toLowerCase()) {
         if (!poolAddress) {
           throw Error('poolAddress is required for XYK/Stableswap/Ominipool pools');
         }
 
         return await this.getLPTokenPositions(walletAddress, poolAddress, poolInfo, alternateAddresses);
-      } else if (poolInfo.poolType.toString().toLowerCase() === 'omnipool') {
+      } else if (poolInfo.poolType.toString().toLowerCase() === PoolType.Omni.toLowerCase()) {
         return await this.getOmnipoolPositions(alternateAddresses, omnipoolTokenAddress);
       }
 
@@ -1899,12 +1888,12 @@ export class Hydration {
   ): Promise<HydrationPosition[]> {
     try {
       // For XYK pools, we need to check the pool's liquidity provider shares
-      if (poolInfo.poolType === 'Xyk') {
+      if (poolInfo.poolType.toString().toLowerCase() === PoolType.XYK.toLowerCase()) {
         return await this.getXYKPoolPositions(walletAddress, poolAddress, poolInfo);
       }
       
       // For Stableswap pools, we need to check the pool's shares
-      if (poolInfo.poolType === 'Stableswap') {
+      if (poolInfo.poolType.toString().toLowerCase() === PoolType.Stable.toLowerCase()) {
         return await this.getStableswapPoolPositions(walletAddress, poolAddress, poolInfo);
       }
       
@@ -1923,7 +1912,7 @@ export class Hydration {
   private async getXYKPoolPositions(
     walletAddress: string,
     poolAddress: string,
-    _poolInfo: any
+    poolInfo: any
   ): Promise<HydrationPosition[]> {
     try {
       // Convert wallet address to Hydration format
@@ -1969,25 +1958,24 @@ export class Hydration {
       // Calculate user's position in each token
       const userBaseAmount = baseTokenReserve.multipliedBy(userShare);
       const userQuoteAmount = quoteTokenReserve.multipliedBy(userShare);
-      
-      // Calculate price as quoteTokenAmount / baseTokenAmount (USDT per HDX)
-      const price = userQuoteAmount.dividedBy(userBaseAmount);
-      
-      // Calculate total position value (base + quote amounts)
-      const totalPositionValue = userBaseAmount.plus(userQuoteAmount);
-      
+
       // Create position entry
       const position: HydrationPosition = {
-        positionId: `xyk-${poolAddress}`,
-        assetId: poolAddress,
-        owner: walletAddress,
-        shares: userLpHuman.toString(),
-        amount: totalPositionValue.toString(),
-        price: price.toNumber()
+        id: undefined,
+        ownerAddress: walletAddress,
+        poolAddress: poolAddress,
+        poolType: PoolType.XYK,
+        baseTokenAddress: poolDetails.baseTokenAddress,
+        quoteTokenAddress: poolDetails.quoteTokenAddress,
+        omnipoolTokenAddress: undefined,
+        shares: userLpHuman.toNumber(),
+        baseTokenAmount: userBaseAmount.toNumber(),
+        quoteTokenAmount: userQuoteAmount.toNumber(),
+        omnipoolTokenAmount: undefined,
+        price: poolInfo.price
       };
 
       return [position];
-      
     } catch (error) {
       logger.error(`Error getting XYK pool positions: ${error.message}`);
       return [];
@@ -2000,7 +1988,7 @@ export class Hydration {
   private async getStableswapPoolPositions(
     walletAddress: string,
     poolAddress: string,
-    _poolInfo: any
+    poolInfo: any
   ): Promise<HydrationPosition[]> {
     try {
       // Convert wallet address to Hydration format
@@ -2046,25 +2034,24 @@ export class Hydration {
       // Calculate user's position in each token
       const userBaseAmount = baseTokenReserve.multipliedBy(userShare);
       const userQuoteAmount = quoteTokenReserve.multipliedBy(userShare);
-      
-      // Calculate price as quoteTokenAmount / baseTokenAmount (USDT per USDC)
-      const price = userQuoteAmount.dividedBy(userBaseAmount);
-      
-      // Calculate total position value (base + quote amounts)
-      const totalPositionValue = userBaseAmount.plus(userQuoteAmount);
-      
+
       // Create position entry
       const position: HydrationPosition = {
-        positionId: `stableswap-${poolAddress}`,
-        assetId: poolAddress,
-        owner: walletAddress,
-        shares: userLpHuman.toString(),
-        amount: totalPositionValue.toString(),
-        price: price.toNumber()
+        id: undefined,
+        ownerAddress: walletAddress,
+        poolAddress: poolAddress,
+        poolType: PoolType.Stable,
+        baseTokenAddress: poolDetails.baseTokenAddress,
+        quoteTokenAddress: poolDetails.quoteTokenAddress,
+        omnipoolTokenAddress: undefined,
+        shares: userLpHuman.toNumber(),
+        baseTokenAmount: userBaseAmount.toNumber(),
+        quoteTokenAmount: userQuoteAmount.toNumber(),
+        omnipoolTokenAmount: undefined,
+        price: poolInfo.price
       };
 
       return [position];
-      
     } catch (error) {
       logger.error(`Error getting Stableswap pool positions: ${error.message}`);
       return [];
@@ -2083,7 +2070,11 @@ export class Hydration {
   ): Promise<HydrationPosition[]> {
     const apiPromise = await this.getApiPromise();
 
-    const collectionId = await apiPromise.consts.omnipool.nftCollectionId;
+    const sdkContext = await this.getSdkContext();
+    const allPools = await this.sdkContextGetPools(sdkContext, []);
+    const omnipoolPoolAddress = allPools.find(pool => pool.type.toLowerCase() === PoolType.Omni.toLowerCase())?.address;
+
+    const collectionId = apiPromise.consts.omnipool.nftCollectionId;
 
     const [positions, uniques] = await Promise.all([
       apiPromise.query.omnipool.positions.entries(),
@@ -2125,14 +2116,23 @@ export class Hydration {
           return null;
         }
 
+        const tokenAddress = positionData.assetId?.toString().replace(/,/g, '');
+        const token = this.polkadot.getToken(tokenAddress);
+
         return {
-          positionId,
-          assetId: positionData.assetId,
-          owner: nftOwner,
-          shares,
-          amount: positionData?.amount?.toString().replace(/,/g, '') || '0',
-          price: positionData?.price
-        };
+          id: Number(positionId?.toString().replace(/,/g, '')),
+          ownerAddress: nftOwner,
+          poolAddress: omnipoolPoolAddress,
+          poolType: PoolType.Omni,
+          baseTokenAddress: undefined,
+          quoteTokenAddress: undefined,
+          omnipoolTokenAddress: tokenAddress,
+          shares: Number(shares?.toString().replace(/,/g, '')),
+          baseTokenAmount: undefined,
+          quoteTokenAmount: undefined,
+          omnipoolTokenAmount: BigNumber(positionData?.amount?.toString().replace(/,/g, '') || '0').dividedBy(new BigNumber(10).pow(token?.decimals)).toNumber(),
+          price: Number(positionData?.price?.toString().replace(/,/g, '') || '0')
+        } as HydrationPosition;
       })
       .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
 
@@ -2149,7 +2149,7 @@ export class Hydration {
       const allPositions: HydrationPosition[] = [];
       let xykPositions = 0;
       let stableswapPositions = 0;
-      let totalValue = new BigNumber(0);
+      let omnipoolPositions = 0;
 
       // Get all pools to check for positions
       const sdkContext = await this.getSdkContext();
@@ -2157,7 +2157,7 @@ export class Hydration {
       
       // Filter for XYK and Stableswap pools only
       const supportedPools = allPools.filter(pool => 
-        pool.type === 'Xyk' || pool.type === 'Stableswap'
+        pool.type.toLowerCase() === PoolType.XYK.toLowerCase() || pool.type.toLowerCase() === PoolType.Stable.toLowerCase() || pool.type.toLowerCase() === PoolType.Omni.toLowerCase()
       );
 
       logger.info(`Checking ${supportedPools.length} supported pools for positions`);
@@ -2177,16 +2177,13 @@ export class Hydration {
             allPositions.push(...positionsWithType);
             
             // Count by pool type
-            if (pool.type === 'Xyk') {
+            if (pool.type.toLowerCase() === PoolType.XYK.toLowerCase()) {
               xykPositions += positions.length;
-            } else if (pool.type === 'Stableswap') {
+            } else if (pool.type.toLowerCase() === PoolType.Stable.toLowerCase()) {
               stableswapPositions += positions.length;
+            } else if (pool.type.toLowerCase() === PoolType.Omni.toLowerCase()) {
+              omnipoolPositions += positions.length;
             }
-            
-            // Add to total value
-            positions.forEach(pos => {
-              totalValue = totalValue.plus(new BigNumber(pos.amount));
-            });
           }
         } catch (error) {
           logger.warn(`Error checking positions for pool ${pool.address}: ${error.message}`);
@@ -2200,8 +2197,7 @@ export class Hydration {
           totalPositions: allPositions.length,
           xykPositions,
           stableswapPositions,
-          omnipoolPositions: 0, // Not implemented yet
-          totalValue: totalValue.toString()
+          omnipoolPositions,
         }
       };
 
@@ -2214,7 +2210,6 @@ export class Hydration {
           xykPositions: 0,
           stableswapPositions: 0,
           omnipoolPositions: 0,
-          totalValue: '0'
         }
       };
     }
@@ -2267,7 +2262,7 @@ export class Hydration {
       );
     } else if (!poolAddress && omnipoolToken) {
       // Assumes the user wants the information for the Omnipool
-      poolAddressToUse = allPools.find(pool => pool.type.toLowerCase() === POOL_TYPE.OMNIPOOL.toLowerCase())?.address;
+      poolAddressToUse = allPools.find(pool => pool.type.toLowerCase() === PoolType.Omni.toLowerCase())?.address;
     } else {
       // Resolve pool address
       if (!poolAddressToUse) {
@@ -2290,31 +2285,34 @@ export class Hydration {
       throw new Error(`Pool not found: ${poolAddressToUse}`);
     }
 
-    if (poolData.type.toLowerCase() === POOL_TYPE.OMNIPOOL.toLowerCase()) {
+    if (poolData.type.toLowerCase() === PoolType.Omni.toLowerCase()) {
       omnipoolTokenAddress = omnipoolTokenAddress || this.polkadot.getToken(omnipoolToken)?.address;
 
       let omnipoolPositions = await this.getOmnipoolPositions(alternateHydraAddresses, omnipoolTokenAddress);
       if (positionId) {
-        omnipoolPositions = omnipoolPositions.filter(pos => pos.positionId === positionId);
+        omnipoolPositions = omnipoolPositions.filter(pos => Number(pos.id) === Number(positionId));
       }
 
       let totalShares = new BigNumber(0);
       let totalAmount = new BigNumber(0);
       for (const position of omnipoolPositions) {
         totalShares = totalShares.plus(new BigNumber(position.shares));
-        totalAmount = totalAmount.plus(new BigNumber(position.amount));
+        totalAmount = totalAmount.plus(new BigNumber(position.omnipoolTokenAmount));
       }
 
       return {
+        id: positionId ? Number(positionId) : undefined,
+        ownerAddress: hydraWalletAddress,
         poolAddress: poolAddressToUse,
-        walletAddress: hydraWalletAddress,
-        baseTokenAddress: omnipoolTokenAddress,
+        baseTokenAddress: undefined,
         quoteTokenAddress: undefined,
-        lpTokenAmount: totalShares.toNumber(),
-        baseTokenAmount: totalAmount.toNumber(),
+        omnipoolTokenAddress: omnipoolTokenAddress,
+        shares: totalShares.toNumber(),
+        baseTokenAmount: undefined,
         quoteTokenAmount: undefined,
-        price: new BigNumber(poolInfo.price).toNumber(),
-      };
+        omnipoolTokenAmount: totalAmount.toNumber(),
+        price: BigNumber(poolInfo.price).toNumber(),
+      } as HydrationPositionInfo;
     } else {
       // Ensure valid quote token
       if (
@@ -2376,15 +2374,18 @@ export class Hydration {
       await api.disconnect();
 
       return {
+        id: undefined,
+        ownerAddress: hydraWalletAddress,
         poolAddress: poolAddressToUse,
-        walletAddress: hydraWalletAddress,
         baseTokenAddress: poolInfo.baseTokenAddress,
         quoteTokenAddress: poolInfo.quoteTokenAddress,
-        lpTokenAmount: lpTokenAmount.toNumber(),
+        omnipoolTokenAddress: undefined,
+        shares: lpTokenAmount.toNumber(),
         baseTokenAmount: baseTokenAmount.toNumber(),
         quoteTokenAmount: quoteTokenAmount.toNumber(),
-        price: new BigNumber(poolInfo.price).toNumber(),
-      };
+        omnipoolTokenAmount: undefined,
+        price: BigNumber(poolInfo.price).toNumber(),
+      } as HydrationPositionInfo;
     }
   }
 }

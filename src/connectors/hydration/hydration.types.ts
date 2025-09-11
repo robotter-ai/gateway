@@ -487,24 +487,31 @@ export interface HydrationGetPositionInfoRequest {
  * Schema for position information response
  */
 export interface HydrationPositionInfo {
+  id?: number;
+  ownerAddress: string;
   poolAddress: string;
-  walletAddress: string;
-  baseTokenAddress: string;
-  quoteTokenAddress: string;
-  lpTokenAmount: number;
-  baseTokenAmount: number;
-  quoteTokenAmount: number;
+  baseTokenAddress?: string;
+  quoteTokenAddress?: string;
+  shares?: number;
+  baseTokenAmount?: number;
+  quoteTokenAmount?: number;
+  omnipoolTokenAmount?: number;
   price: number;
 }
 
 export interface HydrationPosition {
-  positionId: string;
-  assetId: string;
-  owner: string;
-  shares: string;
-  amount: string;
-  price?: number;
-  poolType?: string; // Add pool type for better identification
+  id?: number;
+  ownerAddress: string;
+  poolAddress: string;
+  poolType: string;
+  baseTokenAddress?: string;
+  quoteTokenAddress?: string;
+  omnipoolTokenAddress?: string;
+  shares: number;
+  baseTokenAmount?: number;
+  quoteTokenAmount?: number;
+  omnipoolTokenAmount?: number;
+  price: number;
 }
 
 export interface HydrationAllPositionsRequest {
@@ -519,7 +526,6 @@ export interface HydrationAllPositionsResponse {
     xykPositions: number;
     stableswapPositions: number;
     omnipoolPositions: number;
-    totalValue: string;
   };
 }
 
@@ -576,20 +582,19 @@ export const HydrationPositionInfoSchema = {
   type: 'object',
   required: [
     'poolAddress',
-    'walletAddress',
-    'baseTokenAddress',
-    'lpTokenAmount',
-    'baseTokenAmount',
+    'onwerAddress',
     'price',
   ],
   properties: {
     poolAddress: { type: 'string' },
-    walletAddress: { type: 'string' },
+    ownerAddress: { type: 'string' },
     baseTokenAddress: { type: 'string' },
     quoteTokenAddress: { type: 'string' },
-    lpTokenAmount: { type: 'number' },
+    omnipoolTokenAddress: { type: 'string' },
+    shares: { type: 'number' },
     baseTokenAmount: { type: 'number' },
     quoteTokenAmount: { type: 'number' },
+    omnipoolTokenAmount: { type: 'number' },
     price: { type: 'number' },
   },
 };

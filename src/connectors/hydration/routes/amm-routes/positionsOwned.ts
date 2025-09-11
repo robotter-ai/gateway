@@ -37,14 +37,18 @@ const PositionsOwnedRequest = Type.Object({
 const PositionsOwnedResponse = Type.Union([
   Type.Array(
     Type.Object({
-      id: Type.String(),
+      id: Type.Optional(Type.Number()),
+      ownerAddress: Type.String(),
       poolAddress: Type.String(),
-      walletAddress: Type.String(),
-      baseTokenAddress: Type.String(),
-      quoteTokenAddress: Type.String(),
-      shares: Type.Optional(Type.String()),
-      amount: Type.Optional(Type.String()),
-      price: Type.Optional(Type.String()),
+      poolType: Type.String(),
+      baseTokenAddress: Type.Optional(Type.String()),
+      quoteTokenAddress: Type.Optional(Type.String()),
+      omnipoolTokenAddress: Type.Optional(Type.String()),
+      shares: Type.Number(),
+      baseTokenAmount: Type.Optional(Type.Number()),
+      quoteTokenAmount: Type.Optional(Type.Number()),
+      omnipoolTokenAmount: Type.Optional(Type.Number()),
+      price: Type.Optional(Type.Number()),
     }),
   ),
   Type.Object({
@@ -77,14 +81,18 @@ export const positionsOwnedRoute: FastifyPluginAsync = async (fastify) => {
                 items: {
                   type: 'object',
                   properties: {
-                    id: { type: 'string' },
-                    poolAddress: { type: 'string' },
-                    walletAddress: { type: 'string' },
-                    baseTokenAddress: { type: 'string' },
-                    quoteTokenAddress: { type: 'string' },
-                    shares: { type: 'string' },
-                    amount: { type: 'string' },
-                    price: { type: 'string' },
+                    id: Type.Optional(Type.Number()),
+                    ownerAddress: Type.String(),
+                    poolAddress: Type.String(),
+                    poolType: Type.String(),
+                    baseTokenAddress: Type.Optional(Type.String()),
+                    quoteTokenAddress: Type.Optional(Type.String()),
+                    omnipoolTokenAddress: Type.Optional(Type.String()),
+                    shares: Type.Number(),
+                    baseTokenAmount: Type.Optional(Type.Number()),
+                    quoteTokenAmount: Type.Optional(Type.Number()),
+                    omnipoolTokenAmount: Type.Optional(Type.Number()),
+                    price: Type.Optional(Type.Number()),
                   },
                 },
               },
@@ -124,39 +132,18 @@ export const positionsOwnedRoute: FastifyPluginAsync = async (fastify) => {
         }
 
         // Get positions owned by the wallet
-        const rawPositions = await hydration.getPositionsOwned(
+        const positions = await hydration.getPositionsOwned(
           walletAddress,
           poolAddress,
           omnipoolTokenAddress,
           omnipoolToken,
         );
 
-        // Fetch pool info for base/quote token addresses if poolAddress is provided
-        let poolInfo = null;
-        if (poolAddress) {
-          try {
-            poolInfo = await hydration.getPoolInfo(poolAddress);
-          } catch (error) {
-            logger.warn(`Could not fetch pool info for ${poolAddress}: ${error.message}`);
-          }
-        }
-
-        const positions = rawPositions.map((pos) => ({
-          id: pos.positionId,
-          walletAddress,
-          poolAddress: poolAddress || '',
-          baseTokenAddress: poolInfo?.baseTokenAddress || '',
-          quoteTokenAddress: poolInfo?.quoteTokenAddress || '',
-          shares: pos.shares,
-          amount: pos.amount,
-          price: pos.price?.toString(),
-        }));
-
         logger.info(`Found ${positions.length} positions for wallet ${walletAddress} with pool ${poolAddress}`);
 
         return positions;
       } catch (e) {
-        logger.error(`Error in positionsOwned route: ${e.message}`);
+        logger.error(`Error in positionsOwned route: ${e.message}\n${e.stack}`);
 
         throw fastify.httpErrors.internalServerError(
           'Failed to fetch positions',

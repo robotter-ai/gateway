@@ -163,7 +163,14 @@ export class Hydration {
     try {
       const sdkContext = await this.getSdkContext();
       const pools = await this.sdkContextGetPools(sdkContext, []);
-      const poolData = pools.find(pool => pool.address === poolAddress || pool.id === poolAddress);
+      let poolData;
+
+      if (!poolAddress) {
+        // Assumes the user wants the information for the Omnipool
+        poolData = pools.find(pool => pool.type.toLowerCase() === POOL_TYPE.OMNIPOOL.toLowerCase());
+      } else {
+        poolData = pools.find(pool => pool.address === poolAddress || pool.id === poolAddress);
+      }
 
       if (!poolData) {
         logger.error(`Pool not found: ${poolAddress}`);
@@ -1836,24 +1843,24 @@ export class Hydration {
         encodeAddress(decodeAddress(walletAddress), 0)
       ];
 
-      tokenAddress = tokenAddress ?? this.polkadot.getToken(tokenAddress ?? tokenSymbol)?.address;
+      tokenAddress = tokenAddress ? tokenAddress : tokenSymbol ? this.polkadot.getToken(tokenSymbol)?.address : undefined;
+      tokenAddress =tokenAddress?.replace(/,/g, '');
 
-      return await this.getPoolPositions(walletAddress, poolAddress, alternateHydraAddresses);
+      return await this.getPoolPositions(walletAddress, poolAddress, alternateHydraAddresses, tokenAddress);
     } catch (error) {
-      logger.error(`Error in getPositionsOwned: ${error.message}`);
-      return [];
+      throw error;
     }
   }
 
 
   /**
-   * Get pool-based positions (XYK, Stableswap, etc.)
+   * Get pool-based positions (XYK, Stableswap, Omnipool.)
    */
   private async getPoolPositions(
     walletAddress: string, 
     poolAddress: string, 
     alternateAddresses: string[],
-    _tokenAddress?: string
+    tokenAddress?: string
   ): Promise<HydrationPosition[]> {
     try {
       // Get pool info to determine pool type
@@ -1864,16 +1871,20 @@ export class Hydration {
       }
 
       // For XYK and Stableswap pools, we need to check LP token balances
-      if (poolInfo.poolType === 'Xyk' || poolInfo.poolType === 'Stableswap') {
+      if (poolInfo.poolType.toString().toLowerCase() === 'xyk' || poolInfo.poolType.toString().toLowerCase() === 'stableswap') {
+        if (!poolAddress) {
+          throw Error('poolAddress is required for XYK/Stableswap/Ominipool pools');
+        }
+
         return await this.getLPTokenPositions(walletAddress, poolAddress, poolInfo, alternateAddresses);
+      } else if (poolInfo.poolType.toString().toLowerCase() === 'omnipool') {
+        return await this.getOmnipoolPositions(alternateAddresses, tokenAddress);
       }
 
       logger.info(`Pool type ${poolInfo.poolType} not yet supported for position tracking`);
       return [];
-      
     } catch (error) {
-      logger.error(`Error getting pool positions: ${error.message}`);
-      return [];
+      throw error;
     }
   }
 
@@ -2060,7 +2071,73 @@ export class Hydration {
     }
   }
 
+  /**
+   * Get Omnipool positions by checking NFT balances
+   * @param walletAddress 
+   * @param tokenAddress 
+   * @returns Array of positions
+   */
+  private async getOmnipoolPositions(
+    alternateHydraAddresses: string[],
+    tokenAddress?: string,
+  ): Promise<HydrationPosition[]> {
+    const apiPromise = await this.getApiPromise();
 
+    const collectionId = await apiPromise.consts.omnipool.nftCollectionId;
+
+    const [positions, uniques] = await Promise.all([
+      apiPromise.query.omnipool.positions.entries(),
+      apiPromise.query.uniques.asset.entries(collectionId.toString())
+    ]);
+
+    const nftOwners = new Map(
+      uniques.map(([key, value]) => {
+        const [, itemId] = key.args;
+        const owner = value.unwrap()?.owner.toString();
+
+        return [itemId.toString(), owner];
+      })
+    );
+
+    const result = positions
+      .map(([idRaw, dataRaw]) => {
+        const positionId = idRaw.args[0].toString();
+        const positionData = dataRaw.toHuman() as Record<string, any>;
+        const nftOwner = nftOwners.get(positionId);
+
+        const isMatchingToken = tokenAddress ? Number(positionData?.assetId.replace(/,/g, '')) === Number(tokenAddress) : true;
+        const isMatchingOwner = alternateHydraAddresses.some(addr => nftOwner === addr);
+
+        if (!nftOwner) {
+          return null;
+        }
+
+        if (!isMatchingOwner) {
+          return null;
+        }
+
+        if (!isMatchingToken) {
+          return null;
+        }
+
+        const shares = positionData?.shares?.toString().replace(/,/g, '') || '0';
+        if (new BigNumber(shares).lte(0)) {
+          return null;
+        }
+
+        return {
+          positionId,
+          assetId: positionData.assetId,
+          owner: nftOwner,
+          shares,
+          amount: positionData?.amount?.toString().replace(/,/g, '') || '0',
+          price: positionData?.price
+        };
+      })
+      .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
+
+    return result;
+  }
 
   /**
    * Get all positions owned by a wallet across all supported pool types (XYK, Stableswap)

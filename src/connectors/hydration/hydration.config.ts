@@ -30,9 +30,6 @@ export namespace HydrationConfig {
     /** Default allowed slippage percentage */
     allowedSlippage: string;
 
-    /** Address of the Omnipool pool */
-    omniPoolAddress: string;
-
     /** Gas price for the transaction */
     gasPrice: number;
 
@@ -54,7 +51,6 @@ export namespace HydrationConfig {
    */
   export const config: NetworkConfig = {
     allowedSlippage: configManager.get('hydration.allowedSlippage'),
-    omniPoolAddress: configManager.get('hydration.omniPoolAddress'),
     priorityLevel: configManager.get('hydration.priorityLevel'),
     tradingTypes: ['amm', 'swap'],
     availableNetworks: [{ chain: 'polkadot', networks: ['mainnet'] }],

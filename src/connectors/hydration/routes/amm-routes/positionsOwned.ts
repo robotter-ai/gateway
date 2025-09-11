@@ -119,17 +119,8 @@ export const positionsOwnedRoute: FastifyPluginAsync = async (fastify) => {
         // Get Hydration instance
         const hydration = await Hydration.getInstance(network);
 
-        if (!poolAddress) {
-          // Assumes the user wants the positions from the Omnipool
-          poolAddress = hydration.config.omniPoolAddress;
-        }
-
         if (!walletAddress) {
           throw fastify.httpErrors.badRequest('walletAddress is required');
-        }
-
-        if (!poolAddress) {
-          throw fastify.httpErrors.badRequest('poolAddress is required for XYK/Stableswap/Ominipool pools');
         }
 
         // Get positions owned by the wallet

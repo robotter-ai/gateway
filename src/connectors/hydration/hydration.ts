@@ -1826,7 +1826,7 @@ export class Hydration {
    * @param poolAddress The pool address to filter positions by
    * @returns Array of positions owned by the wallet
    */
-  async getPositionsOwned(walletAddress: string, poolAddress: string, tokenAddress?: string, tokenSymbol?: string): Promise<HydrationPosition[]> {
+  async getPositionsOwned(walletAddress: string, poolAddress: string, omnipoolTokenAddress?: string, omnipoolToken?: string): Promise<HydrationPosition[]> {
     try {
       // Convert wallet address to Hydration format
       const hydraWalletAddress = encodeAddress(
@@ -1843,10 +1843,10 @@ export class Hydration {
         encodeAddress(decodeAddress(walletAddress), 0)
       ];
 
-      tokenAddress = tokenAddress ? tokenAddress : tokenSymbol ? this.polkadot.getToken(tokenSymbol)?.address : undefined;
-      tokenAddress =tokenAddress?.replace(/,/g, '');
+      omnipoolTokenAddress = omnipoolTokenAddress || this.polkadot.getToken(omnipoolToken)?.address;
+      omnipoolTokenAddress = omnipoolTokenAddress?.replace(/,/g, '');
 
-      return await this.getPoolPositions(walletAddress, poolAddress, alternateHydraAddresses, tokenAddress);
+      return await this.getPoolPositions(walletAddress, poolAddress, alternateHydraAddresses, omnipoolTokenAddress);
     } catch (error) {
       throw error;
     }
@@ -1860,7 +1860,7 @@ export class Hydration {
     walletAddress: string, 
     poolAddress: string, 
     alternateAddresses: string[],
-    tokenAddress?: string
+    omnipoolTokenAddress?: string
   ): Promise<HydrationPosition[]> {
     try {
       // Get pool info to determine pool type
@@ -1878,7 +1878,7 @@ export class Hydration {
 
         return await this.getLPTokenPositions(walletAddress, poolAddress, poolInfo, alternateAddresses);
       } else if (poolInfo.poolType.toString().toLowerCase() === 'omnipool') {
-        return await this.getOmnipoolPositions(alternateAddresses, tokenAddress);
+        return await this.getOmnipoolPositions(alternateAddresses, omnipoolTokenAddress);
       }
 
       logger.info(`Pool type ${poolInfo.poolType} not yet supported for position tracking`);
@@ -2074,12 +2074,12 @@ export class Hydration {
   /**
    * Get Omnipool positions by checking NFT balances
    * @param walletAddress 
-   * @param tokenAddress 
+   * @param omnipoolTokenAddress 
    * @returns Array of positions
    */
   private async getOmnipoolPositions(
     alternateHydraAddresses: string[],
-    tokenAddress?: string,
+    omnipoolTokenAddress?: string,
   ): Promise<HydrationPosition[]> {
     const apiPromise = await this.getApiPromise();
 
@@ -2105,7 +2105,7 @@ export class Hydration {
         const positionData = dataRaw.toHuman() as Record<string, any>;
         const nftOwner = nftOwners.get(positionId);
 
-        const isMatchingToken = tokenAddress ? Number(positionData?.assetId.replace(/,/g, '')) === Number(tokenAddress) : true;
+        const isMatchingToken = omnipoolTokenAddress ? Number(positionData?.assetId.replace(/,/g, '')) === Number(omnipoolTokenAddress) : true;
         const isMatchingOwner = alternateHydraAddresses.some(addr => nftOwner === addr);
 
         if (!nftOwner) {

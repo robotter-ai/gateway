@@ -19,15 +19,15 @@ const PositionsOwnedRequest = Type.Object({
       examples: [],
     }),
   ),
-  tokenAddress: Type.Optional(
+  omnipoolToken: Type.Optional(
     Type.String({
-      description: 'The token address to filter positions by. Only needed for Omnipool, or leave it empty to get all positions.',
+      description: 'Omnipool token symbol to filter by. Only for Omnipool; leave empty to get all Omnipool positions.',
       examples: [],
     }),
   ),
-  tokenSymbol: Type.Optional(
+  omnipoolTokenAddress: Type.Optional(
     Type.String({
-      description: 'The token symbol to filter positions by. Only needed for Omnipool, or leave it empty to get all positions.',
+      description: 'Omnipool token address (asset id) to filter by. Only for Omnipool; leave empty to get all Omnipool positions.',
       examples: [],
     }),
   ),
@@ -113,7 +113,7 @@ export const positionsOwnedRoute: FastifyPluginAsync = async (fastify) => {
     },
     async (request) => {
       try {
-        let { walletAddress, poolAddress, tokenAddress, tokenSymbol } = request.query;
+        let { walletAddress, poolAddress, omnipoolTokenAddress, omnipoolToken } = request.query;
         const network = request.query.network || 'mainnet';
 
         // Get Hydration instance
@@ -127,8 +127,8 @@ export const positionsOwnedRoute: FastifyPluginAsync = async (fastify) => {
         const rawPositions = await hydration.getPositionsOwned(
           walletAddress,
           poolAddress,
-          tokenAddress,
-          tokenSymbol,
+          omnipoolTokenAddress,
+          omnipoolToken,
         );
 
         // Fetch pool info for base/quote token addresses if poolAddress is provided

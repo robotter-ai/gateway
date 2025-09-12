@@ -252,6 +252,12 @@ Content-Type: application/json
 
 ###
 
+# GET /hydration/amm/list-pools - Filter omnipool pools
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/hydration/amm/list-pools?network={{network}}&types=omnipool
+Content-Type: application/json
+
+###
+
 # =======================================================
 
 # GET /{{connector}}/amm/pool-info - HYDRATION XYK

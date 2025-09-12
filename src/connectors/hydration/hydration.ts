@@ -169,6 +169,12 @@ export class Hydration {
       }
 
       const poolType = poolData.type;
+      
+      if (!poolType) {
+        logger.error(`Pool type not found for pool: ${poolAddress}`);
+        return null;
+      }
+      
       const isOmnipool = poolType.toLowerCase() === PoolType.Omni.toLowerCase();
 
       if (isOmnipool) {
@@ -532,6 +538,10 @@ export class Hydration {
 
       const currentPrice = poolInfo.price || 10;
       const poolType = poolInfo.poolType;
+
+      if (!poolType) {
+        throw new Error(`Pool type not found for pool: ${poolAddress}`);
+      }
 
       if (!amount || amount <= 0) {
         logger.warn(`Invalid amount provided: ${amount}, using default value 1`);
@@ -930,6 +940,10 @@ export class Hydration {
     let addLiquidityTx;
     const poolType = pool.poolType;
 
+    if (!poolType) {
+      throw new Error(`Pool type not found for pool: ${poolId}`);
+    }
+
     logger.info(`Adding liquidity to ${poolType} pool (${poolId})`);
 
     switch (poolType.toLowerCase()) {
@@ -1185,10 +1199,10 @@ export class Hydration {
   private async hasSuccessEvent(api: any, events: any[], poolType?: string): Promise<boolean> {
     return events.some(({ event }) =>
       api.events.system.ExtrinsicSuccess.is(event) ||
-      (poolType.toLowerCase() === PoolType.XYK.toLowerCase() && api.events.xyk.LiquidityAdded?.is(event)) ||
-      (poolType.toLowerCase() === PoolType.LBP.toLowerCase() && api.events.lbp.LiquidityAdded?.is(event)) ||
-      (poolType.toLowerCase() === PoolType.Omni.toLowerCase() && api.events.omnipool.LiquidityAdded?.is(event)) ||
-      (poolType.toLowerCase() === PoolType.Stable.toLowerCase() && api.events.stableswap.LiquidityAdded?.is(event))
+      (poolType && poolType.toLowerCase() === PoolType.XYK.toLowerCase() && api.events.xyk.LiquidityAdded?.is(event)) ||
+      (poolType && poolType.toLowerCase() === PoolType.LBP.toLowerCase() && api.events.lbp.LiquidityAdded?.is(event)) ||
+      (poolType && poolType.toLowerCase() === PoolType.Omni.toLowerCase() && api.events.omnipool.LiquidityAdded?.is(event)) ||
+      (poolType && poolType.toLowerCase() === PoolType.Stable.toLowerCase() && api.events.stableswap.LiquidityAdded?.is(event))
     );
   }
 
@@ -1301,11 +1315,11 @@ export class Hydration {
     const poolType = (poolInfo.poolType || '').toLowerCase();
 
     // Adjust price range based on pool type
-    if (poolType.toLowerCase().includes(PoolType.Stable.toLowerCase())) {
+    if (poolType.includes(PoolType.Stable.toLowerCase())) {
       priceRange = 0.005; // 0.5% for stable pools
-    } else if (poolType.toLowerCase().includes(PoolType.XYK.toLowerCase())) {
+    } else if (poolType.includes(PoolType.XYK.toLowerCase())) {
       priceRange = 0.05; // 5% for XYK pools
-    } else if (poolType.toLowerCase().includes(PoolType.Omni.toLowerCase())) {
+    } else if (poolType.includes(PoolType.Omni.toLowerCase())) {
       priceRange = 0.15; // 15% for Omnipool (wider range)
     }
 
@@ -1467,7 +1481,11 @@ export class Hydration {
 
     let lpMint = { address: '', decimals: 0 };
 
-    switch (poolType.toLowerCase()) {
+    if (!poolType) {
+      return null;
+    }
+
+    switch (poolType) {
       case PoolType.XYK.toLowerCase(): {
         const shareTokenId = await apiPromise.query.xyk.shareToken(poolAddress);
         const baseSymbol = await this.getTokenSymbol(poolInfo.baseTokenAddress);
@@ -1551,6 +1569,11 @@ export class Hydration {
 
     const apiPromise = await this.getApiPromise();
     const poolType = pool.poolType;
+    
+    if (!poolType) {
+      throw new Error(`Pool type not found for pool: ${poolAddress}`);
+    }
+    
     let removeLiquidityTx: any;
     let userSharesToRemove: BigNumber;
     let totalUserSharesInThePool: BigNumber;
@@ -1920,7 +1943,7 @@ export class Hydration {
         decodeAddress(walletAddress),
         HYDRA_ADDRESS_PREFIX
       );
-      
+
       // Get pool details to get LP token address
       const poolDetails = await this.getPoolDetails(poolAddress);
       if (!poolDetails) {

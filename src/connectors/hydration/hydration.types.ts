@@ -582,7 +582,7 @@ export const HydrationPositionInfoSchema = {
   type: 'object',
   required: [
     'poolAddress',
-    'onwerAddress',
+    'ownerAddress',
     'price',
   ],
   properties: {

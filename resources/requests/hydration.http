@@ -669,8 +669,8 @@ Content-Type: application/json
 
 ###
 
-# GET /{{connector}}/amm/position-info - Omnipool
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&omnipoolToken={{omnipoolTokenSymbol}
+# GET /{{connector}}/amm/position-info - Omnipool with token
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/position-info?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&omnipoolToken={{omnipoolTokenSymbol}}
 Content-Type: application/json
 
 ###

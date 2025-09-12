@@ -334,28 +334,8 @@ export class Hydration {
     const effectiveSlippage = this.getSlippagePercentage(slippagePct);
     const estimatedAmountIn = new BigNumber(tradeHuman.amountIn.toString());
     const estimatedAmountOut = new BigNumber(tradeHuman.amountOut.toString());
-    const isStablecoinPair = this.isStablecoinPair(baseToken.symbol, quoteToken.symbol);
 
-    // Calculate the price
-    let price: BigNumber;
-    if (isStablecoinPair) {
-      if (side === 'BUY') {
-        price = estimatedAmountIn.dividedBy(estimatedAmountOut);
-      } else {
-        price = estimatedAmountIn.dividedBy(estimatedAmountOut);
-      }
-    } else {
-      if (side === 'BUY') {
-        price = estimatedAmountIn.dividedBy(estimatedAmountOut);
-      } else {
-        price = estimatedAmountOut.dividedBy(estimatedAmountIn);
-      }
-    }
-
-    if (!price.isFinite() || price.isNaN()) {
-      price = new BigNumber(tradeHuman.spotPrice.toString());
-      logger.warn(`Using fallback spotPrice: ${price}`);
-    }
+    const price = BigNumber(tradeHuman.spotPrice.toString());
 
     let minAmountOut, maxAmountIn;
 

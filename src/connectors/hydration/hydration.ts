@@ -2072,7 +2072,17 @@ export class Hydration {
 
     const sdkContext = await this.getSdkContext();
     const allPools = await this.sdkContextGetPools(sdkContext, []);
-    const omnipoolPoolAddress = allPools.find(pool => pool.type.toLowerCase() === PoolType.Omni.toLowerCase())?.address;
+    const omnipoolPool = allPools.find(pool => pool.type.toLowerCase() === PoolType.Omni.toLowerCase());
+    const omnipoolPoolAddress = omnipoolPool?.address;
+
+    const usdcTokenAddress = this.polkadot.getToken('USDC').address;
+
+    const quote = (await this.sdkContextGetBestSell(
+      sdkContext,
+      omnipoolTokenAddress,
+      usdcTokenAddress,
+      BigNumber(1)
+    )).toHuman();
 
     const collectionId = apiPromise.consts.omnipool.nftCollectionId;
 
@@ -2131,7 +2141,7 @@ export class Hydration {
           baseTokenAmount: undefined,
           quoteTokenAmount: undefined,
           omnipoolTokenAmount: BigNumber(positionData?.amount?.toString().replace(/,/g, '') || '0').dividedBy(new BigNumber(10).pow(token?.decimals)).toNumber(),
-          price: Number(positionData?.price?.toString().replace(/,/g, '') || '0')
+          price: Number(quote.spotPrice)
         } as HydrationPosition;
       })
       .filter((pos): pos is NonNullable<typeof pos> => pos !== null);

@@ -705,7 +705,7 @@ Content-Type: application/json
 
 ###
 
-# GET /{{connector}}/amm/positions-owned - Omnipool
+# GET /{{connector}}/amm/positions-owned - Omnipool with token
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/positions-owned?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}&omnipoolToken={{omnipoolTokenSymbol}}&omnipoolTokenAddress={{omnipoolTokenAddress}}
 Content-Type: application/json
 

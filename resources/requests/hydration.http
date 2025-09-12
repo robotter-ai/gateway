@@ -214,11 +214,6 @@ GET {{httpProtocol}}://{{host}}:{{port}}/connectors/hydration/amm/get-tradeable-
 
 ###
 
-# GET /hydration/amm/get-all-position-token-ids - Get all token IDs that have positions (for debugging)
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/hydration/amm/get-all-position-token-ids?network={{network}}
-
-###
-
 # ===================== LIST POOLS =====================
 
 # GET /hydration/amm/list-pools - List all pools
@@ -326,7 +321,7 @@ Content-Type: application/json
 ###
 
 # GET /{{connector}}/amm/quote-swap - HYDRATION Omnipool BUYING SMALL AMOUNT
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{baseTokenSymbol}}&quoteToken={{quoteTokenSymbol}}&amount={{
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/quote-swap?network={{network}}&baseToken={{baseTokenSymbol}}&quoteToken={{quoteTokenSymbol}}&amount={{mediumAmount}}&side={{sideBuy}}&slippagePct={{slippagePercentage}}
 Content-Type: application/json
 
 ###
@@ -711,19 +706,7 @@ Content-Type: application/json
 
 ###
 
-# GET /{{connector}}/amm/get-tradeable-tokens
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/get-tradeable-tokens
-Content-Type: application/json
-
-###
-
-# GET /{{connector}}/amm/get-all-tokens
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/get-all-tokens
-Content-Type: application/json
-
-###
-# Get All Positions (XYK + Stableswap) (Slow since it goes pool by pool)
-# Get all positions across all supported pool types for a wallet
+# Get all positions across all supported pool types for a wallet (Slow since it goes pool by pool)
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/get-all-positions?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}
 
 ###

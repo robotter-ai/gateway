@@ -14,7 +14,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 // Routes
 import { chainRoutes } from './chains/chain.routes';
 import { ethereumRoutes } from './chains/ethereum/ethereum.routes';
-import { polkadotRoutes } from './chains/polkadot/polkadot.routes';
+import { hydrationChainRoutes } from './chains/hydration/hydration.routes';
 import { solanaRoutes } from './chains/solana/solana.routes';
 import { configRoutes } from './config/config.routes';
 import { connectorsRoutes } from './connectors/connector.routes';
@@ -65,7 +65,7 @@ const swaggerOptions = {
       // Chains
       { name: 'solana', description: 'Solana chain endpoints' },
       { name: 'ethereum', description: 'Ethereum chain endpoints' },
-      { name: 'polkadot', description: 'Polkadot chain endpoints' },
+      { name: 'hydration', description: 'Hydration chain endpoints' },
 
       // Connectors
       { name: 'jupiter', description: 'Jupiter DEX aggregator (Solana)' },
@@ -95,7 +95,7 @@ const swaggerOptions = {
       },
       {
         name: 'hydration/amm',
-        description: 'Hydration AMM connector (Polkadot)',
+        description: 'Hydration AMM connector (Hydration)',
       },
     ],
     components: {
@@ -222,7 +222,7 @@ const configureGatewayServer = () => {
     // Register chain routes
     app.register(solanaRoutes, { prefix: '/chains/solana' });
     app.register(ethereumRoutes, { prefix: '/chains/ethereum' });
-    app.register(polkadotRoutes, { prefix: '/chains/polkadot' });
+    app.register(hydrationChainRoutes, { prefix: '/chains/hydration' });
   };
 
   // Register routes on main server

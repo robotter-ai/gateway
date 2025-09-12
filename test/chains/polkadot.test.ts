@@ -2,22 +2,22 @@ jest.mock('../../src/services/config-manager-v2', () => ({
   ConfigManagerV2: {
     getInstance: jest.fn(() => ({
       get: jest.fn((key: string) => {
-        if (key === 'polkadot.networks.mainnet.nodeURL') {
+        if (key === 'hydration.networks.mainnet.nodeURL') {
           return 'ws://localhost:9944';
         }
-        if (key === 'polkadot.networks.mainnet.transactionURL') {
+        if (key === 'hydration.networks.mainnet.transactionURL') {
           return 'https://hydration.api.subscan.io/api/scan/extrinsic';
         }
-        if (key === 'polkadot.networks.mainnet.tokenListType') {
+        if (key === 'hydration.networks.mainnet.tokenListType') {
           return 'FILE';
         }
-        if (key === 'polkadot.networks.mainnet.tokenListSource') {
+        if (key === 'hydration.networks.mainnet.tokenListSource') {
           return 'src/templates/lists/hydration.json';
         }
-        if (key === 'polkadot.networks.mainnet.nativeCurrencySymbol') {
+        if (key === 'hydration.networks.mainnet.nativeCurrencySymbol') {
           return 'HDX';
         }
-        if (key === 'polkadot.networks.mainnet.feePaymentCurrencySymbol') {
+        if (key === 'hydration.networks.mainnet.feePaymentCurrencySymbol') {
           return 'HDX';
         }
         return undefined;
@@ -46,12 +46,12 @@ import {
 } from '@polkadot/types/lookup';
 import Fastify from 'fastify';
 
-import { Polkadot } from '../../src/chains/polkadot/polkadot';
-import { balancesRoute } from '../../src/chains/polkadot/routes/balances';
-import { estimateGasRoute } from '../../src/chains/polkadot/routes/estimate-gas';
-import { pollRoute } from '../../src/chains/polkadot/routes/poll';
-import { statusRoute } from '../../src/chains/polkadot/routes/status';
-import { tokensRoute } from '../../src/chains/polkadot/routes/tokens';
+import { Hydration } from '../../src/chains/hydration/hydration';
+import { balancesRoute } from '../../src/chains/hydration/routes/balances';
+import { estimateGasRoute } from '../../src/chains/hydration/routes/estimate-gas';
+import { pollRoute } from '../../src/chains/hydration/routes/poll';
+import { statusRoute } from '../../src/chains/hydration/routes/status';
+import { tokensRoute } from '../../src/chains/hydration/routes/tokens';
 import { ConfigManagerCertPassphrase } from '../../src/services/config-manager-cert-passphrase';
 
 const MOCK_API = {
@@ -120,19 +120,19 @@ const MOCK_API = {
   },
   runtimeMetadata: {},
 };
-const CHAIN_NAME = 'polkadot';
+const CHAIN_NAME = 'hydration';
 const CHAIN_NETWORK = 'mainnet';
 const MOCK_ADDRESS_WALLET = '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty';
 
 const MockDecrypt = () => {
-  jest.spyOn(Polkadot.prototype, 'decrypt').mockImplementation(async () => {
+  jest.spyOn(Hydration.prototype, 'decrypt').mockImplementation(async () => {
     return 'seed sock milk update focus rotate barely fade car face mechanic mercy';
   });
 };
 
 const MockAxiosGet = () => {
-  jest.spyOn(Polkadot.prototype, 'axiosGet').mockResolvedValue({
-    data: [{ symbol: 'DOT', name: 'Polkadot', decimals: 10, id: '0x1' }],
+  jest.spyOn(Hydration.prototype, 'axiosGet').mockResolvedValue({
+    data: [{ symbol: 'DOT', name: 'Hydration', decimals: 10, id: '0x1' }],
   });
 };
 const MockBalances = () => {
@@ -144,14 +144,14 @@ const MockBalances = () => {
   };
 };
 const MockAxiosPost = () => {
-  jest.spyOn(Polkadot.prototype, 'axiosPost').mockResolvedValue({
+  jest.spyOn(Hydration.prototype, 'axiosPost').mockResolvedValue({
     data: { data: { success: true, fee: '1000000' } },
   });
 };
 
 const MockfsReadFile = () => {
   jest
-    .spyOn(Polkadot.prototype, 'fsReadFile')
+    .spyOn(Hydration.prototype, 'fsReadFile')
     .mockImplementation((path: string) => {
       const pathStr = path?.toString?.() || '';
 
@@ -163,7 +163,7 @@ const MockfsReadFile = () => {
         return Promise.resolve(
           Buffer.from(`
 networks:
-  polkadot:
+  hydration:
     mainnet:
       nodeURL: ws://localhost:9944
   `),
@@ -185,7 +185,7 @@ networks:
 
 const MockapiPromiseTx = () => {
   jest
-    .spyOn(Polkadot.prototype, 'apiPromiseTx')
+    .spyOn(Hydration.prototype, 'apiPromiseTx')
     .mockImplementation(
       () =>
         MOCK_API.tx as unknown as Promise<
@@ -202,14 +202,14 @@ const MockReadPassphrase = () => {
 
 const MockapiPromiseErrors = () => {
   jest
-    .spyOn(Polkadot.prototype, 'apiPromiseErrors')
+    .spyOn(Hydration.prototype, 'apiPromiseErrors')
     .mockReturnValue(
       MOCK_API.errors as unknown as Promise<ModuleErrors<ApiTypes>>,
     );
 };
 const MockapiPromiseCreate = () => {
   jest
-    .spyOn(Polkadot.prototype, 'apiPromiseCreate')
+    .spyOn(Hydration.prototype, 'apiPromiseCreate')
     .mockResolvedValue(MOCK_API as unknown as ApiPromise);
 };
 
@@ -229,7 +229,7 @@ afterAll(() => {
 });
 
 let app;
-describe('Polkadot Routes', () => {
+describe('Hydration Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     MockAxiosGet();
@@ -269,7 +269,7 @@ describe('Polkadot Routes', () => {
         method: 'POST',
         url: '/estimate-gas',
         payload: {
-          chain: 'polkadot',
+          chain: 'hydration',
           network: CHAIN_NETWORK,
           from: MOCK_ADDRESS_WALLET,
           to: MOCK_ADDRESS_WALLET,

@@ -1,32 +1,32 @@
 import { FastifyPluginAsync, FastifyInstance } from 'fastify';
 
-import { Polkadot } from '../polkadot';
+import { HydrationChain } from '../hydration';
 import {
-  PolkadotTokensRequest,
-  PolkadotTokensResponse,
-  PolkadotTokensRequestSchema,
-  PolkadotTokensResponseSchema,
-} from '../polkadot.types';
+  HydrationTokensRequest,
+  HydrationTokensResponse,
+  HydrationTokensRequestSchema,
+  HydrationTokensResponseSchema,
+} from '../hydration.types';
 
 /**
- * Retrieves token information from the Polkadot network
+ * Retrieves token information from the Hydration network
  *
  * @param fastify Fastify instance
  * @param network Network identifier (e.g., 'mainnet', 'westend')
  * @param tokenSymbols Optional array or string of token symbols to filter by
  * @returns Token information for the requested tokens
  */
-export async function getPolkadotTokens(
+export async function getHydrationTokens(
   _fastify: FastifyInstance,
   network: string,
   tokenSymbols?: string[] | string,
-): Promise<PolkadotTokensResponse> {
+): Promise<HydrationTokensResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
 
-  const polkadot = await Polkadot.getInstance(network);
-  const tokens = await polkadot.getTokensWithSymbols(tokenSymbols);
+  const hydration = await HydrationChain.getInstance(network);
+  const tokens = await hydration.getTokensWithSymbols(tokenSymbols);
 
   return {
     tokens: tokens.map((token) => ({
@@ -43,22 +43,22 @@ export async function getPolkadotTokens(
  */
 export const tokensRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
-    Querystring: PolkadotTokensRequest;
-    Reply: PolkadotTokensResponse;
+    Querystring: HydrationTokensRequest;
+    Reply: HydrationTokensResponse;
   }>(
     '/tokens',
     {
       schema: {
-        description: 'Get token information for Polkadot network',
-        tags: ['polkadot'],
-        querystring: PolkadotTokensRequestSchema,
+        description: 'Get token information for Hydration network',
+        tags: ['hydration'],
+        querystring: HydrationTokensRequestSchema,
         response: {
-          200: PolkadotTokensResponseSchema,
+          200: HydrationTokensResponseSchema,
         },
       },
     },
     async (request) => {
-      return await getPolkadotTokens(
+      return await getHydrationTokens(
         fastify,
         request.query.network,
         request.query.tokenSymbols,

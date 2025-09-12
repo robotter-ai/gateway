@@ -49,8 +49,8 @@ jest.mock('@polkadot/util-crypto', () => ({
   cryptoWaitReady: jest.fn().mockResolvedValue(true),
 }));
 
-jest.mock('../../../src/chains/polkadot/polkadot.validators', () => ({
-  validatePolkadotAddress: jest.fn().mockReturnValue(true),
+jest.mock('../../../src/chains/hydration/hydration.validators', () => ({
+  validateHydrationAddress: jest.fn().mockReturnValue(true),
 }));
 
 import { BigNumber } from '@galacticcouncil/sdk';
@@ -82,7 +82,7 @@ jest.spyOn(fs, 'readFile').mockImplementation((file: any) => {
     return Promise.resolve(
       Buffer.from(`
 networks:
-  polkadot:
+  hydration:
     mainnet:
       nodeURL: ws://localhost:9944
   `),
@@ -282,8 +282,8 @@ const _MOCK_API = {
   disconnect: jest.fn().mockResolvedValue(undefined),
 };
 
-jest.mock('../../../src/chains/polkadot/polkadot', () => ({
-  Polkadot: {
+jest.mock('../../../src/chains/hydration/hydration', () => ({
+  Hydration: {
     getInstance: jest.fn().mockResolvedValue({
       config: {
         network: {
@@ -321,7 +321,7 @@ jest.mock('../../../src/connectors/hydration/hydration.config', () => ({
       },
       allowedSlippage: '1',
       tradingTypes: ['amm', 'swap'],
-      availableNetworks: [{ chain: 'polkadot', networks: ['mainnet'] }],
+      availableNetworks: [{ chain: 'hydration', networks: ['mainnet'] }],
       gasPrice: 0.00000177,
       gasLimit: 338667,
       gasCost: 0.6,
@@ -359,7 +359,7 @@ jest.mock('../../../src/connectors/hydration/hydration', () => {
 
         realInstance.getApiPromise = jest.fn().mockResolvedValue(_MOCK_API);
 
-        realInstance.polkadot = {
+        realInstance.hydration = {
           getWallet: jest.fn().mockResolvedValue({
             address: '0x360CC4D00B4cbfCB854367D6Dd30C6aFBe74697a',
             signAndSend: jest.fn().mockResolvedValue({ hash: '0xSIG' }),
@@ -499,7 +499,7 @@ jest.mock('../../../src/connectors/hydration/hydration', () => {
             return 'UNKNOWN';
           });
 
-        realInstance.polkadotGetInstance = jest.fn().mockResolvedValue({
+        realInstance.hydrationGetInstance = jest.fn().mockResolvedValue({
           getWallet: jest.fn().mockResolvedValue({
             address: '0x360CC4D00B4cbfCB854367D6Dd30C6aFBe74697a',
             signAndSend: jest.fn().mockResolvedValue({ hash: '0xSIG' }),

@@ -233,7 +233,7 @@ Content-Type: application/json
 
 ###
 
-# GET /hydration/amm/list-pools - Filter by tokenAddresses (using Polkadot asset IDs)
+# GET /hydration/amm/list-pools - Filter by tokenAddresses (using Hydration asset IDs)
 GET {{httpProtocol}}://{{host}}:{{port}}/connectors/hydration/amm/list-pools?network={{network}}&tokenAddresses=10&tokenAddresses=22
 Content-Type: application/json
 

@@ -44,9 +44,9 @@ export const chainRoutes: FastifyPluginAsync = async (fastify) => {
         ConfigManagerV2.getInstance().get('solana.networks') || {},
       );
 
-      // Get Polkadot networks
-      const polkadotNetworks = Object.keys(
-        ConfigManagerV2.getInstance().get('polkadot.networks') || {},
+      // Get Hydration networks
+      const hydrationNetworks = Object.keys(
+        ConfigManagerV2.getInstance().get('hydration.networks') || {},
       );
 
       const chains = [
@@ -59,8 +59,8 @@ export const chainRoutes: FastifyPluginAsync = async (fastify) => {
           networks: solanaNetworks,
         },
         {
-          chain: 'polkadot',
-          networks: polkadotNetworks,
+          chain: 'hydration',
+          networks: hydrationNetworks,
         },
       ];
 

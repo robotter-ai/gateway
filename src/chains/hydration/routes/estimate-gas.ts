@@ -1,18 +1,18 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 
-import { Polkadot } from '../polkadot';
+import { HydrationChain } from '../hydration';
 import {
-  PolkadotEstimateGasRequest,
-  PolkadotEstimateGasResponse,
-  PolkadotEstimateGasRequestSchema,
-  PolkadotEstimateGasResponseSchema,
-} from '../polkadot.types';
+  HydrationEstimateGasRequest,
+  HydrationEstimateGasResponse,
+  HydrationEstimateGasRequestSchema,
+  HydrationEstimateGasResponseSchema,
+} from '../hydration.types';
 
 /**
- * Estimates gas (fees) for a Polkadot transaction
+ * Estimates gas (fees) for a Hydration transaction
  *
- * For Polkadot networks, this provides fee estimation information including:
- * - Gas price (usually 0 as Polkadot uses weight-based fees)
+ * For Hydration networks, this provides fee estimation information including:
+ * - Gas price (usually 0 as Hydration uses weight-based fees)
  * - Gas price token (native currency symbol)
  * - Gas limit (if specified)
  * - Gas cost estimate
@@ -22,17 +22,17 @@ import {
  * @param gasLimit Optional gas limit for the transaction
  * @returns Gas estimation information
  */
-export async function estimateGasPolkadot(
+export async function estimateGasHydration(
   _fastify: FastifyInstance,
   network: string,
   gasLimit?: number,
-): Promise<PolkadotEstimateGasResponse> {
+): Promise<HydrationEstimateGasResponse> {
   if (!network) {
     throw new Error('Network parameter is required');
   }
 
-  const polkadot = await Polkadot.getInstance(network);
-  return await polkadot.estimateTransactionGas(gasLimit);
+  const hydration = await HydrationChain.getInstance(network);
+  return await hydration.estimateTransactionGas(gasLimit);
 }
 
 /**
@@ -40,36 +40,36 @@ export async function estimateGasPolkadot(
  */
 export const estimateGasRoute: FastifyPluginAsync = async (fastify) => {
   fastify.post<{
-    Body: PolkadotEstimateGasRequest;
-    Reply: PolkadotEstimateGasResponse;
+    Body: HydrationEstimateGasRequest;
+    Reply: HydrationEstimateGasResponse;
   }>(
     '/estimate-gas',
     {
       schema: {
-        description: 'Estimate gas for a Polkadot transaction',
-        tags: ['polkadot'],
+        description: 'Estimate gas for a Hydration transaction',
+        tags: ['hydration'],
         body: {
-          ...PolkadotEstimateGasRequestSchema,
+          ...HydrationEstimateGasRequestSchema,
           properties: {
-            ...PolkadotEstimateGasRequestSchema.properties,
+            ...HydrationEstimateGasRequestSchema.properties,
             chain: {
               type: 'string',
-              enum: ['polkadot'],
-              examples: ['polkadot'],
+              enum: ['hydration'],
+              examples: ['hydration'],
             },
             network: { type: 'string', examples: ['mainnet', 'westend'] },
             gasLimit: { type: 'number', examples: [100000] },
           },
         },
         response: {
-          200: PolkadotEstimateGasResponseSchema,
+          200: HydrationEstimateGasResponseSchema,
         },
       },
     },
     async (request) => {
       const { network, gasLimit } = request.body;
 
-      return await estimateGasPolkadot(fastify, network, gasLimit);
+      return await estimateGasHydration(fastify, network, gasLimit);
     },
   );
 };

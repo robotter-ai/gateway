@@ -211,16 +211,16 @@ export interface LiquidityQuote {
 
 // Add the external pool info type
 export interface ExternalPoolInfo {
+  id?: string;
   address: string;
   baseTokenAddress: string;
-  quoteTokenAddress: string;
-  feePct: number;
-  price: number;
-  baseTokenAmount: number;
-  quoteTokenAmount: number;
+  quoteTokenAddress?: string;
+  feePct?: number;
+  price?: number;
+  baseTokenAmount?: number;
+  quoteTokenAmount?: number;
   poolType: string;
   liquidity?: number;
-  id: string;
   tokens: string[];
 }
 

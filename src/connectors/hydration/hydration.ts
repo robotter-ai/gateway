@@ -28,11 +28,14 @@ import {
   SwapQuote,
   SwapRoute
 } from './hydration.types';
+import { TokenInfo } from "../../chains/ethereum/ethereum";
 
 // Hydration-specific constants
-const HYDRA_ADDRESS_PREFIX = 63;
 
+const HYDRA_ADDRESS_PREFIX = 63;
+const HUB_SYMBOL = 'H2O';
 const LP_DECIMALS = 18;
+const DEFAULT_FEE = 500 / 10000;
 
 /**
  * Main class for interacting with the Hydration protocol on Polkadot
@@ -179,23 +182,23 @@ export class Hydration {
 
       if (isOmnipool) {
         // For omnipool, use hub asset (H2O) as both base and quote token
-        const hubAsset = this.polkadot.getToken('H2O');
+        const hubAsset = this.polkadot.getToken(HUB_SYMBOL);
         if (!hubAsset) {
-          throw new Error('Hub asset (H2O) not found');
+          throw new Error(`Hub asset (${HUB_SYMBOL}) not found`);
         }
 
         return {
+          id: undefined,
           address: poolData.address,
-          baseTokenAddress: hubAsset.address,
-          quoteTokenAddress: hubAsset.address,
-          feePct: 500 / 10000, // Default fee for omnipool
-          price: 1, // Default price for omnipool
+          baseTokenAddress: '',
+          quoteTokenAddress: '',
+          feePct: 0,
+          price: 0,
           baseTokenAmount: 0,
           quoteTokenAmount: 0,
           poolType: PoolType.Omni,
-          id: poolData.id,
           tokens: poolData.tokens.map(token => token.symbol)
-        };
+        } as ExternalPoolInfo;
       }
 
       // For regular pools, continue with existing logic
@@ -217,6 +220,7 @@ export class Hydration {
         .toFixed(poolData.tokens[1].decimals));
 
       let poolPrice = 1;
+      let feePct = DEFAULT_FEE;
       try {
         const sdkContext = await this.getSdkContext();
         const amountBN = BigNumber('1');
@@ -235,6 +239,8 @@ export class Hydration {
           amountBN
         );
 
+        feePct = Number(sellQuote.toHuman().tradeFeePct);
+
         const buyPrice = Number(buyQuote.toHuman().spotPrice);
         const sellPrice = Number(sellQuote.toHuman().spotPrice);
         const midPrice = (buyPrice + sellPrice) / 2;
@@ -252,7 +258,7 @@ export class Hydration {
         address: poolData.address,
         baseTokenAddress: baseToken.address,
         quoteTokenAddress: quoteToken.address,
-        feePct: 500 / 10000,
+        feePct: feePct,
         price: poolPrice,
         baseTokenAmount,
         quoteTokenAmount,
@@ -337,11 +343,6 @@ export class Hydration {
         price = estimatedAmountIn.dividedBy(estimatedAmountOut);
       } else {
         price = estimatedAmountIn.dividedBy(estimatedAmountOut);
-      }
-
-      if (price.lt(new BigNumber(0.5)) || price.gt(new BigNumber(2.0))) {
-        price = (new BigNumber(1.0)).plus((estimatedAmountIn.minus(estimatedAmountOut)).dividedBy(BigNumber.max(estimatedAmountIn, estimatedAmountOut)));
-        logger.warn(`Adjusting unreasonable stablecoin price (${estimatedAmountIn}/${estimatedAmountOut}) to ${price}`);
       }
     } else {
       if (side === 'BUY') {
@@ -467,13 +468,7 @@ export class Hydration {
 
     const feePaymentToken = this.polkadot.getFeePaymentToken();
 
-    let fee: BigNumber;
-    try {
-      fee = new BigNumber(transaction.events.map((it: any) => it.toHuman()).filter((it: any) => it.event.method == 'TransactionFeePaid')[0].event.data.actualFee.toString().replaceAll(',', '')).dividedBy(Math.pow(10, feePaymentToken.decimals));
-    } catch (error) {
-      logger.error(`It was not possible to extract the fee from the transaction:`, error);
-      fee = new BigNumber(Number.NaN);
-    }
+    const fee = this.getFee(feePaymentToken, transaction);
 
     const tradeHuman = trade.toHuman();
 
@@ -487,6 +482,24 @@ export class Hydration {
       priceImpact: 0
     };
   }
+
+  /**
+   * Get the fee from the transaction
+   * @param feePaymentToken The fee payment token
+   * @param transaction 
+   * @returns The fee
+   */
+  getFee(feePaymentToken: TokenInfo, transaction: any) {
+    let fee: BigNumber;
+    try {
+        fee = new BigNumber(transaction.events.map((it: any) => it.toHuman()).filter((it: any) => it.event.method == 'TransactionFeePaid')[0].event.data.actualFee.toString().replaceAll(',', '')).dividedBy(Math.pow(10, feePaymentToken.decimals));
+    } catch (error) {
+        logger.error(`It was not possible to extract the fee from the transaction:`, error);
+        fee = new BigNumber(Number.NaN);
+    }
+
+    return fee;
+}
 
   /**
    * Get slippage percentage
@@ -840,6 +853,18 @@ export class Hydration {
   }
 
   /**
+   * Submit a transaction to the network
+   * @param tx Transaction to submit
+   * @param wallet Wallet to sign the transaction
+   * @param statusHandler Status handler
+   * @returns Unsubscribe function
+   */
+  @runWithRetryAndTimeout()
+  private async transactionSignAndSend(tx: any, wallet: any, statusHandler: any): Promise<() => void> {
+    return await tx.signAndSend(wallet, statusHandler);
+  }
+
+  /**
    * Clean up SDK context resources
    */
   public async cleanup(): Promise<void> {
@@ -1122,7 +1147,7 @@ export class Hydration {
 
       try {
         logger.info(`Submitting transaction...`);
-        unsub = await tx.signAndSend(wallet, statusHandler);
+        unsub = await this.transactionSignAndSend(tx, wallet, statusHandler);
       } catch (error) {
         const fallbackHash = tx.hex || tx.hash?.toHex?.() || 'unknown';
         logger.error(`Exception during transaction submission: ${error.message}`);
@@ -1500,13 +1525,13 @@ export class Hydration {
       case PoolType.Stable.toLowerCase(): {
         lpMint = {
           address: poolInfo.id || '',
-          decimals: 18
+          decimals: LP_DECIMALS
         };
         break;
       }
 
       case PoolType.Omni.toLowerCase(): {
-        const hubAsset = await this.polkadot.getToken('H2O');
+        const hubAsset = await this.polkadot.getToken(HUB_SYMBOL);
         lpMint = {
           address: hubAsset?.address || '',
           decimals: hubAsset?.decimals || 0
@@ -1654,7 +1679,7 @@ export class Hydration {
           throw new Error('Invalid stableswap pool ID');
         }
 
-        shareTokenDecimals = 18; // Stableswap uses 18 decimals for LP tokens
+        shareTokenDecimals = LP_DECIMALS; // Stableswap uses 18 decimals for LP tokens
         const shareTokenId = pool.id;
 
         const rawBalance = await apiPromise.query.tokens.accounts(walletAddress, shareTokenId);
@@ -1766,7 +1791,7 @@ export class Hydration {
             .integerValue(BigNumber.ROUND_DOWN);
 
           // Convert to human readable format (divide by 10^18)
-          baseTokenAmountRemoved = amountToRemove.dividedBy(Math.pow(10, 18));
+          baseTokenAmountRemoved = amountToRemove.dividedBy(Math.pow(10, LP_DECIMALS));
           quoteTokenAmountRemoved = new BigNumber(0);
 
           const position = userPositions.find(pos =>
@@ -1817,7 +1842,7 @@ export class Hydration {
     }
 
     if (poolType.toLowerCase() === PoolType.Omni.toLowerCase()) {
-      shareTokenDecimals = 18;
+      shareTokenDecimals = LP_DECIMALS;
     }
 
     const formattedSharesRemoved = userSharesToRemove.dividedBy(Math.pow(10, shareTokenDecimals));

@@ -764,10 +764,9 @@ export class Hydration {
    * Get SDK Context instance
    */
   public async getSdkContext(): Promise<any> {
-    if (!this.sdkContext) {
-      const api = await this.getApiPromise();
-      this.sdkContext = await this.sdkContextCreate(api);
-    }
+    const api = await this.getApiPromise();
+    this.sdkContext = await this.sdkContextCreate(api);
+
     return this.sdkContext;
   }
 
@@ -889,10 +888,16 @@ export class Hydration {
 
     // Get token symbols from addresses
     if (!baseTokenSymbol) {
+      try {
       baseTokenSymbol = await this.getTokenSymbol(pool.baseTokenAddress);
+      } catch (error) {
+      }
     }
     if (!quoteTokenSymbol) {
-      quoteTokenSymbol = await this.getTokenSymbol(pool.quoteTokenAddress);
+      try {
+        quoteTokenSymbol = await this.getTokenSymbol(pool.quoteTokenAddress);
+      } catch (error) {
+      }
     }
 
     // Validate amounts
@@ -1319,6 +1324,10 @@ export class Hydration {
     // Safely get pool type with fallback
     const poolType = (poolInfo.poolType || '').toLowerCase();
 
+    if (poolInfo.poolType?.toLowerCase().includes(PoolType.Omni.toLowerCase())) {
+      throw new Error('Omnipool pools are not supported for liquidity quote');
+    }
+
     // Adjust price range based on pool type
     if (poolType.includes(PoolType.Stable.toLowerCase())) {
       priceRange = 0.005; // 0.5% for stable pools
@@ -1740,7 +1749,7 @@ export class Hydration {
           }
 
           // Get user positions
-          const userPositions = await this.getPositionsOwned(walletAddress, tokenId.toString());
+          const userPositions = await this.getPositionsOwned(walletAddress, poolAddress, tokenId.toString());
 
           if (userPositions.length === 0) {
             throw new Error(`No positions found for token ${tokenId} owned by ${walletAddress}`);
@@ -1860,7 +1869,7 @@ export class Hydration {
         encodeAddress(decodeAddress(walletAddress), 0)
       ];
 
-      omnipoolTokenAddress = omnipoolTokenAddress || omnipoolToken ? this.hydration.getToken(omnipoolToken)?.address : undefined;
+      omnipoolTokenAddress = omnipoolTokenAddress ? omnipoolTokenAddress : omnipoolToken ? this.hydration.getToken(omnipoolToken)?.address : undefined;
       omnipoolTokenAddress = omnipoolTokenAddress?.replace(/,/g, '');
 
       return await this.getPoolPositions(walletAddress, poolAddress, alternateHydraAddresses, omnipoolTokenAddress);

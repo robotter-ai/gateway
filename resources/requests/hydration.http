@@ -252,6 +252,12 @@ Content-Type: application/json
 
 ###
 
+# GET /hydration/amm/list-pools - Filter omnipool pools
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/hydration/amm/list-pools?network={{network}}&types=omnipool
+Content-Type: application/json
+
+###
+
 # =======================================================
 
 # GET /{{connector}}/amm/pool-info - HYDRATION XYK
@@ -578,9 +584,9 @@ Content-Type: application/json
   "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressOmnipool}}",
   "baseToken": "{{omnipoolTokenSymbol}}",
-  "quoteToken": null,
-  "baseTokenAmount": "{{mediumBaseTokenAmount}}",
-  "quoteTokenAmount": "{{mediumQuoteTokenAmount}}",
+  "quoteToken": "{{omnipoolTokenSymbol}}",
+  "baseTokenAmount": "{{smallBaseTokenAmount}}",
+  "quoteTokenAmount": "{{smallQuoteTokenAmount}}",
   "slippagePct": "{{slippagePercentage}}"
 }
 
@@ -647,7 +653,7 @@ Content-Type: application/json
   "walletAddress": "{{$processEnv %walletPublicKey}}",
   "poolAddress": "{{poolAddressOmnipool}}",
   "percentageToRemove": "{{smallPercentageToRemove}}",
-  "tokenId": "31"
+  "tokenId": "{{omnipoolTokenAddress}}"
 }
 
 ###
@@ -706,7 +712,7 @@ Content-Type: application/json
 
 ###
 
-# Get all positions across all supported pool types for a wallet (Slow since it goes pool by pool)
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/get-all-positions?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}
+# # Get all positions across all supported pool types for a wallet (Slow since it goes pool by pool)
+# GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/get-all-positions?network={{network}}&walletAddress={{$processEnv %walletPublicKey}}
 
-###
+# ###

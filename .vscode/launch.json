@@ -7,7 +7,7 @@
 			"request": "launch",
 			"name": "gateway:dev",
 			"runtimeExecutable": "pnpm",
-			"runtimeArgs": ["run", "dev", "--passphrase", "asdf"],
+			"runtimeArgs": ["run", "dev", "--passphrase", "<GATEWAY_PASSPHRASE>"],
 			"cwd": "${workspaceFolder}",
 			"stopOnEntry": false,
 			"watchMode": true

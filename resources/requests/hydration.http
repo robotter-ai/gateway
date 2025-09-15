@@ -273,7 +273,7 @@ Content-Type: application/json
 ###
 
 # GET /{{connector}}/amm/pool-info - HYDRATION Omnipool
-GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/pool-info?network={{network}}&poolAddress={{poolAddressOmnipool}}
+GET {{httpProtocol}}://{{host}}:{{port}}/connectors/{{connector}}/amm/pool-info?network={{network}}&poolAddress={{poolAddressOmnipool}}&baseToken={{omnipoolTokenSymbol}}&quoteToken=USDC
 Content-Type: application/json
 
 ###

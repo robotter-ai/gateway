@@ -21,6 +21,8 @@ export async function getHydrationPoolInfo(
   fastify: FastifyInstance,
   network: string,
   poolAddress: string,
+  baseToken?: string,
+  quoteToken?: string,
 ): Promise<HydrationPoolInfo> {
   // Validate required parameters
   if (!network) {
@@ -44,7 +46,7 @@ export async function getHydrationPoolInfo(
 
   try {
     // Get pool information with proper typing
-    const poolInfo = await hydration.getPoolDetails(poolAddress);
+    const poolInfo = await hydration.getPoolDetails(poolAddress, baseToken, quoteToken);
     if (!poolInfo) {
       throw fastify.httpErrors.notFound(`Pool not found: ${poolAddress}`);
     }
@@ -90,13 +92,15 @@ export const poolInfoRoute: FastifyPluginAsync = async (fastify) => {
     },
     async (request, _reply) => {
       try {
-        const { poolAddress } = request.query;
+        const { poolAddress, baseToken, quoteToken } = request.query as any;
         const network = request.query.network || 'mainnet';
 
         const result = await getHydrationPoolInfo(
           fastify,
           network,
           poolAddress,
+          baseToken,
+          quoteToken,
         );
 
         return result;

@@ -153,14 +153,16 @@ export class Hydration {
    * @param poolAddress The address of the pool
    * @returns A Promise that resolves to pool information or null if not found
    */
-  async getPoolInfo(poolAddress: string): Promise<ExternalPoolInfo | null> {
+  async getPoolInfo(
+    poolAddress: string,
+    options?: { omnipoolTokenSymbol?: string; omnipoolQuoteSymbol?: string }
+  ): Promise<ExternalPoolInfo | null> {
     try {
       const sdkContext = await this.getSdkContext();
       const pools = await this.sdkContextGetPools(sdkContext, []);
       let poolData;
 
       if (!poolAddress) {
-        // Assumes the user wants the information for the Omnipool
         poolData = pools.find(pool => pool.type.toLowerCase() === PoolType.Omni.toLowerCase());
       } else {
         poolData = pools.find(pool => pool.address === poolAddress || pool.id === poolAddress);
@@ -181,19 +183,23 @@ export class Hydration {
       const isOmnipool = poolType.toLowerCase() === PoolType.Omni.toLowerCase();
 
       if (isOmnipool) {
-        // For omnipool, use hub asset (H2O) as both base and quote token
+        // For omnipool, set base/quote using provided symbols, fallback to hub asset
+        const baseSymbol = options?.omnipoolTokenSymbol;
+        const quoteSymbol = options?.omnipoolQuoteSymbol || 'USDC';
+        const baseTok = baseSymbol ? this.hydration.getToken(baseSymbol) : undefined;
+        const quoteTok = quoteSymbol ? this.hydration.getToken(quoteSymbol) : undefined;
         const hubAsset = this.hydration.getToken(HUB_SYMBOL);
-        if (!hubAsset) {
-          throw new Error(`Hub asset (${HUB_SYMBOL}) not found`);
-        }
+
+        const baseAddress = baseTok?.address || hubAsset?.address || '';
+        const quoteAddress = quoteTok?.address || hubAsset?.address || '';
 
         return {
           id: undefined,
           address: poolData.address,
-          baseTokenAddress: '',
-          quoteTokenAddress: '',
-          feePct: 0,
-          price: 0,
+          baseTokenAddress: baseAddress,
+          quoteTokenAddress: quoteAddress,
+          feePct: DEFAULT_FEE,
+          price: 1,
           baseTokenAmount: 0,
           quoteTokenAmount: 0,
           poolType: PoolType.Omni,
@@ -201,7 +207,6 @@ export class Hydration {
         } as ExternalPoolInfo;
       }
 
-      // For regular pools, continue with existing logic
       const baseToken = this.hydration.getToken(poolData.tokens[0].symbol);
       const quoteToken = this.hydration.getToken(poolData.tokens[1].symbol);
 
@@ -211,47 +216,37 @@ export class Hydration {
         throw new Error(`Quote token not found for pool ${poolAddress}: ${poolData.tokens[1].symbol}`);
       }
 
-      const baseTokenAmount = Number(BigNumber(poolData.tokens[0].balance.toString())
-        .div(BigNumber(10).pow(poolData.tokens[0].decimals))
-        .toFixed(poolData.tokens[0].decimals));
+      const baseTokenAmount = Number(
+        BigNumber(poolData.tokens[0].balance.toString())
+          .div(BigNumber(10).pow(poolData.tokens[0].decimals))
+          .toFixed(poolData.tokens[0].decimals),
+      );
 
-      const quoteTokenAmount = Number(BigNumber(poolData.tokens[1].balance.toString())
-        .div(BigNumber(10).pow(poolData.tokens[1].decimals))
-        .toFixed(poolData.tokens[1].decimals));
+      const quoteTokenAmount = Number(
+        BigNumber(poolData.tokens[1].balance.toString())
+          .div(BigNumber(10).pow(poolData.tokens[1].decimals))
+          .toFixed(poolData.tokens[1].decimals),
+      );
 
-      let poolPrice = 1;
+      // XYK price is quote/base
+      const reservePrice = baseTokenAmount > 0 ? quoteTokenAmount / baseTokenAmount : 0;
+      let poolPrice = reservePrice;
       let feePct = DEFAULT_FEE;
+
       try {
         const sdkContext = await this.getSdkContext();
         const amountBN = BigNumber('1');
-
-        const buyQuote = await this.sdkContextGetBestBuy(
-          sdkContext,
-          quoteToken.address,
-          baseToken.address,
-          amountBN
-        );
 
         const sellQuote = await this.sdkContextGetBestSell(
           sdkContext,
           baseToken.address,
           quoteToken.address,
-          amountBN
+          amountBN,
         );
-
         feePct = Number(sellQuote.toHuman().tradeFeePct);
-
-        const buyPrice = Number(buyQuote.toHuman().spotPrice);
-        const sellPrice = Number(sellQuote.toHuman().spotPrice);
-        const midPrice = (buyPrice + sellPrice) / 2;
-
-        if (!isNaN(midPrice) && isFinite(midPrice)) {
-          poolPrice = Number(midPrice);
-        }
       } catch (priceError) {
-        if (baseTokenAmount > 0 && quoteTokenAmount > 0) {
-          poolPrice = quoteTokenAmount / baseTokenAmount;
-        }
+        // keep reservePrice fallback and default fee
+        poolPrice = reservePrice;
       }
 
       return {
@@ -1482,8 +1477,15 @@ export class Hydration {
    * @param poolAddress Address of the pool to query
    * @returns Detailed pool information in the HydrationPoolInfo format
    */
-  async getPoolDetails(poolAddress: string): Promise<HydrationPoolInfo | null> {
-    const poolInfo = await this.getPoolInfo(poolAddress);
+  async getPoolDetails(
+    poolAddress: string,
+    baseTokenSymbol?: string,
+    quoteTokenSymbol?: string
+  ): Promise<HydrationPoolInfo | null> {
+    const poolInfo = await this.getPoolInfo(poolAddress, {
+      omnipoolTokenSymbol: baseTokenSymbol,
+      omnipoolQuoteSymbol: quoteTokenSymbol,
+    });
 
     if (!poolInfo) {
       return null;

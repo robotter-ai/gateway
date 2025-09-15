@@ -433,7 +433,14 @@ export class HydrationChain {
       }
     }
 
-    return balances;
+    const sortedBalances = Object.keys(balances)
+    .sort()
+    .reduce<Record<string, number>>((acc, key) => {
+      acc[key] = balances[key as keyof typeof balances];
+      return acc;
+    }, {});
+
+    return sortedBalances;
   }
 
   /**
